@@ -33,14 +33,16 @@
 	<div class="modal-content">
 		<div class="modal-header">Create</div>
 		<div class="modal-body">
-			<div class="label-and-input">
-				<label for="type-input">Type</label>
-				<select id="type-input" on:change={typeSelectChanged}>
-					<option>Account</option>
-					<option>Service</option>
-				</select>
+			<div class="form">
+				<div class="label-and-input clickable-height">
+					<label for="type-input">Type</label>
+					<select id="type-input" on:change={typeSelectChanged}>
+						<option>Account</option>
+						<option>Service</option>
+					</select>
+				</div>
+				<svelte:component this={currentConfigComponent} bind:config={data.config} />
 			</div>
-			<svelte:component this={currentConfigComponent} bind:config={data.config} />
 		</div>
 		<div class="modal-footer">
 			<button on:click={saveClicked}>Save</button>
@@ -50,6 +52,18 @@
 </div>
 
 <style>
+	:global(.label-and-input) {
+		display: flex;
+		height: 32px;
+	}
+
+	:global(.label-and-input > label) {
+		min-width: 64px;
+	}
+	:global(.label-and-input > input, select) {
+		flex-grow: 1;
+	}
+
 	.modal {
 		position: fixed;
 		left: 0;
@@ -61,7 +75,16 @@
 		justify-content: center;
 		align-items: center;
 	}
-	.modal-body {
+	.modal-content {
 		background-color: white;
+	}
+	.modal-body {
+		margin-top: 8px;
+		margin-bottom: 8px;
+	}
+	.form {
+		display: flex;
+		flex-direction: column;
+		row-gap: 8px;
 	}
 </style>
