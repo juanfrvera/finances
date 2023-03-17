@@ -1,4 +1,5 @@
 <script extends>
+	import Switch from '../util/switch.svelte';
 	import CurrencySelect from './util/currency-select.svelte';
 
 	export const config = { name: '', cost: 0, currency: 'ars' };
@@ -6,10 +7,22 @@
 
 <div class="label-and-input">
 	<label for="name-input">Name</label>
-	<input bind:value={config.name} id="name-input" />
+	<input bind:value={config.name} id="name-input" class="input-stretch" />
 </div>
 <CurrencySelect bind:value={config.currency} />
 <div class="label-and-input">
 	<label for="cost-input">Cost</label>
-	<input bind:value={config.cost} id="cost-input" type="number" />
+	<input bind:value={config.cost} id="cost-input" type="number" class="input-stretch" />
 </div>
+<div class="label-and-input">
+	<label for="is-manual-input">Is Manual</label>
+	<div class="switch-container">
+		<Switch />
+	</div>
+</div>
+
+<style>
+	.switch-container {
+		height: 16px;
+	}
+</style>

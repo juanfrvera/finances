@@ -31,12 +31,11 @@
 
 <div class="modal">
 	<div class="modal-content">
-		<div class="modal-header">Create</div>
 		<div class="modal-body">
 			<div class="form">
 				<div class="label-and-input clickable-height">
 					<label for="type-input">Type</label>
-					<select id="type-input" on:change={typeSelectChanged}>
+					<select id="type-input" on:change={typeSelectChanged} class="input-stretch">
 						<option>Account</option>
 						<option>Service</option>
 					</select>
@@ -45,23 +44,26 @@
 			</div>
 		</div>
 		<div class="modal-footer">
-			<button on:click={saveClicked}>Save</button>
-			<button on:click={cancelClicked}>Cancel</button>
+			<button on:click={saveClicked} class="comfortable-button">Save</button>
+			<button on:click={cancelClicked} class="comfortable-button">Cancel</button>
 		</div>
 	</div>
 </div>
 
 <style>
 	:global(.label-and-input) {
-		display: flex;
 		height: 32px;
+
+		display: flex;
+		align-items: center;
 	}
 
 	:global(.label-and-input > label) {
-		min-width: 64px;
+		min-width: 72px;
 	}
-	:global(.label-and-input > input, select) {
+	:global(.input-stretch) {
 		flex-grow: 1;
+		align-self: stretch;
 	}
 
 	.modal {
@@ -77,14 +79,24 @@
 	}
 	.modal-content {
 		background-color: white;
+		padding: 16px;
+		border: 1px solid;
 	}
 	.modal-body {
 		margin-top: 8px;
-		margin-bottom: 8px;
+		margin-bottom: 16px;
 	}
 	.form {
 		display: flex;
 		flex-direction: column;
 		row-gap: 8px;
+	}
+
+	.modal-footer {
+		display: flex;
+		justify-content: space-around;
+	}
+	.comfortable-button {
+		padding: 4px 8px;
 	}
 </style>
