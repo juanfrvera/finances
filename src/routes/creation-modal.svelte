@@ -48,3 +48,20 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.modal {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.modal-body {
+		background-color: white;
+	}
+</style>
