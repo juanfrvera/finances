@@ -1,7 +1,7 @@
-export interface IItemData {
+export interface IItemData<T = IItemConfig> {
     id: string;
     type: string;
-    config: IItemConfig;
+    config: T;
 }
 
 export type IItemConfig = IAccountItemConfig | IServiceItemConfig;
@@ -27,9 +27,9 @@ export interface IAsyncOpResult<Success, Error> {
 }
 
 //#region Creation
-export interface IItemCreationData {
+export interface IItemCreationData<T = IItemCreationConfig> {
     type: string;
-    config: IItemCreationConfig;
+    config: T;
 }
 
 export type IItemCreationConfig = IAccountItemCreationConfig | IServiceItemCreationConfig;

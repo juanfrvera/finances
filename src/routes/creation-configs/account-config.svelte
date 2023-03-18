@@ -1,12 +1,8 @@
-<script context="module" lang="ts">
-	export const defaultData: IAccountItemCreationConfig = { name: '', balance: 0, currency: 'ars' };
-</script>
-
 <script lang="ts">
 	import type { IAccountItemCreationConfig } from '../../typings';
 	import CurrencySelect from './util/currency-select.svelte';
 
-	export const config: IAccountItemCreationConfig = defaultData;
+	export let config: IAccountItemCreationConfig;
 </script>
 
 <div class="label-and-input">

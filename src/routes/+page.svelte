@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { AccountItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData } from '../typings';
-	import { defaultData as accountCreationDefaultData } from './creation-configs/account-creation-config.svelte';
 	import ItemModal from './item-modal.svelte';
 	import Item from './item-render/item.svelte';
 
@@ -17,10 +17,7 @@
 	//#region Creation
 	function addClicked() {
 		view.creationModal = {
-			data: {
-				type: 'Account',
-				config: accountCreationDefaultData
-			}
+			data: AccountItem.getDefaultData()
 		};
 	}
 	function saveCreationModal() {
@@ -53,7 +50,7 @@
 	<button on:click={addClicked} class="square clickable">
 		<div class="title">Add</div>
 	</button>
-	{#each view.list as item (item.id)}
+	{#each view.list as item (item.id + item.type)}
 		<Item data={item} on:click={itemClicked} />
 	{/each}
 </div>

@@ -1,18 +1,9 @@
-<script context="module" lang="ts">
-	export const defaultData: IServiceItemCreationConfig = {
-		name: '',
-		cost: 0,
-		currency: 'ars',
-		isManual: true
-	};
-</script>
-
 <script lang="ts">
 	import type { IServiceItemCreationConfig } from '../../typings';
 	import Switch from '../util/switch.svelte';
 	import CurrencySelect from './util/currency-select.svelte';
 
-	export const config: IServiceItemCreationConfig = defaultData;
+	export let config: IServiceItemCreationConfig;
 </script>
 
 <div class="label-and-input">
@@ -27,7 +18,7 @@
 <div class="label-and-input">
 	<label for="is-manual-input">Is Manual</label>
 	<div class="switch-container">
-		<Switch bind:value={config.isManual} />
+		<Switch bind:checked={config.isManual} />
 	</div>
 </div>
 

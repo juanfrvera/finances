@@ -1,10 +1,10 @@
 <script lang="ts">
-	export let value: boolean;
+	export let checked: boolean;
 </script>
 
 <!-- Rectangular switch -->
 <label class="switch">
-	<input bind:value type="checkbox" />
+	<input bind:checked type="checkbox" />
 	<span class="slider" />
 </label>
 
