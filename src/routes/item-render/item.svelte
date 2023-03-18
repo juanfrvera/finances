@@ -1,15 +1,21 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import { ItemHelper } from '../../logic/item';
 	import type { IItemData } from '../../typings';
 
-	export let data: IItemData<any>;
+	export let data: IItemData;
 
 	let currentItemRenderComponent = ItemHelper.getClassByTypeString(data.type)!.getRenderer();
+	const dispatch = createEventDispatcher();
+
+	function clicked() {
+		dispatch('click', data);
+	}
 </script>
 
-<div class="square">
+<button on:click={clicked} class="square">
 	<svelte:component this={currentItemRenderComponent} {data} />
-</div>
+</button>
 
 <style>
 	.square {

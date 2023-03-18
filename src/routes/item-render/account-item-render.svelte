@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { IAccountItem, IItemData } from '../../typings';
+	import type { IAccountItemConfig, IItemData } from '../../typings';
 
-	export let data: IItemData<IAccountItem>;
+	export let data: IItemData<IAccountItemConfig>;
 </script>
 
 <div class="name">{data.config.name}</div>

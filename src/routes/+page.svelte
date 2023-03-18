@@ -1,28 +1,52 @@
 <script lang="ts">
-	import type { IItem, IItemCreationData, IItemData } from '../typings';
-	import CreationModal from './creation-modal.svelte';
+	import type { IItemConfig, IItemCreationData, IItemData } from '../typings';
+	import { defaultData as accountCreationDefaultData } from './creation-configs/account-creation-config.svelte';
+	import ItemModal from './item-modal.svelte';
 	import Item from './item-render/item.svelte';
 
 	const view: {
-		showCreationModal?: boolean;
-		list: Array<IItemData<IItem>>;
+		creationModal?: {
+			data: IItemCreationData;
+		};
+		list: Array<IItemData>;
+		editModal?: {
+			item: IItemData;
+		};
 	} = { list: [] };
 
+	//#region Creation
 	function addClicked() {
-		view.showCreationModal = true;
+		view.creationModal = {
+			data: {
+				type: 'Account',
+				config: accountCreationDefaultData
+			}
+		};
 	}
-	function saveClickedOnCreationModal(event: CustomEvent<IItemCreationData<any>>) {
-		console.log(event.detail);
-		const newItem: IItemData<IItem> = {
+	function saveCreationModal() {
+		const data = view.creationModal!.data;
+
+		const newItem: IItemData = {
 			id: Date.now().toString(),
-			type: event.detail.type,
-			config: { ...event.detail.config }
+			type: data.type,
+			config: { ...(data.config as IItemConfig) }
 		};
 		view.list = [newItem, ...view.list];
+
+		closeCreationModal();
 	}
-	function cancelClickedOnCreationModal() {
-		view.showCreationModal = false;
+	function closeCreationModal() {
+		view.creationModal = undefined;
 	}
+	//#endregion Creation
+	//#region Edition
+	function itemClicked(event: CustomEvent<IItemData>) {
+		view.editModal = { item: event.detail };
+	}
+	function closeEditModal() {
+		view.editModal = undefined;
+	}
+	//#endregion
 </script>
 
 <div class="whiteboard">
@@ -30,11 +54,28 @@
 		<div class="title">Add</div>
 	</button>
 	{#each view.list as item (item.id)}
-		<Item data={item} />
+		<Item data={item} on:click={itemClicked} />
 	{/each}
 </div>
-{#if view.showCreationModal}
-	<CreationModal on:save={saveClickedOnCreationModal} on:cancel={cancelClickedOnCreationModal} />
+
+<!-- Modals -->
+{#if view.creationModal}
+	<ItemModal
+		data={view.creationModal.data}
+		on:backgroundClick={closeCreationModal}
+		on:escapeKeyUp={closeCreationModal}
+		on:enterKeyUp={saveCreationModal}
+	>
+		<button on:click={saveCreationModal} class="comfortable-button">Save</button>
+		<button on:click={closeCreationModal} class="comfortable-button">Cancel</button>
+	</ItemModal>
+{/if}
+{#if view.editModal != null}
+	<ItemModal
+		bind:data={view.editModal.item}
+		on:backgroundClick={closeEditModal}
+		on:escapeKeyUp={closeEditModal}
+	/>
 {/if}
 
 <style>

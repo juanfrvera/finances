@@ -1,35 +1,46 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import AccountCreationConfig from './creation-configs/account-creation-config.svelte';
-	import ServiceCreationConfig from './creation-configs/service-creation-config.svelte';
+	import { createEventDispatcher, type ComponentType } from 'svelte';
+	import type { IItemCreationData } from '../typings';
+	import AccountCreationConfig, {
+		defaultData as accountCreationDefaultData
+	} from './creation-configs/account-creation-config.svelte';
+	import ServiceCreationConfig, {
+		defaultData as serviceCreationDefaultData
+	} from './creation-configs/service-creation-config.svelte';
 
-	export const data: { type: string; config } = {
-		type: 'Account',
-		config: {}
-	};
+	export let data: IItemCreationData;
 
 	const dispatch = createEventDispatcher();
-	let currentConfigComponent: typeof AccountCreationConfig | typeof ServiceCreationConfig =
-		AccountCreationConfig;
+	let currentConfigComponent: ComponentType = AccountCreationConfig;
 
 	function typeSelectChanged(e: Event) {
 		const value = (e.target as HTMLSelectElement).value;
 		if (value === 'Account') {
 			currentConfigComponent = AccountCreationConfig;
+			data.config = accountCreationDefaultData;
 		} else if (value === 'Service') {
 			currentConfigComponent = ServiceCreationConfig;
+			data.config = serviceCreationDefaultData;
 		}
 		data.type = value;
 	}
-	function saveClicked() {
-		dispatch('save', data);
+
+	function handleKeyUp(event: KeyboardEvent) {
+		if (event.key === 'Escape') {
+			dispatch('escapeKeyUp');
+		} else if (event.key === 'Enter') {
+			dispatch('enterKeyUp');
+		}
 	}
-	function cancelClicked() {
-		dispatch('cancel');
+	function backgroundClicked() {
+		console.log('background clicked');
+		dispatch('backgroundClick');
 	}
 </script>
 
+<svelte:window on:keyup={handleKeyUp} />
 <div class="modal">
+	<button class="modal-background" on:click={backgroundClicked} />
 	<div class="modal-content">
 		<div class="modal-body">
 			<div class="form">
@@ -40,12 +51,11 @@
 						<option>Service</option>
 					</select>
 				</div>
-				<svelte:component this={currentConfigComponent} bind:config={data.config} />
+				<svelte:component this={currentConfigComponent} config={data.config} />
 			</div>
 		</div>
 		<div class="modal-footer">
-			<button on:click={saveClicked} class="comfortable-button">Save</button>
-			<button on:click={cancelClicked} class="comfortable-button">Cancel</button>
+			<slot />
 		</div>
 	</div>
 </div>
@@ -78,9 +88,16 @@
 		align-items: center;
 	}
 	.modal-content {
+		position: relative;
 		background-color: white;
 		padding: 16px;
 		border: 1px solid;
+	}
+	.modal-background {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(255, 255, 255, 0.75);
 	}
 	.modal-body {
 		margin-top: 8px;

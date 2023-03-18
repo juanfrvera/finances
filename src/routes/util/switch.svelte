@@ -1,6 +1,10 @@
+<script lang="ts">
+	export let value: boolean;
+</script>
+
 <!-- Rectangular switch -->
 <label class="switch">
-	<input type="checkbox" />
+	<input bind:value type="checkbox" />
 	<span class="slider" />
 </label>
 
@@ -31,15 +35,16 @@
 		background-color: #ccc;
 		-webkit-transition: 0.4s;
 		transition: 0.4s;
+		display: flex;
+		align-items: center;
 	}
 
 	.slider:before {
 		position: absolute;
 		content: '';
-		height: 60%;
-		width: 16px;
+		height: 12px;
+		width: 12px;
 		left: 4px;
-		bottom: 4px;
 		background-color: white;
 		-webkit-transition: 0.4s;
 		transition: 0.4s;
