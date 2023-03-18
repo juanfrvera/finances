@@ -1,22 +1,28 @@
-import AccountConfig from "../routes/creation-configs/account-config.svelte";
-import ServiceConfig from "../routes/creation-configs/service-config.svelte";
-import AccountItemRender from "../routes/item-render/account-item-render.svelte";
-import ServiceItemRender from "../routes/item-render/service-item-render.svelte";
+import AccountEditRender from "../routes/item-edit/renders/account-edit-render.svelte";
+import ServiceEditRender from "../routes/item-edit/renders/service-edit-render.svelte";
+import AccountListRender from "../routes/item-list/account-list-render.svelte";
+import ServiceListRender from "../routes/item-list/service-list-render.svelte";
+import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
+import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
 import type { IAccountItemCreationConfig, IItemCreationData } from "../typings";
 
-export type ItemRenderer = typeof AccountItemRender | typeof ServiceItemRender;
-export type ConfigRenderer = typeof AccountConfig | typeof ServiceConfig;
+export type ListRender = typeof AccountListRender | typeof ServiceListRender;
+export type EditRender = typeof AccountEditRender | typeof ServiceEditRender;
+export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender;
 
 export abstract class Item {
     public static getTypeString() { return ""; }
-    public static getRenderer(): ItemRenderer { return AccountItemRender; }
-    public static getConfigRenderer(): ConfigRenderer { return AccountConfig; }
+    public static getListRender(): ListRender { return AccountListRender; }
+    public static getEditRender(): EditRender { return AccountEditRender; }
+    public static getSeeRender(): SeeRender { return AccountSeeRender; }
 }
 
 export class AccountItem extends Item {
     public static getTypeString(): string { return "Account"; }
-    public static getRenderer(): ItemRenderer { return AccountItemRender; }
-    public static getConfigRenderer(): ConfigRenderer { return AccountConfig; }
+    public static getListRender(): ListRender { return AccountListRender; }
+    public static getEditRender(): EditRender { return AccountEditRender; }
+    public static getSeeRender(): SeeRender { return AccountSeeRender; }
+
     public static getDefaultData(): IItemCreationData<IAccountItemCreationConfig> {
         return { type: this.getTypeString(), config: { name: '', balance: 0, currency: 'ars' } };
     }
@@ -24,8 +30,9 @@ export class AccountItem extends Item {
 
 export class ServiceItem extends Item {
     public static getTypeString(): string { return "Service"; }
-    public static getRenderer(): ItemRenderer { return ServiceItemRender; }
-    public static getConfigRenderer(): ConfigRenderer { return ServiceConfig; }
+    public static getListRender(): ListRender { return ServiceListRender; }
+    public static getEditRender(): EditRender { return ServiceEditRender; }
+    public static getSeeRender(): SeeRender { return ServiceSeeRender; }
 }
 
 export class ItemHelper {

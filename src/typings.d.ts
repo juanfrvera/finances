@@ -16,6 +16,7 @@ export interface IServiceItemConfig {
     currency: string;
     /** If the payment has to be done manually */
     isManual: boolean;
+    lastPayDate: Date;
 }
 
 export interface IAsyncOp<Data, Success, Error> {

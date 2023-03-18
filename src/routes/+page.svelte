@@ -1,14 +1,19 @@
 <script lang="ts">
 	import { AccountItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData } from '../typings';
-	import ItemModal from './item-modal.svelte';
-	import Item from './item-render/item.svelte';
+	import ItemEdit from './item-edit/item-edit.svelte';
+	import Item from './item-list/item.svelte';
+	import ItemSee from './item-see/item-see.svelte';
+	import Modal from './util/modal.svelte';
 
 	const view: {
 		creationModal?: {
 			data: IItemCreationData;
 		};
 		list: Array<IItemData>;
+		seeModal?: {
+			item: IItemData;
+		};
 		editModal?: {
 			item: IItemData;
 		};
@@ -36,14 +41,22 @@
 		view.creationModal = undefined;
 	}
 	//#endregion Creation
-	//#region Edition
+	//#region See
 	function itemClicked(event: CustomEvent<IItemData>) {
-		view.editModal = { item: event.detail };
+		view.seeModal = { item: event.detail };
+	}
+	function closeSeeModal() {
+		view.seeModal = undefined;
+	}
+	//#endregion See
+	//#region Edit
+	function openEditModalFromSee() {
+		view.editModal = { item: view.seeModal!.item };
 	}
 	function closeEditModal() {
 		view.editModal = undefined;
 	}
-	//#endregion
+	//#endregion Edit
 </script>
 
 <div class="whiteboard">
@@ -57,22 +70,35 @@
 
 <!-- Modals -->
 {#if view.creationModal}
-	<ItemModal
-		data={view.creationModal.data}
+	<Modal
 		on:backgroundClick={closeCreationModal}
 		on:escapeKeyUp={closeCreationModal}
 		on:enterKeyUp={saveCreationModal}
 	>
-		<button on:click={saveCreationModal} class="comfortable-button">Save</button>
-		<button on:click={closeCreationModal} class="comfortable-button">Cancel</button>
-	</ItemModal>
+		<ItemEdit data={view.creationModal.data} />
+		<div slot="footer" class="modal-footer-buttons">
+			<button on:click={saveCreationModal} class="comfortable-button">Save</button>
+			<button on:click={closeCreationModal} class="comfortable-button">Cancel</button>
+		</div>
+	</Modal>
+{/if}
+{#if view.seeModal != null}
+	<Modal
+		on:backgroundClick={closeSeeModal}
+		on:escapeKeyUp={closeSeeModal}
+		on:enterKeyUp={closeSeeModal}
+	>
+		<ItemSee data={view.seeModal.item} />
+		<div slot="footer" class="modal-footer-buttons">
+			<button on:click={openEditModalFromSee} class="comfortable-button">Edit</button>
+			<button on:click={closeSeeModal} class="comfortable-button">Close</button>
+		</div>
+	</Modal>
 {/if}
 {#if view.editModal != null}
-	<ItemModal
-		bind:data={view.editModal.item}
-		on:backgroundClick={closeEditModal}
-		on:escapeKeyUp={closeEditModal}
-	/>
+	<Modal on:backgroundClick={closeEditModal} on:escapeKeyUp={closeEditModal}>
+		<ItemEdit bind:data={view.editModal.item} />
+	</Modal>
 {/if}
 
 <style>
@@ -90,5 +116,13 @@
 	}
 	.clickable {
 		cursor: pointer;
+	}
+	.comfortable-button {
+		padding: 4px 8px;
+	}
+	.modal-footer-buttons {
+		width: 100%;
+		display: flex;
+		justify-content: space-around;
 	}
 </style>

@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, type ComponentType } from 'svelte';
 	import { ItemHelper } from '../../logic/item';
 	import type { IItemData } from '../../typings';
 
 	export let data: IItemData;
 
-	let currentItemRenderComponent = ItemHelper.getClassByTypeString(data.type)!.getRenderer();
+	let currentItemRenderComponent: ComponentType = ItemHelper.getClassByTypeString(
+		data.type
+	)!.getListRender();
 	const dispatch = createEventDispatcher();
 
 	function clicked() {
