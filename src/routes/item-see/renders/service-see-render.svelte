@@ -6,16 +6,58 @@
 
 	let view: {
 		lastPayDateString: string;
+		showMarkAsPaidButton: boolean;
+		markPaidDatePicker?: {
+			dateInputString: string;
+		};
+		showChangePaidDateButton: boolean;
 	};
 
 	onMount(() => {
 		let lastPayDateString = 'Never';
+		let showMarkAsPaidButton = true;
 		if (data.config.lastPayDate != null) {
-			lastPayDateString = data.config.lastPayDate.toString();
+			const lastPayDate = data.config.lastPayDate;
+			lastPayDateString = lastPayDate.toLocaleDateString();
+
+			const date = new Date();
+			if (
+				lastPayDate.getMonth() === date.getMonth() &&
+				lastPayDate.getFullYear() === date.getFullYear()
+			) {
+				showMarkAsPaidButton = false;
+			}
 		}
 
-		view = { lastPayDateString };
+		view = {
+			lastPayDateString,
+			showMarkAsPaidButton,
+			showChangePaidDateButton: !showMarkAsPaidButton
+		};
 	});
+
+	function markAsPaidClicked() {
+		view.showMarkAsPaidButton = false;
+		openMarkPaidDatePicker(new Date(Date.now()));
+	}
+	function changePaidDateClicked() {
+		view.showChangePaidDateButton = false;
+		openMarkPaidDatePicker(data.config.lastPayDate);
+	}
+	function confirmPaidDate() {
+		const date = new Date(view.markPaidDatePicker!.dateInputString + 'T00:00');
+		view.lastPayDateString = date.toLocaleDateString();
+		data.config.lastPayDate = date;
+
+		view.markPaidDatePicker = undefined;
+		view.showChangePaidDateButton = true;
+	}
+	function openMarkPaidDatePicker(date: Date) {
+		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
+		view.markPaidDatePicker = {
+			dateInputString: date.toISOString().substring(0, 10)
+		};
+	}
 </script>
 
 {#if view != null}
@@ -26,7 +68,16 @@
 			<div class="value-label">Last pay date:</div>
 			<div class="value">{view.lastPayDateString}</div>
 		</div>
-		<button class="comfortable-button">Mark as Paid</button>
+		{#if view.showMarkAsPaidButton}
+			<button on:click={markAsPaidClicked}>Mark as Paid</button>
+		{/if}
+		{#if view.markPaidDatePicker != undefined}
+			<input bind:value={view.markPaidDatePicker.dateInputString} type="date" />
+			<button on:click={confirmPaidDate}>Confirm date</button>
+		{/if}
+		{#if view.showChangePaidDateButton}
+			<button on:click={changePaidDateClicked}>Change Date</button>
+		{/if}
 	</div>
 {/if}
 
