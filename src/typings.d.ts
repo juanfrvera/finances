@@ -1,4 +1,4 @@
-export interface IItemData<T = IItemConfig> {
+export interface IItemData<T = any> {
     id: string;
     type: string;
     config: T;
@@ -17,6 +17,9 @@ export interface IServiceItemConfig {
     /** If the payment has to be done manually */
     isManual: boolean;
     lastPayDate: Date;
+}
+export interface ITotalItemConfig {
+    currencies: Array<{ name: string; total: number }>;
 }
 
 export interface IAsyncOp<Data, Success, Error> {

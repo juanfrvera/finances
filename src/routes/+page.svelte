@@ -1,23 +1,44 @@
 <script lang="ts">
-	import { AccountItem } from '../logic/item';
-	import type { IItemConfig, IItemCreationData, IItemData } from '../typings';
+	import { onMount } from 'svelte';
+	import { AccountItem, TotalItem } from '../logic/item';
+	import type { IItemConfig, IItemCreationData, IItemData, ITotalItemConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import Item from './item-list/item.svelte';
 	import ItemSee from './item-see/item-see.svelte';
+	import { ItemStorage } from '../item.storage';
 	import Modal from './util/modal.svelte';
 
 	const view: {
-		creationModal?: {
-			data: IItemCreationData;
-		};
 		list: Array<IItemData>;
-		seeModal?: {
-			item: IItemData;
-		};
-		editModal?: {
-			item: IItemData;
-		};
+		creationModal?: { data: IItemCreationData };
+		seeModal?: { item: IItemData };
+		editModal?: { item: IItemData };
 	} = { list: [] };
+	const totalItem: IItemData<ITotalItemConfig> = {
+		id: TotalItem.getTypeString(),
+		type: TotalItem.getTypeString(),
+		config: {
+			currencies: [
+				{ name: 'ars', total: 0 },
+				{ name: 'usd', total: 0 }
+			]
+		}
+	};
+
+	onMount(() => {
+		const list = ItemStorage.getItems();
+
+		const totalIndex = list.findIndex((i) => i.type === TotalItem.getTypeString());
+		if (totalIndex === -1) {
+			list.push(totalItem);
+		} else {
+			list[totalIndex] = totalItem;
+		}
+
+		TotalItem.calculate(list, totalItem);
+
+		view.list = list;
+	});
 
 	//#region Creation
 	function addClicked() {
@@ -34,6 +55,9 @@
 			config: { ...(data.config as IItemConfig) }
 		};
 		view.list = [newItem, ...view.list];
+		ItemStorage.saveItems(view.list);
+
+		TotalItem.calculate(view.list, totalItem);
 
 		closeCreationModal();
 	}
@@ -124,5 +148,6 @@
 		width: 100%;
 		display: flex;
 		justify-content: space-around;
+		column-gap: 32px;
 	}
 </style>
