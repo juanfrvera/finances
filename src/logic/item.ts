@@ -41,13 +41,13 @@ export class TotalItem extends Item {
     public static getListRender(): ListRender { return TotalListRender; }
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
-    public static calculate(list: IItemData[], total: IItemData<ITotalItemConfig>) {
+    public static calculate(list: IItemData[], totalItem: IItemData<ITotalItemConfig>) {
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
 
             if (item.type === AccountItem.getTypeString()) {
                 const account = item as IItemData<IAccountItemConfig>;
-                const currencyObject = total.config.currencies.find((c) => c.name === account.config.currency);
+                const currencyObject = totalItem.config.currencies.find((c) => c.name === account.config.currency);
 
                 if (currencyObject != null) {
                     currencyObject.total += account.config.balance;

@@ -19,7 +19,7 @@ export interface IServiceItemConfig {
     lastPayDate: Date;
 }
 export interface ITotalItemConfig {
-    currencies: Array<{ name: string; total: number }>;
+    currencies: Array<{ name: string; total: number; }>;
 }
 
 export interface IAsyncOp<Data, Success, Error> {
