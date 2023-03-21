@@ -72,6 +72,11 @@
 	function closeSeeModal() {
 		view.seeModal = undefined;
 	}
+	function itemUpdated(event: CustomEvent<IItemData>) {
+		// Set update date of item so it is re-rendered
+		event.detail.updateDate = new Date();
+		ItemStorage.saveItems(view.list);
+	}
 	//#endregion See
 	//#region Edit
 	function openEditModalFromSee() {
@@ -87,7 +92,7 @@
 	<button on:click={addClicked} class="square clickable">
 		<div class="title">Add</div>
 	</button>
-	{#each view.list as item (item.id + item.type)}
+	{#each view.list as item (item.id + item.type + item.updateDate)}
 		<Item data={item} on:click={itemClicked} />
 	{/each}
 </div>
@@ -112,7 +117,7 @@
 		on:escapeKeyUp={closeSeeModal}
 		on:enterKeyUp={closeSeeModal}
 	>
-		<ItemSee data={view.seeModal.item} />
+		<ItemSee data={view.seeModal.item} on:update={itemUpdated} />
 		<div slot="footer" class="modal-footer-buttons">
 			<button on:click={openEditModalFromSee} class="comfortable-button">Edit</button>
 			<button on:click={closeSeeModal} class="comfortable-button">Close</button>

@@ -5,7 +5,7 @@ import ServiceListRender from "../routes/item-list/service-list-render.svelte";
 import TotalListRender from "../routes/item-list/total-list-render.svelte";
 import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
-import type { IAccountItemConfig, IAccountItemCreationConfig, IItemCreationData, IItemData, ITotalItemConfig } from "../typings";
+import type { IAccountItemConfig, IAccountItemCreationConfig, IItemCreationData, IItemData, IServiceItemConfig, ITotalItemConfig } from "../typings";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender;
@@ -34,6 +34,15 @@ export class ServiceItem extends Item {
     public static getListRender(): ListRender { return ServiceListRender; }
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
+
+    public static wasThisMonthPaid(data: IItemData<IServiceItemConfig>) {
+        if (data.config.lastPayDateString != null) {
+            const today = new Date();
+            const lastPayDate = new Date(data.config.lastPayDateString.substring(0, 10));
+            return lastPayDate != null && (lastPayDate.getMonth() === today.getMonth() && lastPayDate.getFullYear() === today.getFullYear());
+        }
+        return false;
+    }
 }
 
 export class TotalItem extends Item {
@@ -41,6 +50,7 @@ export class TotalItem extends Item {
     public static getListRender(): ListRender { return TotalListRender; }
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
+
     public static calculate(list: IItemData[], totalItem: IItemData<ITotalItemConfig>) {
         for (let i = 0; i < list.length; i++) {
             const item = list[i];

@@ -2,6 +2,7 @@ export interface IItemData<T = any> {
     id: string;
     type: string;
     config: T;
+    updateDate?: Date;
 }
 
 export type IItemConfig = IAccountItemConfig | IServiceItemConfig;
@@ -16,7 +17,7 @@ export interface IServiceItemConfig {
     currency: string;
     /** If the payment has to be done manually */
     isManual: boolean;
-    lastPayDate: Date;
+    lastPayDateString: string;
 }
 export interface ITotalItemConfig {
     currencies: Array<{ name: string; total: number; }>;

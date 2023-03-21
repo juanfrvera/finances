@@ -1,8 +1,32 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { ServiceItem } from '../../logic/item';
 	import type { IServiceItemConfig, IItemData } from '../../typings';
 
 	export let data: IItemData<IServiceItemConfig>;
+	const view: { containerClass?: string } = {};
+
+	onMount(() => {
+		if (data.config.isManual) {
+			if (ServiceItem.wasThisMonthPaid(data)) {
+				view.containerClass = 'manual-paid';
+			} else {
+				view.containerClass = 'should-manual-pay';
+			}
+		}
+	});
 </script>
 
-<div class="name">{data.config.name}</div>
-<div class="data">{data.config.cost} {data.config.currency}</div>
+<div class={view.containerClass}>
+	<div class="name">{data.config.name}</div>
+	<div class="data">{data.config.cost} {data.config.currency}</div>
+</div>
+
+<style>
+	.should-manual-pay {
+		border: 1px solid red;
+	}
+	.manual-paid {
+		border: 1px solid green;
+	}
+</style>

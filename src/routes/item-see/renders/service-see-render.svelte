@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { ServiceItem } from '../../../logic/item';
 	import type { IItemData, IServiceItemConfig } from '../../../typings';
 
 	export let data: IItemData<IServiceItemConfig>;
+	const dispatch = createEventDispatcher();
 
 	let view: IView;
 	onMount(() => {
@@ -10,17 +12,10 @@
 		if (data.config.isManual) {
 			let lastPayDateString = 'Never';
 			let showMarkAsPaidButton = true;
-			if (data.config.lastPayDate != null) {
-				const lastPayDate = data.config.lastPayDate;
-				lastPayDateString = lastPayDate.toLocaleDateString();
-
-				const date = new Date();
-				if (
-					lastPayDate.getMonth() === date.getMonth() &&
-					lastPayDate.getFullYear() === date.getFullYear()
-				) {
-					showMarkAsPaidButton = false;
-				}
+			if (data.config.lastPayDateString != null) {
+				const lastPayDate = new Date(data.config.lastPayDateString);
+				showMarkAsPaidButton = data.config.isManual && !ServiceItem.wasThisMonthPaid(data);
+				lastPayDateString = data.config.lastPayDateString;
 			}
 
 			view.payDate = {
@@ -37,21 +32,25 @@
 	}
 	function changePaidDateClicked() {
 		view.payDate!.showChangePaidDateButton = false;
-		openMarkPaidDatePicker(data.config.lastPayDate);
+		openMarkPaidDatePicker(new Date(data.config.lastPayDateString));
 	}
 	function confirmPaidDate() {
 		const date = new Date(view.payDate!.markPaidDatePicker!.dateInputString + 'T00:00');
-		view.payDate!.lastPayDateString = date.toLocaleDateString();
-		data.config.lastPayDate = date;
+		data.config.lastPayDateString = date.toLocaleDateString();
+		view.payDate!.lastPayDateString = data.config.lastPayDateString;
 
 		view.payDate!.markPaidDatePicker = undefined;
 		view.payDate!.showChangePaidDateButton = true;
+		triggerOnUpdate();
 	}
 	function openMarkPaidDatePicker(date: Date) {
 		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
 		view.payDate!.markPaidDatePicker = {
 			dateInputString: date.toISOString().substring(0, 10)
 		};
+	}
+	function triggerOnUpdate() {
+		dispatch('update', data);
 	}
 
 	interface IView {
