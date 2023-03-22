@@ -52,6 +52,7 @@ export class TotalItem extends Item {
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
 
     public static calculate(list: IItemData[], totalItem: IItemData<ITotalItemConfig>) {
+        totalItem.config.currencies.forEach((c) => c.total = 0);
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
 
@@ -68,9 +69,18 @@ export class TotalItem extends Item {
 }
 
 export class ItemHelper {
-    private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem, TotalItem];
+    private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem];
+    private static readonly specialItemClasses: Array<typeof Item> = [TotalItem];
 
     public static getClassByTypeString(type: string) {
-        return this.itemClasses.find((c) => c.getTypeString() === type);
+        const itemClass = this.itemClasses.find((c) => c.getTypeString() === type);
+        if (itemClass != null) {
+            return itemClass;
+        }
+        return this.getSpecialClassByTypeString(type);
+    }
+    /** Returns the class if one is found, or null if not */
+    public static getSpecialClassByTypeString(type: string) {
+        return this.specialItemClasses.find((c) => c.getTypeString() === type);
     }
 }

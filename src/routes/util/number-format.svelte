@@ -1,6 +1,15 @@
 <script lang="ts">
 	export let value: number;
-	$: formattedString = (Math.round(value * 100) / 100).toFixed(2);
+	$: intPart = Math.floor(value);
+	$: decimalPart = ((value - Math.floor(value)) * 100).toFixed(0);
 </script>
 
-{formattedString}
+<span class="int-part">{intPart}</span>{#if decimalPart != '0'}<span class="decimal-part"
+		>,{decimalPart}</span
+	>{/if}
+
+<style>
+	.decimal-part {
+		font-size: 16px;
+	}
+</style>

@@ -55,10 +55,7 @@
 			config: { ...(data.config as IItemConfig) }
 		};
 		view.list = [newItem, ...view.list];
-		ItemStorage.saveItems(view.list);
-
-		TotalItem.calculate(view.list, totalItem);
-
+		calculateAndSave();
 		closeCreationModal();
 	}
 	function closeCreationModal() {
@@ -75,7 +72,7 @@
 	function itemUpdated(event: CustomEvent<IItemData>) {
 		// Set update date of item so it is re-rendered
 		event.detail.updateDate = new Date();
-		ItemStorage.saveItems(view.list);
+		calculateAndSave();
 	}
 	//#endregion See
 	//#region Edit
@@ -83,9 +80,14 @@
 		view.editModal = { item: view.seeModal!.item };
 	}
 	function closeEditModal() {
+		calculateAndSave();
 		view.editModal = undefined;
 	}
 	//#endregion Edit
+	function calculateAndSave() {
+		ItemStorage.saveItems(view.list);
+		TotalItem.calculate(view.list, totalItem);
+	}
 </script>
 
 <div class="whiteboard">
