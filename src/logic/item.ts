@@ -16,6 +16,7 @@ export abstract class Item {
     public static getListRender(): ListRender { return AccountListRender; }
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
+    public static isItemOnQuery(item: IItemData, query: string) { return false; }
 }
 
 export class AccountItem extends Item {
@@ -23,6 +24,17 @@ export class AccountItem extends Item {
     public static getListRender(): ListRender { return AccountListRender; }
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
+
+    public static isItemOnQuery(item: IItemData<IAccountItemConfig>, query: string) {
+        const lwQuery = query.toLowerCase();
+        const config = item.config;
+
+        if (config.name.toLowerCase().includes(lwQuery)) return true;
+        if (config.balance.toString().includes(query)) return true;
+        if (config.currency.toLowerCase().includes(query)) return true;
+
+        return false;
+    }
 
     public static getDefaultData(): IItemCreationData<IAccountItemCreationConfig> {
         return { type: this.getTypeString(), config: { name: '', balance: 0, currency: 'ars' } };
@@ -34,6 +46,19 @@ export class ServiceItem extends Item {
     public static getListRender(): ListRender { return ServiceListRender; }
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
+
+    public static isItemOnQuery(item: IItemData<IServiceItemConfig>, query: string) {
+        const lwQuery = query.toLowerCase();
+        const config = item.config;
+
+        if (config.name.toLowerCase().includes(lwQuery)) return true;
+        if (config.cost.toString().includes(query)) return true;
+        if (config.currency.toLowerCase().includes(query)) return true;
+        if (config.isManual && query === "manual") return true;
+        if (!config.isManual && lwQuery === "auto") return true;
+
+        return false;
+    }
 
     public static wasThisMonthPaid(data: IItemData<IServiceItemConfig>) {
         if (data.config.lastPayDateString != null) {
@@ -82,5 +107,13 @@ export class ItemHelper {
     /** Returns the class if one is found, or null if not */
     public static getSpecialClassByTypeString(type: string) {
         return this.specialItemClasses.find((c) => c.getTypeString() === type);
+    }
+    public static isItemOnQuery(item: IItemData, query: string) {
+        const lwQuery = query.toLowerCase();
+
+        if (item.id.includes(query)) return true;
+        if (item.type.toLowerCase().includes(lwQuery)) return true;
+
+        return this.getClassByTypeString(item.type)?.isItemOnQuery(item, query);
     }
 }

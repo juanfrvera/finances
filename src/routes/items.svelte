@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { AccountItem, TotalItem } from '../logic/item';
+	import { AccountItem, ItemHelper, TotalItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData, ITotalItemConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import Item from './item-list/item.svelte';
@@ -8,9 +8,11 @@
 	import { ItemStorage } from '../storage/item.store';
 	import Modal from './util/modal.svelte';
 
+	let list: IItemData[] = [];
+	let currentSearchQuery: string = '';
 	const view: {
 		showStoreLocationPrompt?: boolean;
-		list: Array<IItemData>;
+		list: IItemData[];
 		creationModal?: { data: IItemCreationData };
 		seeModal?: { item: IItemData };
 		editModal?: { item: IItemData };
@@ -31,7 +33,7 @@
 	});
 
 	function loadItems() {
-		const list = ItemStorage.getItems();
+		list = ItemStorage.getItems();
 
 		const totalIndex = list.findIndex((i) => i.type === TotalItem.getTypeString());
 		if (totalIndex === -1) {
@@ -41,8 +43,7 @@
 		}
 
 		TotalItem.calculate(list, totalItem);
-
-		view.list = list;
+		calculateViewList();
 	}
 
 	//#region Creation
@@ -59,7 +60,9 @@
 			type: data.type,
 			config: { ...(data.config as IItemConfig) }
 		};
-		view.list = [newItem, ...view.list];
+
+		list = [newItem, ...list];
+		calculateViewList();
 		calculateAndSave();
 		closeCreationModal();
 	}
@@ -90,8 +93,15 @@
 	}
 	//#endregion Edit
 	function calculateAndSave() {
-		ItemStorage.saveItems(view.list);
-		TotalItem.calculate(view.list, totalItem);
+		ItemStorage.saveItems(list);
+		TotalItem.calculate(list, totalItem);
+	}
+	function searchInputChanged(e: Event) {
+		currentSearchQuery = (e.target! as HTMLInputElement).value;
+		calculateViewList();
+	}
+	function calculateViewList() {
+		view.list = list.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
 	}
 </script>
 
@@ -101,7 +111,7 @@
 
 <div id="container">
 	<header id="header">
-		<input id="search-bar" />
+		<input id="search-bar" on:input={searchInputChanged} />
 	</header>
 	<main id="whiteboard">
 		<button on:click={addClicked} class="square white-button">
