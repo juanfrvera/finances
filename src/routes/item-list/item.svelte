@@ -15,18 +15,6 @@
 	}
 </script>
 
-<button on:click={clicked} class="square">
+<button on:click={clicked} class="square white-button">
 	<svelte:component this={currentItemRenderComponent} {data} />
 </button>
-
-<style>
-	.square {
-		border: 1px solid;
-		padding: 8px;
-		font-size: 20px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-</style>

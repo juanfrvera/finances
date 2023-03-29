@@ -1,7 +1,3 @@
-<svelte:head>
-	<title>Finances</title>
-</svelte:head>
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { AccountItem, TotalItem } from '../logic/item';
@@ -9,11 +5,11 @@
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import Item from './item-list/item.svelte';
 	import ItemSee from './item-see/item-see.svelte';
-	import { ItemStorage } from '../storage/item.storage';
+	import { ItemStorage } from '../storage/item.store';
 	import Modal from './util/modal.svelte';
 
 	const view: {
-		showStoreLocationPrompt? : boolean;
+		showStoreLocationPrompt?: boolean;
 		list: Array<IItemData>;
 		creationModal?: { data: IItemCreationData };
 		seeModal?: { item: IItemData };
@@ -34,7 +30,7 @@
 		loadItems();
 	});
 
-	function loadItems(){
+	function loadItems() {
 		const list = ItemStorage.getItems();
 
 		const totalIndex = list.findIndex((i) => i.type === TotalItem.getTypeString());
@@ -99,12 +95,16 @@
 	}
 </script>
 
-<div class="whiteboard">
-    <header id="header">
-    	<input id="search-bar"/>
-    </header>
-	<main id="body">
-		<button on:click={addClicked} class="square clickable">
+<svelte:head>
+	<title>Finances</title>
+</svelte:head>
+
+<div id="container">
+	<header id="header">
+		<input id="search-bar" />
+	</header>
+	<main id="whiteboard">
+		<button on:click={addClicked} class="square white-button">
 			<div class="title">Add</div>
 		</button>
 		{#each view.list as item (item.id + item.type + item.updateDate)}
@@ -147,28 +147,43 @@
 {/if}
 
 <style>
-	.whiteboard {
-		display: flex;
-		flex-direction: column;
-		width: 100%;
-	}
-	#header, #body{
-		width: 100%;
-	}
-	#body{
-		display: flex;
-	}
-	.square {
-		border: 1px solid;
+	:global(.square) {
 		padding: 8px;
+
+		border: 1px solid;
+
 		font-size: 20px;
+
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 	}
-	.clickable {
+	:global(.white-button) {
+		background-color: white;
 		cursor: pointer;
+	}
+	:global(.white-button:hover) {
+		background-color: lightgray;
+	}
+
+	#container {
+		margin: 16px;
+		width: 100%;
+
+		display: flex;
+		flex-direction: column;
+		row-gap: 16px;
+	}
+	#header,
+	#whiteboard {
+		width: 100%;
+	}
+	#whiteboard {
+		display: flex;
+		flex-wrap: wrap;
+		column-gap: 8px;
+		row-gap: 8px;
 	}
 	.comfortable-button {
 		padding: 4px 8px;
@@ -178,5 +193,8 @@
 		display: flex;
 		justify-content: space-around;
 		column-gap: 32px;
+	}
+	#search-bar {
+		height: 32px;
 	}
 </style>
