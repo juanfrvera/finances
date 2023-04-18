@@ -1,14 +1,16 @@
 import AccountEditRender from "../routes/item-edit/renders/account-edit-render.svelte";
+import DebtEditRender from "../routes/item-edit/renders/debt-edit-render.svelte";
 import ServiceEditRender from "../routes/item-edit/renders/service-edit-render.svelte";
 import AccountListRender from "../routes/item-list/account-list-render.svelte";
+import DebtListRender from "../routes/item-list/debt-list-render.svelte";
 import ServiceListRender from "../routes/item-list/service-list-render.svelte";
 import TotalListRender from "../routes/item-list/total-list-render.svelte";
 import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
-import type { IAccountItemConfig, IAccountItemCreationConfig, IItemCreationData, IItemData, IServiceItemConfig, ITotalItemConfig } from "../typings";
+import type { IAccountConfig, IAccountCreationConfig, IItemCreationData, IItemData, IServiceConfig, ITotalConfig } from "../typings";
 
-export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender;
-export type EditRender = typeof AccountEditRender | typeof ServiceEditRender;
+export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender | typeof DebtListRender;
+export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender;
 export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender;
 
 export abstract class Item {
@@ -25,7 +27,7 @@ export class AccountItem extends Item {
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
 
-    public static isItemOnQuery(item: IItemData<IAccountItemConfig>, query: string) {
+    public static isItemOnQuery(item: IItemData<IAccountConfig>, query: string) {
         const lwQuery = query.toLowerCase();
         const config = item.config;
 
@@ -36,7 +38,7 @@ export class AccountItem extends Item {
         return false;
     }
 
-    public static getDefaultData(): IItemCreationData<IAccountItemCreationConfig> {
+    public static getDefaultData(): IItemCreationData<IAccountCreationConfig> {
         return { type: this.getTypeString(), config: { name: '', balance: 0, currency: 'ars' } };
     }
 }
@@ -47,7 +49,7 @@ export class ServiceItem extends Item {
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
 
-    public static isItemOnQuery(item: IItemData<IServiceItemConfig>, query: string) {
+    public static isItemOnQuery(item: IItemData<IServiceConfig>, query: string) {
         const lwQuery = query.toLowerCase();
         const config = item.config;
 
@@ -60,7 +62,7 @@ export class ServiceItem extends Item {
         return false;
     }
 
-    public static wasThisMonthPaid(data: IItemData<IServiceItemConfig>) {
+    public static wasThisMonthPaid(data: IItemData<IServiceConfig>) {
         if (data.config.lastPayDateString != null) {
             const today = new Date();
             const lastPayDate = new Date(data.config.lastPayDateString.substring(0, 10));
@@ -76,13 +78,13 @@ export class TotalItem extends Item {
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
 
-    public static calculate(list: IItemData[], totalItem: IItemData<ITotalItemConfig>) {
+    public static calculate(list: IItemData[], totalItem: IItemData<ITotalConfig>) {
         totalItem.config.currencies.forEach((c) => c.total = 0);
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
 
             if (item.type === AccountItem.getTypeString()) {
-                const account = item as IItemData<IAccountItemConfig>;
+                const account = item as IItemData<IAccountConfig>;
                 const currencyObject = totalItem.config.currencies.find((c) => c.name === account.config.currency);
 
                 if (currencyObject != null) {
@@ -93,8 +95,14 @@ export class TotalItem extends Item {
     }
 }
 
+export class DebtItem extends Item {
+    public static getTypeString(): string { return "Debt"; }
+    public static getListRender(): ListRender { return DebtListRender; }
+    public static getEditRender(): EditRender { return DebtEditRender; }
+}
+
 export class ItemHelper {
-    private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem];
+    private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem, DebtItem];
     private static readonly specialItemClasses: Array<typeof Item> = [TotalItem];
 
     public static getClassByTypeString(type: string) {
@@ -115,5 +123,8 @@ export class ItemHelper {
         if (item.type.toLowerCase().includes(lwQuery)) return true;
 
         return this.getClassByTypeString(item.type)?.isItemOnQuery(item, query);
+    }
+    public static getItemClasses() {
+        return this.itemClasses;
     }
 }

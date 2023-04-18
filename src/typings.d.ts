@@ -5,13 +5,13 @@ export interface IItemData<T = any> {
     updateDate?: Date;
 }
 
-export type IItemConfig = IAccountItemConfig | IServiceItemConfig;
-export interface IAccountItemConfig {
+export type IItemConfig = IAccountConfig | IServiceConfig;
+export interface IAccountConfig {
     name: string;
     balance: number;
     currency: string;
 }
-export interface IServiceItemConfig {
+export interface IServiceConfig {
     name: string;
     cost: number;
     currency: string;
@@ -19,8 +19,14 @@ export interface IServiceItemConfig {
     isManual: boolean;
     lastPayDateString: string;
 }
-export interface ITotalItemConfig {
+export interface ITotalConfig {
     currencies: Array<{ name: string; total: number; }>;
+}
+export interface IDebtConfig {
+    withWho: string;
+    amount: number;
+    currency: string;
+    theyPayMe: boolean;
 }
 
 export interface IAsyncOp<Data, Success, Error> {
@@ -32,23 +38,29 @@ export interface IAsyncOpResult<Success, Error> {
 }
 
 //#region Creation
-export interface IItemCreationData<T = IItemCreationConfig> {
+export interface IItemCreationData<T = ICreationConfig> {
     type: string;
     config: T;
 }
 
-export type IItemCreationConfig = IAccountItemCreationConfig | IServiceItemCreationConfig;
+export type ICreationConfig = IAccountCreationConfig | IServiceCreationConfig;
 
-export interface IAccountItemCreationConfig {
+export interface IAccountCreationConfig {
     name?: string;
     balance?: number;
     currency?: string;
 }
-export interface IServiceItemCreationConfig {
+export interface IServiceCreationConfig {
     name?: string;
     cost?: number;
     currency?: string;
     /** If the payment has to be done manually */
     isManual: boolean;
+}
+export interface IDebtCreationConfig {
+    withWho?: string;
+    amount?: number;
+    currency?: string;
+    theyPayMe?: boolean;
 }
 //#endregion

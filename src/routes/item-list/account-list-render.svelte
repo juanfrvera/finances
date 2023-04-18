@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { IAccountItemConfig, IItemData } from '../../typings';
+	import type { IAccountConfig, IItemData } from '../../typings';
 	import NumberFormat from '../util/number-format.svelte';
 
-	export let data: IItemData<IAccountItemConfig>;
+	export let data: IItemData<IAccountConfig>;
 </script>
 
 <div class="name">{data.config.name}</div>

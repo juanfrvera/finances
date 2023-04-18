@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { IItemData, ITotalItemConfig } from '../../typings';
+	import type { IItemData, ITotalConfig } from '../../typings';
 	import NumberFormat from '../util/number-format.svelte';
 
-	export let data: IItemData<ITotalItemConfig>;
+	export let data: IItemData<ITotalConfig>;
 </script>
 
 <div>Total</div>

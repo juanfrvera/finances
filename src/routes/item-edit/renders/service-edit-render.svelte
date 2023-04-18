@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { IServiceItemCreationConfig } from '../../../typings';
+	import type { IServiceCreationConfig } from '../../../typings';
 	import Switch from '../../util/switch.svelte';
 	import CurrencySelect from '../util/currency-select.svelte';
 
-	export let config: IServiceItemCreationConfig;
+	export let config: IServiceCreationConfig;
 </script>
 
 <div class="label-and-input">

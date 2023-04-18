@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import { onMount, type ComponentType } from 'svelte';
 	import { ItemHelper } from '../../logic/item';
 	import type { IItemCreationData } from '../../typings';
 	import AccountConfig from './renders/account-edit-render.svelte';
@@ -8,6 +8,14 @@
 
 	let currentConfigComponent: ComponentType = AccountConfig;
 	$: currentConfigComponent = getConfigRenderer(data.type);
+
+	let view: { typeOptions: string[] };
+
+	onMount(() => {
+		view = {
+			typeOptions: ItemHelper.getItemClasses().map((ic) => ic.getTypeString())
+		};
+	});
 
 	function typeSelectChanged(e: Event) {
 		const value = (e.target as HTMLSelectElement).value;
@@ -20,21 +28,24 @@
 	}
 </script>
 
-<div class="form">
-	<div class="label-and-input clickable-height">
-		<label for="type-input">Type</label>
-		<select
-			id="type-input"
-			bind:value={data.type}
-			on:change={typeSelectChanged}
-			class="input-stretch"
-		>
-			<option>Account</option>
-			<option>Service</option>
-		</select>
+{#if view != null}
+	<div class="form">
+		<div class="label-and-input clickable-height">
+			<label for="type-input">Type</label>
+			<select
+				id="type-input"
+				bind:value={data.type}
+				on:change={typeSelectChanged}
+				class="input-stretch"
+			>
+				{#each view.typeOptions as option (option)}
+					<option>{option}</option>
+				{/each}
+			</select>
+		</div>
+		<svelte:component this={currentConfigComponent} config={data.config} />
 	</div>
-	<svelte:component this={currentConfigComponent} config={data.config} />
-</div>
+{/if}
 
 <style>
 	:global(.label-and-input) {

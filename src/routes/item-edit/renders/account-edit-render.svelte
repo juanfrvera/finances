@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { IAccountItemCreationConfig } from '../../../typings';
+	import type { IAccountCreationConfig } from '../../../typings';
 	import CurrencySelect from '../util/currency-select.svelte';
 
-	export let config: IAccountItemCreationConfig;
+	export let config: IAccountCreationConfig;
 </script>
 
 <div class="label-and-input">

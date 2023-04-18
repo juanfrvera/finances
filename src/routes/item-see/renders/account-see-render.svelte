@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { IAccountItemConfig, IItemData } from '../../../typings';
+	import type { IAccountConfig, IItemData } from '../../../typings';
 
-	export let data: IItemData<IAccountItemConfig>;
+	export let data: IItemData<IAccountConfig>;
 </script>
 
 {#if data != null}

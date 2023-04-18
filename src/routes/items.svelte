@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { AccountItem, ItemHelper, TotalItem } from '../logic/item';
-	import type { IItemConfig, IItemCreationData, IItemData, ITotalItemConfig } from '../typings';
+	import type { IItemConfig, IItemCreationData, IItemData, ITotalConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import Item from './item-list/item.svelte';
 	import ItemSee from './item-see/item-see.svelte';
@@ -17,7 +17,7 @@
 		seeModal?: { item: IItemData };
 		editModal?: { item: IItemData };
 	} = { list: [] };
-	const totalItem: IItemData<ITotalItemConfig> = {
+	const totalItem: IItemData<ITotalConfig> = {
 		id: TotalItem.getTypeString(),
 		type: TotalItem.getTypeString(),
 		config: {

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { ServiceItem } from '../../logic/item';
-	import type { IServiceItemConfig, IItemData } from '../../typings';
+	import type { IServiceConfig, IItemData } from '../../typings';
 
-	export let data: IItemData<IServiceItemConfig>;
+	export let data: IItemData<IServiceConfig>;
 	const view: { containerClass?: string } = {};
 
 	onMount(() => {
