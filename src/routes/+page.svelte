@@ -11,7 +11,7 @@
 	});
 </script>
 
-<div id="main-container">
+<div id="container">
 	{#if view.showItems}
 		<Items />
 	{/if}
@@ -20,8 +20,9 @@
 <style>
 	:global(body) {
 		margin: 0;
+		background-color: #b9eddd;
 	}
-	#main-container {
+	#container {
 		width: 100%;
 		height: 100vh;
 		display: flex;

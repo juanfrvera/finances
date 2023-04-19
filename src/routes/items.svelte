@@ -1,22 +1,24 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { AccountItem, ItemHelper, TotalItem } from '../logic/item';
+	import { AccountItem, Item, ItemHelper, TotalItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData, ITotalConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
-	import Item from './item-list/item.svelte';
+	import ItemList from './item-list/item.svelte';
 	import ItemSee from './item-see/item-see.svelte';
-	import { ItemStorage } from '../storage/item.store';
+	import { ItemStore } from '../storage/item.store';
 	import Modal from './util/modal.svelte';
 
 	let list: IItemData[] = [];
 	let currentSearchQuery: string = '';
+
 	const view: {
-		showStoreLocationPrompt?: boolean;
+		showEmptyState?: boolean;
 		list: IItemData[];
 		creationModal?: { data: IItemCreationData };
 		seeModal?: { item: IItemData };
 		editModal?: { item: IItemData };
 	} = { list: [] };
+
 	const totalItem: IItemData<ITotalConfig> = {
 		id: TotalItem.getTypeString(),
 		type: TotalItem.getTypeString(),
@@ -33,16 +35,18 @@
 	});
 
 	function loadItems() {
-		list = ItemStorage.getItems();
+		list = ItemStore.getItems();
 
-		const totalIndex = list.findIndex((i) => i.type === TotalItem.getTypeString());
-		if (totalIndex === -1) {
-			list.push(totalItem);
-		} else {
-			list[totalIndex] = totalItem;
+		if (list != null && list.length > 0) {
+			const totalIndex = list.findIndex((i) => i.type === TotalItem.getTypeString());
+			if (totalIndex === -1) {
+				list.push(totalItem);
+			} else {
+				list[totalIndex] = totalItem;
+			}
+			TotalItem.calculate(list, totalItem);
 		}
 
-		TotalItem.calculate(list, totalItem);
 		calculateViewList();
 	}
 
@@ -93,7 +97,7 @@
 	}
 	//#endregion Edit
 	function calculateAndSave() {
-		ItemStorage.saveItems(list);
+		ItemStore.saveItems(list);
 		TotalItem.calculate(list, totalItem);
 	}
 	function searchInputChanged(e: Event) {
@@ -101,7 +105,36 @@
 		calculateViewList();
 	}
 	function calculateViewList() {
-		view.list = list.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
+		if (list != null && list.length > 0) {
+			view.list = list.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
+			view.showEmptyState = false;
+		} else {
+			view.showEmptyState = true;
+		}
+	}
+	//#region fromEmptyState
+	function createAccount() {
+		view.creationModal = {
+			data: AccountItem.getDefaultData()
+		};
+	}
+	//#endregion
+	function deleteCurrentItem() {
+		const item = view.seeModal!.item;
+
+		list = list.filter((i) => i.id != item.id);
+		ItemStore.deleteItem(item);
+
+		if (list.length > 1) {
+			TotalItem.calculate(list, totalItem);
+		} else if (list.length == 1 && list[0].type === TotalItem.getTypeString()) {
+			ItemStore.deleteItem(list[0]);
+			list = [];
+		}
+
+		calculateViewList();
+
+		closeSeeModal();
 	}
 </script>
 
@@ -110,17 +143,45 @@
 </svelte:head>
 
 <div id="container">
-	<header id="header">
-		<input id="search-bar" on:input={searchInputChanged} />
-	</header>
-	<main id="whiteboard">
-		<button on:click={addClicked} class="square white-button">
-			<div class="title">Add</div>
-		</button>
-		{#each view.list as item (item.id + item.type + item.updateDate)}
-			<Item data={item} on:click={itemClicked} />
-		{/each}
-	</main>
+	{#if !view.showEmptyState}
+		<header id="header">
+			<input id="search-bar" on:input={searchInputChanged} />
+		</header>
+		<main id="whiteboard">
+			<button on:click={addClicked} class="square white-button">
+				<div class="title">Add</div>
+			</button>
+			{#each view.list as item (item.id + item.type + item.updateDate)}
+				<ItemList data={item} on:click={itemClicked} />
+			{/each}
+		</main>
+	{:else}
+		<div>Welcome, let's start creating your first Item, choose one of the following:</div>
+		<div>
+			<div class="title">Account</div>
+			<div class="description">
+				Create an Account to keep track of the balance of an specific bank account or wallet you
+				want to track.
+			</div>
+			<button on:click={createAccount} class="button">Create Account</button>
+		</div>
+		<div>
+			<div class="title">Service</div>
+			<div class="description">
+				Create a Service to keep track of something you need to pay every month. We will help you
+				identify when was your last payment and the services you need to pay before the month ends.
+			</div>
+			<button class="button">Create Service</button>
+		</div>
+		<div>
+			<div class="title">Debt</div>
+			<div class="description">
+				Create a Debt to keep track of an amount someone owes you or that you owe to someone. You
+				can mark it as paid when is time.
+			</div>
+			<button class="button">Create Debt</button>
+		</div>
+	{/if}
 </div>
 
 <!-- Modals -->
@@ -145,8 +206,9 @@
 	>
 		<ItemSee data={view.seeModal.item} on:update={itemUpdated} />
 		<div slot="footer" class="modal-footer-buttons">
-			<button on:click={openEditModalFromSee} class="comfortable-button">Edit</button>
-			<button on:click={closeSeeModal} class="comfortable-button">Close</button>
+			<button on:click={openEditModalFromSee} class="button">Edit</button>
+			<button on:click={deleteCurrentItem} class="button">Delete</button>
+			<button on:click={closeSeeModal} class="button">Close</button>
 		</div>
 	</Modal>
 {/if}
@@ -206,5 +268,9 @@
 	}
 	#search-bar {
 		height: 32px;
+	}
+
+	.call-to-action-button {
+		width: fit-content;
 	}
 </style>
