@@ -53,7 +53,7 @@
 	//#region Creation
 	function addClicked() {
 		view.creationModal = {
-			data: AccountItem.getDefaultData()
+			data: { type: AccountItem.getTypeString(), config: {} }
 		};
 	}
 	function saveCreationModal() {
