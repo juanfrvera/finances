@@ -7,7 +7,7 @@ import ServiceListRender from "../routes/item-list/service-list-render.svelte";
 import TotalListRender from "../routes/item-list/total-list-render.svelte";
 import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IAccountCreationConfig, IItemCreationData, IItemData, IServiceConfig, ITotalConfig } from "../typings";
+import type { IAccountConfig, IAccountCreationConfig, IDebtCreationConfig, IItemCreationData, IItemData, IServiceConfig, IServiceCreationConfig, ITotalConfig } from "../typings";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender | typeof DebtListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender;
@@ -36,10 +36,6 @@ export class AccountItem extends Item {
         if (config.currency.toLowerCase().includes(query)) return true;
 
         return false;
-    }
-
-    public static getDefaultData(): IItemCreationData<IAccountCreationConfig> {
-        return { type: this.getTypeString(), config: { name: '', balance: 0, currency: 'ars' } };
     }
 }
 

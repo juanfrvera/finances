@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { AccountItem, Item, ItemHelper, TotalItem } from '../logic/item';
+	import { AccountItem, DebtItem, Item, ItemHelper, ServiceItem, TotalItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData, ITotalConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item.svelte';
@@ -115,7 +115,17 @@
 	//#region fromEmptyState
 	function createAccount() {
 		view.creationModal = {
-			data: AccountItem.getDefaultData()
+			data: { type: AccountItem.getTypeString(), config: {} }
+		};
+	}
+	function createService() {
+		view.creationModal = {
+			data: { type: ServiceItem.getTypeString(), config: {} }
+		};
+	}
+	function createDebt() {
+		view.creationModal = {
+			data: { type: DebtItem.getTypeString(), config: {} }
 		};
 	}
 	//#endregion
@@ -171,7 +181,7 @@
 				Create a Service to keep track of something you need to pay every month. We will help you
 				identify when was your last payment and the services you need to pay before the month ends.
 			</div>
-			<button class="button">Create Service</button>
+			<button on:click={createService} class="button">Create Service</button>
 		</div>
 		<div>
 			<div class="title">Debt</div>
@@ -179,7 +189,7 @@
 				Create a Debt to keep track of an amount someone owes you or that you owe to someone. You
 				can mark it as paid when is time.
 			</div>
-			<button class="button">Create Debt</button>
+			<button on:click={createDebt} class="button">Create Debt</button>
 		</div>
 	{/if}
 </div>
