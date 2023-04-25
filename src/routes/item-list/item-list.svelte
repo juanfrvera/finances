@@ -18,3 +18,12 @@
 <button on:click={clicked} class="square white-button">
 	<svelte:component this={currentItemRenderComponent} {data} />
 </button>
+
+<style>
+	:global(.unpaid) {
+		border: 1px solid red;
+	}
+	:global(.paid) {
+		border: 1px solid green;
+	}
+</style>

@@ -1,17 +1,18 @@
 import AccountEditRender from "../routes/item-edit/renders/account-edit-render.svelte";
 import DebtEditRender from "../routes/item-edit/renders/debt-edit-render.svelte";
 import ServiceEditRender from "../routes/item-edit/renders/service-edit-render.svelte";
-import AccountListRender from "../routes/item-list/account-list-render.svelte";
-import DebtListRender from "../routes/item-list/debt-list-render.svelte";
-import ServiceListRender from "../routes/item-list/service-list-render.svelte";
-import TotalListRender from "../routes/item-list/total-list-render.svelte";
+import AccountListRender from "../routes/item-list/renders/account-list-render.svelte";
+import DebtListRender from "../routes/item-list/renders/debt-list-render.svelte";
+import ServiceListRender from "../routes/item-list/renders/service-list-render.svelte";
+import TotalListRender from "../routes/item-list/renders/total-list-render.svelte";
 import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
+import DebtSeeRender from "../routes/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
 import type { IAccountConfig, IAccountCreationConfig, IItemCreationData, IItemData, IServiceConfig, ITotalConfig } from "../typings";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender | typeof DebtListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender;
-export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender;
+export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender | typeof DebtSeeRender;
 
 export abstract class Item {
     public static getTypeString() { return ""; }
@@ -99,6 +100,7 @@ export class DebtItem extends Item {
     public static getTypeString(): string { return "Debt"; }
     public static getListRender(): ListRender { return DebtListRender; }
     public static getEditRender(): EditRender { return DebtEditRender; }
+    public static getSeeRender(): SeeRender { return DebtSeeRender; }
 }
 
 export class ItemHelper {

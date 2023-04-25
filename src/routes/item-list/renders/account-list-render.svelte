@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { IAccountConfig, IItemData } from '../../typings';
-	import NumberFormat from '../util/number-format.svelte';
+	import type { IAccountConfig, IItemData } from '../../../typings';
+	import NumberFormat from '../../util/number-format.svelte';
 
 	export let data: IItemData<IAccountConfig>;
 </script>

@@ -27,6 +27,7 @@ export interface IDebtConfig {
     amount: number;
     currency: string;
     theyPayMe: boolean;
+    paidDate: string;
 }
 
 export interface IAsyncOp<Data, Success, Error> {

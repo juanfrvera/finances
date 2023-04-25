@@ -3,7 +3,7 @@
 	import { AccountItem, ItemHelper, TotalItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData, ITotalConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
-	import Item from './item-list/item.svelte';
+	import Item from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
 	import { ItemStorage } from '../storage/item.store';
 	import Modal from './util/modal.svelte';
