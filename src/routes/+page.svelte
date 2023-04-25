@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { UserStore } from '../storage/user.store';
+	import { UserStore } from '../storage/user.storage';
 	import Items from './items.svelte';
 
 	const view: { showWelcome?: boolean; showItems?: boolean } = {};
@@ -20,7 +20,7 @@
 <style>
 	:global(body) {
 		margin: 0;
-		background-color: #cde9e0;
+		background-color: #dff1ec;
 	}
 	#container {
 		width: 100%;

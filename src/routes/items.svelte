@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { AccountItem, DebtItem, ItemHelper, ServiceItem, TotalItem } from '../logic/item';
 	import type { IItemConfig, IItemCreationData, IItemData, ITotalConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
-	import { ItemStore } from '../storage/item.store';
+	import { ItemStore } from '../storage/item.storage';
 	import Modal from './util/modal.svelte';
+	import { CurrencyLogic } from '../logic/currency.logic';
+	import { CurrencyStorage } from '../storage/currency.storage';
 
 	let list: IItemData[] = [];
 	let currentSearchQuery: string = '';
@@ -29,6 +31,9 @@
 			]
 		}
 	};
+
+	// Currency context
+	setContext(CurrencyLogic.contextKey, CurrencyLogic.currencyContext);
 
 	onMount(() => {
 		loadItems();
