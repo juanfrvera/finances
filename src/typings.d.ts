@@ -56,7 +56,7 @@ export interface IServiceCreationConfig {
     cost?: number;
     currency?: string;
     /** If the payment has to be done manually */
-    isManual: boolean;
+    isManual?: boolean;
 }
 export interface IDebtCreationConfig {
     withWho?: string;
