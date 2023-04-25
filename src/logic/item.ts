@@ -8,7 +8,7 @@ import TotalListRender from "../routes/item-list/renders/total-list-render.svelt
 import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "../routes/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IAccountCreationConfig, IDebtCreationConfig, IItemCreationData, IItemData, IServiceConfig, IServiceCreationConfig, ITotalConfig } from "../typings";
+import type { IAccountConfig, IAccountCreationConfig, IDebtConfig, IDebtCreationConfig, IItemCreationData, IItemData, IServiceConfig, IServiceCreationConfig, ITotalConfig } from "../typings";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender | typeof DebtListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender;
@@ -97,6 +97,18 @@ export class DebtItem extends Item {
     public static getListRender(): ListRender { return DebtListRender; }
     public static getEditRender(): EditRender { return DebtEditRender; }
     public static getSeeRender(): SeeRender { return DebtSeeRender; }
+
+    public static isItemOnQuery(item: IItemData<IDebtConfig>, query: string) {
+        const lwQuery = query.toLowerCase();
+        const config = item.config;
+
+        if (config.withWho.toLowerCase().includes(lwQuery)) return true;
+        if (config.amount.toString().includes(query)) return true;
+        if (config.currency.toLowerCase().includes(query)) return true;
+        if (config.paidDate != null && config.paidDate.includes(query)) return true;
+
+        return false;
+    }
 }
 
 export class ItemHelper {

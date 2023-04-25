@@ -155,7 +155,14 @@
 <div id="container">
 	{#if !view.showEmptyState}
 		<header id="header">
-			<input id="search-bar" on:input={searchInputChanged} />
+			<div class="field">
+				<p class="control has-icons-left">
+					<input id="search-bar" on:input={searchInputChanged} class="input" />
+					<span class="icon is-small is-left">
+						<i class="fa-solid fa-magnifying-glass" />
+					</span>
+				</p>
+			</div>
 		</header>
 		<main id="whiteboard">
 			<button on:click={addClicked} class="square white-button">
@@ -275,8 +282,5 @@
 		display: flex;
 		justify-content: space-around;
 		column-gap: 32px;
-	}
-	#search-bar {
-		height: 32px;
 	}
 </style>

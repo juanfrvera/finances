@@ -20,7 +20,7 @@
 <style>
 	:global(body) {
 		margin: 0;
-		background-color: #b9eddd;
+		background-color: #cde9e0;
 	}
 	#container {
 		width: 100%;
