@@ -279,8 +279,4 @@
 	#search-bar {
 		height: 32px;
 	}
-
-	.call-to-action-button {
-		width: fit-content;
-	}
 </style>
