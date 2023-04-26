@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { IDebtConfig, IItemData } from '../../../typings';
 	import NumberFormat from '../../util/number-format.svelte';
+	import { DebtLogic } from '../../../logic/debt.logic';
 
 	export let data: IItemData<IDebtConfig>;
 
@@ -12,17 +13,9 @@
 
 	onMount(() => {
 		const isPaid = data.config.paidDate != null;
-
 		const containerClass = isPaid ? 'paid' : 'unpaid';
 
-		const who = data.config.withWho;
-		let payDirectionString = `${who} will pay you`;
-		const theyPayMe = data.config.theyPayMe;
-		if (theyPayMe && isPaid) payDirectionString = `${who} paid you`;
-		if (!theyPayMe && isPaid) payDirectionString = `You paid ${who}`;
-		if (!theyPayMe && !isPaid) payDirectionString = `You owe ${who}`;
-
-		view = { containerClass, payDirectionString };
+		view = { containerClass, payDirectionString: DebtLogic.calculatePayStateString(data) };
 	});
 </script>
 

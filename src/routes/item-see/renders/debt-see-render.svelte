@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { IDebtConfig, IItemData } from '../../../typings';
+	import { DebtLogic } from '../../../logic/debt.logic';
 
 	export let data: IItemData<IDebtConfig>;
 	const dispatch = createEventDispatcher();
@@ -25,14 +26,7 @@
 			showChangePaidDateButton: isPaid
 		};
 
-		const who = data.config.withWho;
-		let payDirectionString = `${who} will pay you`;
-		const theyPayMe = data.config.theyPayMe;
-		if (theyPayMe && isPaid) payDirectionString = `${who} paid you`;
-		if (!theyPayMe && isPaid) payDirectionString = `You paid ${who}`;
-		if (!theyPayMe && !isPaid) payDirectionString = `You need to pay ${who}`;
-
-		view.payDirectionString = payDirectionString;
+		view.payDirectionString = DebtLogic.calculatePayStateString(data);
 	});
 
 	function markAsPaidClicked() {
