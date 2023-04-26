@@ -277,7 +277,8 @@
 		display: flex;
 		flex-wrap: wrap;
 		column-gap: 8px;
-		row-gap: 8px;
+		row-gap: 12px;
+		justify-content: space-between;
 	}
 	.comfortable-button {
 		padding: 4px 8px;
