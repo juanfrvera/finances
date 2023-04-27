@@ -20,7 +20,8 @@ export interface IServiceConfig {
     lastPayDateString: string;
 }
 export interface ITotalConfig {
-    currencies: Array<{ name: string; total: number; }>;
+    currency: string;
+    total: number;
 }
 export interface IDebtConfig {
     withWho: string;

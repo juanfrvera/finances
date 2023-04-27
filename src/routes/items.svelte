@@ -8,7 +8,6 @@
 	import { ItemStore } from '../storage/item.storage';
 	import Modal from './util/modal.svelte';
 	import { CurrencyLogic } from '../logic/currency.logic';
-	import { CurrencyStorage } from '../storage/currency.storage';
 
 	let list: IItemData[] = [];
 	let currentSearchQuery: string = '';
@@ -16,43 +15,47 @@
 	const view: {
 		showEmptyState?: boolean;
 		list: IItemData[];
+		currencyList : Array<IItemData<ITotalConfig>>;
 		creationModal?: { data: IItemCreationData };
 		seeModal?: { item: IItemData };
 		editModal?: { item: IItemData };
-	} = { list: [] };
-
-	const totalItem: IItemData<ITotalConfig> = {
-		id: TotalItem.getTypeString(),
-		type: TotalItem.getTypeString(),
-		config: {
-			currencies: [
-				{ name: 'ars', total: 0 },
-				{ name: 'usd', total: 0 }
-			]
-		}
-	};
+	} = { list: [], currencyList: [] };
 
 	// Currency context
 	setContext(CurrencyLogic.contextKey, CurrencyLogic.currencyContext);
 
 	onMount(() => {
 		loadItems();
+		CurrencyLogic.currencyAddedSubject.subscribe({
+			next: (currency) => {
+				console.log(`Currency added received in items, currency: ${currency}`);
+			}
+		});
 	});
 
 	function loadItems() {
 		list = ItemStore.getItems();
-
-		if (list != null && list.length > 0) {
-			const totalIndex = list.findIndex((i) => i.type === TotalItem.getTypeString());
-			if (totalIndex === -1) {
-				list.push(totalItem);
-			} else {
-				list[totalIndex] = totalItem;
-			}
-			TotalItem.calculate(list, totalItem);
-		}
-
 		calculateViewList();
+		calculateCurrencyItems();
+	}
+
+	function calculateCurrencyItems(){
+		view.currencyList = [];
+		const currencies = CurrencyLogic.currencyContext.getCurrencies();
+
+		for (const currency of currencies) {
+			const currencyItem : IItemData<ITotalConfig> = {
+				id: currency,
+				type: TotalItem.getTypeString(),
+				config: {
+					currency,
+					total: 0
+				}
+			}
+			TotalItem.calculate(list, currencyItem);
+
+			view.currencyList.push(currencyItem);
+		}
 	}
 
 	//#region Creation
@@ -103,7 +106,7 @@
 	//#endregion Edit
 	function calculateAndSave() {
 		ItemStore.saveItems(list);
-		TotalItem.calculate(list, totalItem);
+		calculateCurrencyItems();
 	}
 	function searchInputChanged(e: Event) {
 		currentSearchQuery = (e.target! as HTMLInputElement).value;
@@ -141,7 +144,7 @@
 		ItemStore.deleteItem(item);
 
 		if (list.length > 1) {
-			TotalItem.calculate(list, totalItem);
+			calculateCurrencyItems();
 		} else if (list.length == 1 && list[0].type === TotalItem.getTypeString()) {
 			ItemStore.deleteItem(list[0]);
 			list = [];

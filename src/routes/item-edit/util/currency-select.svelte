@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 	import { CurrencyLogic, type ICurrencyContext } from '../../../logic/currency.logic';
-	import { listen } from 'svelte/internal';
 
 	export let value: string = 'ars';
 
@@ -54,6 +53,8 @@
 		} else {
 			view.list = [createdCurrency];
 		}
+
+		value = createdCurrency;
 
 		closeCreation();
 	}

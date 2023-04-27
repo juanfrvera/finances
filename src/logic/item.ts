@@ -76,16 +76,14 @@ export class TotalItem extends Item {
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
 
     public static calculate(list: IItemData[], totalItem: IItemData<ITotalConfig>) {
-        totalItem.config.currencies.forEach((c) => c.total = 0);
+        totalItem.config.total = 0;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
 
             if (item.type === AccountItem.getTypeString()) {
                 const account = item as IItemData<IAccountConfig>;
-                const currencyObject = totalItem.config.currencies.find((c) => c.name === account.config.currency);
-
-                if (currencyObject != null) {
-                    currencyObject.total += account.config.balance;
+                if (account.config.currency === totalItem.config.currency) {
+                    totalItem.config.total += account.config.balance;
                 }
             }
         }
