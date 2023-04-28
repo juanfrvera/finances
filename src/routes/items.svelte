@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, setContext } from 'svelte';
-	import { AccountItem, DebtItem, ItemHelper, ServiceItem, TotalItem } from '../logic/item';
-	import type { IItemConfig, IItemCreationData, IItemData, ITotalConfig } from '../typings';
+	import { AccountItem, DebtItem, ItemHelper, ServiceItem, CurrencyItem } from '../logic/item';
+	import type { IItemConfig, IItemCreationData, IItemData, ICurrencyConfig } from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
@@ -15,7 +15,7 @@
 	const view: {
 		showEmptyState?: boolean;
 		list: IItemData[];
-		currencyList : Array<IItemData<ITotalConfig>>;
+		currencyList: IItemData<ICurrencyConfig>[];
 		creationModal?: { data: IItemCreationData };
 		seeModal?: { item: IItemData };
 		editModal?: { item: IItemData };
@@ -39,23 +39,25 @@
 		calculateCurrencyItems();
 	}
 
-	function calculateCurrencyItems(){
-		view.currencyList = [];
+	function calculateCurrencyItems() {
+		const currencyItems: Array<IItemData<ICurrencyConfig>> = [];
 		const currencies = CurrencyLogic.currencyContext.getCurrencies();
 
 		for (const currency of currencies) {
-			const currencyItem : IItemData<ITotalConfig> = {
+			const currencyItem: IItemData<ICurrencyConfig> = {
 				id: currency,
-				type: TotalItem.getTypeString(),
+				type: CurrencyItem.getTypeString(),
 				config: {
 					currency,
 					total: 0
 				}
-			}
-			TotalItem.calculate(list, currencyItem);
+			};
+			CurrencyItem.calculate(list, currencyItem);
 
-			view.currencyList.push(currencyItem);
+			currencyItems.push(currencyItem);
 		}
+
+		view.currencyList = currencyItems;
 	}
 
 	//#region Creation
@@ -145,7 +147,7 @@
 
 		if (list.length > 1) {
 			calculateCurrencyItems();
-		} else if (list.length == 1 && list[0].type === TotalItem.getTypeString()) {
+		} else if (list.length == 1 && list[0].type === CurrencyItem.getTypeString()) {
 			ItemStore.deleteItem(list[0]);
 			list = [];
 		}
@@ -178,6 +180,9 @@
 			</button>
 			{#each view.list as item (item.id + item.type + item.updateDate)}
 				<ItemList data={item} on:click={itemClicked} />
+			{/each}
+			{#each view.currencyList as currency (currency.id + currency.config.total)}
+				<ItemList data={currency} on:click={itemClicked} />
 			{/each}
 		</main>
 	{:else}

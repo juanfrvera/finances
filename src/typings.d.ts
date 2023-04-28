@@ -19,7 +19,7 @@ export interface IServiceConfig {
     isManual: boolean;
     lastPayDateString: string;
 }
-export interface ITotalConfig {
+export interface ICurrencyConfig {
     currency: string;
     total: number;
 }

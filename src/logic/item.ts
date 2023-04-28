@@ -4,15 +4,16 @@ import ServiceEditRender from "../routes/item-edit/renders/service-edit-render.s
 import AccountListRender from "../routes/item-list/renders/account-list-render.svelte";
 import DebtListRender from "../routes/item-list/renders/debt-list-render.svelte";
 import ServiceListRender from "../routes/item-list/renders/service-list-render.svelte";
-import TotalListRender from "../routes/item-list/renders/total-list-render.svelte";
+import CurrencyListRender from "../routes/item-list/renders/currency-list-render.svelte";
 import AccountSeeRender from "../routes/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "../routes/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IAccountCreationConfig, IDebtConfig, IDebtCreationConfig, IItemCreationData, IItemData, IServiceConfig, IServiceCreationConfig, ITotalConfig } from "../typings";
+import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig } from "../typings";
+import CurrencySeeRender from "../routes/item-see/renders/currency-see-render.svelte";
 
-export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof TotalListRender | typeof DebtListRender;
+export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof CurrencyListRender | typeof DebtListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender;
-export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender | typeof DebtSeeRender;
+export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender | typeof DebtSeeRender | typeof CurrencySeeRender;
 
 export abstract class Item {
     public static getTypeString() { return ""; }
@@ -69,13 +70,13 @@ export class ServiceItem extends Item {
     }
 }
 
-export class TotalItem extends Item {
+export class CurrencyItem extends Item {
     public static getTypeString(): string { return "Total"; }
-    public static getListRender(): ListRender { return TotalListRender; }
+    public static getListRender(): ListRender { return CurrencyListRender; }
     public static getEditRender(): EditRender { return ServiceEditRender; }
-    public static getSeeRender(): SeeRender { return ServiceSeeRender; }
+    public static getSeeRender(): SeeRender { return CurrencySeeRender; }
 
-    public static calculate(list: IItemData[], totalItem: IItemData<ITotalConfig>) {
+    public static calculate(list: IItemData[], totalItem: IItemData<ICurrencyConfig>) {
         totalItem.config.total = 0;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
@@ -111,7 +112,7 @@ export class DebtItem extends Item {
 
 export class ItemHelper {
     private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem, DebtItem];
-    private static readonly specialItemClasses: Array<typeof Item> = [TotalItem];
+    private static readonly specialItemClasses: Array<typeof Item> = [CurrencyItem];
 
     public static getClassByTypeString(type: string) {
         const itemClass = this.itemClasses.find((c) => c.getTypeString() === type);
