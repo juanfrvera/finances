@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { IDebtConfig, IItemData } from '../../../typings';
-	import { DebtLogic } from '../../../logic/debt.logic';
+	import { DebtLogic } from '../../../logic/debt';
 
 	export let data: IItemData<IDebtConfig>;
 	const dispatch = createEventDispatcher();

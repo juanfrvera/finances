@@ -10,9 +10,10 @@ import DebtSeeRender from "../routes/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "../routes/item-see/renders/service-see-render.svelte";
 import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig } from "../typings";
 import CurrencySeeRender from "../routes/item-see/renders/currency-see-render.svelte";
+import CurrencyEditRender from "../routes/item-edit/renders/currency-edit-render.svelte";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof CurrencyListRender | typeof DebtListRender;
-export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender;
+export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender | typeof CurrencyEditRender;
 export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender | typeof DebtSeeRender | typeof CurrencySeeRender;
 
 export abstract class Item {
@@ -71,9 +72,9 @@ export class ServiceItem extends Item {
 }
 
 export class CurrencyItem extends Item {
-    public static getTypeString(): string { return "Total"; }
+    public static getTypeString(): string { return "Currency"; }
     public static getListRender(): ListRender { return CurrencyListRender; }
-    public static getEditRender(): EditRender { return ServiceEditRender; }
+    public static getEditRender(): EditRender { return CurrencyEditRender; }
     public static getSeeRender(): SeeRender { return CurrencySeeRender; }
 
     public static calculate(list: IItemData[], totalItem: IItemData<ICurrencyConfig>) {
@@ -111,19 +112,13 @@ export class DebtItem extends Item {
 }
 
 export class ItemHelper {
-    private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem, DebtItem];
-    private static readonly specialItemClasses: Array<typeof Item> = [CurrencyItem];
+    private static readonly itemClasses: Array<typeof Item> = [AccountItem, ServiceItem, DebtItem, CurrencyItem];
 
     public static getClassByTypeString(type: string) {
         const itemClass = this.itemClasses.find((c) => c.getTypeString() === type);
         if (itemClass != null) {
             return itemClass;
         }
-        return this.getSpecialClassByTypeString(type);
-    }
-    /** Returns the class if one is found, or null if not */
-    public static getSpecialClassByTypeString(type: string) {
-        return this.specialItemClasses.find((c) => c.getTypeString() === type);
     }
     public static isItemOnQuery(item: IItemData, query: string) {
         const lwQuery = query.toLowerCase();

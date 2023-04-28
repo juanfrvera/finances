@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
-	import { CurrencyLogic, type ICurrencyContext } from '../../../logic/currency.logic';
+	import { CurrencyLogic, type ICurrencyContext } from '../../../logic/currency';
 
 	export let value: string = 'ars';
 
@@ -9,89 +9,46 @@
 	const view: {
 		list?: string[];
 		showList?: boolean;
-		showCreateButton?: boolean;
-		creating?: {
-			disableSave?: boolean;
-		};
+		needsToCreate?: boolean;
 	} = {};
 
-	let createdCurrency: string;
-
 	onMount(() => {
-		view.list = context.getCurrencies();
-		if (view.list.length > 0) {
-			view.showList = true;
-		}
-		view.showCreateButton = true;
+		view.list = context.getCurrencies().map((c) => c.config.currency);
+
+		const hasCurrencies = view.list.length > 0;
+		view.showList = hasCurrencies;
+		view.needsToCreate = !hasCurrencies;
 	});
 
 	function createButtonClicked() {
-		view.showCreateButton = false;
-		view.showList = false;
-		view.creating = {
-			disableSave: true
-		};
-	}
-
-	function creationInputKeyUp(e: KeyboardEvent) {
-		const value = (e.target as HTMLInputElement).value;
-
-		view.creating!.disableSave = value == null || value.length <= 0;
-
-		createdCurrency = value;
-	}
-
-	function cancelCreation() {
-		closeCreation();
-	}
-
-	function saveCreation() {
-		context.addCurrency(createdCurrency);
-
-		if (view.list != null) {
-			view.list.push(createdCurrency);
-		} else {
-			view.list = [createdCurrency];
-		}
-
-		value = createdCurrency;
-
-		closeCreation();
-	}
-
-	function closeCreation() {
-		createdCurrency = '';
-		view.creating = undefined;
-		view.showList = true;
-		view.showCreateButton = true;
+		context.onGoToCreation();
 	}
 </script>
 
 <div class="label-and-input">
 	<label for="currency-input">Currency</label>
-	<div class="select-and-button">
-		{#if view.showList && view.list}
-			<div class="select input-stretch">
-				<select bind:value id="currency-input" class="w-100">
-					{#each view.list as currency}
-						<option>{currency}</option>
-					{/each}
-				</select>
-			</div>
-		{/if}
-		{#if view.showCreateButton}
-			<button on:click={createButtonClicked}>Create Currency</button>
-		{/if}
-		{#if view.creating}
-			<input on:keyup={creationInputKeyUp} class="input" type="text" placeholder="usd" />
-			<button disabled={view.creating.disableSave} on:click={saveCreation}>Save</button>
-			<button on:click={cancelCreation}>Cancel</button>
-		{/if}
-	</div>
+	{#if view.showList && view.list}
+		<div class="select input-stretch">
+			<select bind:value id="currency-input" class="w-100">
+				{#each view.list as currency}
+					<option>{currency}</option>
+				{/each}
+			</select>
+		</div>
+	{/if}
+	{#if view.needsToCreate}
+		<div class="create-currency-info">
+			You don't have currencies <button on:click={createButtonClicked}>Create one</button>
+		</div>
+	{/if}
 </div>
 
 <style>
-	.select-and-button {
+	.create-currency-info {
+		width: 100%;
 		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		column-gap: 8px;
 	}
 </style>

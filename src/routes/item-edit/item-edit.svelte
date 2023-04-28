@@ -53,7 +53,7 @@
 	}
 
 	:global(.label-and-input > label) {
-		min-width: 72px;
+		min-width: 100px;
 	}
 	:global(.input-stretch) {
 		flex-grow: 1;

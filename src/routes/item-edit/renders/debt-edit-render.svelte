@@ -7,13 +7,13 @@
 </script>
 
 <div class="label-and-input">
-	<label for="name-input">With who</label>
-	<input bind:value={config.withWho} id="name-input" class="input-stretch" />
+	<label for="who-input">With who</label>
+	<input bind:value={config.withWho} id="who-input" class="input-stretch" />
 </div>
 <CurrencySelect bind:value={config.currency} />
 <div class="label-and-input">
-	<label for="balance-input">Amount</label>
-	<input bind:value={config.amount} id="balance-input" type="number" class="input-stretch" />
+	<label for="amount-input">Amount</label>
+	<input bind:value={config.amount} id="amount-input" type="number" class="input-stretch" />
 </div>
 <div class="label-and-input">
 	<label for="is-manual-input">They Pay Me</label>

@@ -1,12 +1,20 @@
 import type { IItemData } from "../typings";
 
-export class ItemStore {
+export class ItemStorage {
     private static readonly itemsLocalStorageKey = "items";
 
-    public static getItems(): IItemData[] {
+    public static getItems(filter?: { type?: string }): IItemData[] {
         const listJsonString = localStorage.getItem(this.itemsLocalStorageKey);
         if (listJsonString != null) {
-            return JSON.parse(listJsonString);
+            let list: IItemData[] = JSON.parse(listJsonString);
+
+            if (filter != null) {
+                if (filter.type != null) {
+                    list = list.filter((i) => i.type === filter.type);
+                }
+            }
+
+            return list;
         }
         return [];
     }

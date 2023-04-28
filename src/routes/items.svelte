@@ -5,9 +5,9 @@
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
-	import { ItemStore } from '../storage/item.storage';
+	import { ItemStorage } from '../storage/item';
 	import Modal from './util/modal.svelte';
-	import { CurrencyLogic } from '../logic/currency.logic';
+	import { CurrencyLogic, type ICurrencyContext } from '../logic/currency';
 
 	let list: IItemData[] = [];
 	let currentSearchQuery: string = '';
@@ -15,14 +15,17 @@
 	const view: {
 		showEmptyState?: boolean;
 		list: IItemData[];
-		currencyList: IItemData<ICurrencyConfig>[];
 		creationModal?: { data: IItemCreationData };
 		seeModal?: { item: IItemData };
 		editModal?: { item: IItemData };
-	} = { list: [], currencyList: [] };
+	} = { list: [] };
 
 	// Currency context
-	setContext(CurrencyLogic.contextKey, CurrencyLogic.currencyContext);
+	const currencyContext: ICurrencyContext = {
+		getCurrencies: CurrencyLogic.getCurrencies,
+		onGoToCreation: goToCurrencyCreation
+	};
+	setContext(CurrencyLogic.contextKey, currencyContext);
 
 	onMount(() => {
 		loadItems();
@@ -34,30 +37,16 @@
 	});
 
 	function loadItems() {
-		list = ItemStore.getItems();
+		list = ItemStorage.getItems();
 		calculateViewList();
-		calculateCurrencyItems();
 	}
 
 	function calculateCurrencyItems() {
-		const currencyItems: Array<IItemData<ICurrencyConfig>> = [];
-		const currencies = CurrencyLogic.currencyContext.getCurrencies();
+		const currencyItems = list.filter((i) => i.type === CurrencyItem.getTypeString());
 
-		for (const currency of currencies) {
-			const currencyItem: IItemData<ICurrencyConfig> = {
-				id: currency,
-				type: CurrencyItem.getTypeString(),
-				config: {
-					currency,
-					total: 0
-				}
-			};
+		for (const currencyItem of currencyItems) {
 			CurrencyItem.calculate(list, currencyItem);
-
-			currencyItems.push(currencyItem);
 		}
-
-		view.currencyList = currencyItems;
 	}
 
 	//#region Creation
@@ -107,8 +96,8 @@
 	}
 	//#endregion Edit
 	function calculateAndSave() {
-		ItemStore.saveItems(list);
 		calculateCurrencyItems();
+		ItemStorage.saveItems(list);
 	}
 	function searchInputChanged(e: Event) {
 		currentSearchQuery = (e.target! as HTMLInputElement).value;
@@ -143,18 +132,26 @@
 		const item = view.seeModal!.item;
 
 		list = list.filter((i) => i.id != item.id);
-		ItemStore.deleteItem(item);
+		ItemStorage.deleteItem(item);
 
 		if (list.length > 1) {
 			calculateCurrencyItems();
 		} else if (list.length == 1 && list[0].type === CurrencyItem.getTypeString()) {
-			ItemStore.deleteItem(list[0]);
+			ItemStorage.deleteItem(list[0]);
 			list = [];
 		}
 
 		calculateViewList();
 
 		closeSeeModal();
+	}
+	function goToCurrencyCreation() {
+		if (view.creationModal == null) {
+			view.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
+		} else {
+			view.creationModal.data.type = CurrencyItem.getTypeString();
+			view.creationModal.data.config = {};
+		}
 	}
 </script>
 
@@ -180,9 +177,6 @@
 			</button>
 			{#each view.list as item (item.id + item.type + item.updateDate)}
 				<ItemList data={item} on:click={itemClicked} />
-			{/each}
-			{#each view.currencyList as currency (currency.id + currency.config.total)}
-				<ItemList data={currency} on:click={itemClicked} />
 			{/each}
 		</main>
 	{:else}
