@@ -25,6 +25,7 @@ export interface ICurrencyConfig {
 }
 export interface IDebtConfig {
     withWho: string;
+    description: string;
     amount: number;
     currency: string;
     theyPayMe: boolean;
@@ -64,5 +65,6 @@ export interface IDebtCreationConfig {
     amount?: number;
     currency?: string;
     theyPayMe?: boolean;
+    description?: string;
 }
 //#endregion

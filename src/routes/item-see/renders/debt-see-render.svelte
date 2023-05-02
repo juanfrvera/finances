@@ -15,7 +15,7 @@
 			};
 			showChangePaidDateButton: boolean;
 		};
-		payDirectionString?: string;
+		payInfo?: string;
 	} = {};
 
 	onMount(() => {
@@ -26,7 +26,10 @@
 			showChangePaidDateButton: isPaid
 		};
 
-		view.payDirectionString = DebtLogic.calculatePayStateString(data);
+		view.payInfo = DebtLogic.calculatePayStateString(data);
+		if (data.config.description && data.config.description.length > 0) {
+			view.payInfo += ` ${data.config.description}`;
+		}
 	});
 
 	function markAsPaidClicked() {
@@ -60,7 +63,7 @@
 
 {#if view != null}
 	<div class="debt-see">
-		<div>{view.payDirectionString}</div>
+		<div>{view.payInfo}</div>
 		<div>{data.config.amount} {data.config.currency}</div>
 		{#if view.payDate != undefined}
 			{#if view.payDate.showPaidDate}
