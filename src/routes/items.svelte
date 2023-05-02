@@ -127,6 +127,11 @@
 			data: { type: DebtItem.getTypeString(), config: {} }
 		};
 	}
+	function createCurrency() {
+		view.creationModal = {
+			data: { type: CurrencyItem.getTypeString(), config: {} }
+		};
+	}
 	//#endregion
 	function deleteCurrentItem() {
 		const item = view.seeModal!.item;
@@ -204,6 +209,14 @@
 				can mark it as paid when is time.
 			</div>
 			<button on:click={createDebt} class="button">Create Debt</button>
+		</div>
+		<div>
+			<div class="title">Currency</div>
+			<div class="description">
+				Create a Currency to organize your accounts by linking them to it, then you will be able to
+				see the sum of all the accounts in the same currency.
+			</div>
+			<button on:click={createCurrency} class="button">Create Currency</button>
 		</div>
 	{/if}
 </div>
