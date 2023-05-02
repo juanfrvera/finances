@@ -21,6 +21,10 @@
 		<Switch bind:checked={config.isManual} />
 	</div>
 </div>
+<div>
+	Mark the service as manual if you want to mark it as paid every month. You can change this setting
+	later.
+</div>
 
 <style>
 	.switch-container {

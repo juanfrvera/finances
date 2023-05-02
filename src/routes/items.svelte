@@ -230,8 +230,8 @@
 	>
 		<ItemEdit data={view.creationModal.data} />
 		<div slot="footer" class="modal-footer-buttons">
-			<button on:click={saveCreationModal} class="comfortable-button">Save</button>
-			<button on:click={closeCreationModal} class="comfortable-button">Cancel</button>
+			<button on:click={saveCreationModal} class="button is-primary">Save</button>
+			<button on:click={closeCreationModal} class="button">Cancel</button>
 		</div>
 	</Modal>
 {/if}
@@ -244,7 +244,7 @@
 		<ItemSee data={view.seeModal.item} on:update={itemUpdated} />
 		<div slot="footer" class="modal-footer-buttons">
 			<button on:click={openEditModalFromSee} class="button">Edit</button>
-			<button on:click={deleteCurrentItem} class="button">Delete</button>
+			<button on:click={deleteCurrentItem} class="button is-danger">Delete</button>
 			<button on:click={closeSeeModal} class="button">Close</button>
 		</div>
 	</Modal>
@@ -294,9 +294,6 @@
 		column-gap: 8px;
 		row-gap: 12px;
 		justify-content: space-between;
-	}
-	.comfortable-button {
-		padding: 4px 8px;
 	}
 	.modal-footer-buttons {
 		width: 100%;
