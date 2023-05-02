@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { IServiceCreationConfig } from '../../../typings';
-	import Switch from '../../util/switch.svelte';
+	import type { IServiceCreationConfig } from '@/typings';
+	import Switch from '@/components/switch.svelte';
 	import CurrencySelect from '../util/currency-select.svelte';
 
 	export let config: IServiceCreationConfig;

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { IDebtCreationConfig } from '../../../typings';
-	import Switch from '../../util/switch.svelte';
+	import type { IDebtCreationConfig } from '@/typings';
+	import Switch from '@/components/switch.svelte';
 	import CurrencySelect from '../util/currency-select.svelte';
 
 	export let config: IDebtCreationConfig;

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { IDebtConfig, IItemData } from '../../../typings';
-	import NumberFormat from '../../util/number-format.svelte';
-	import { DebtLogic } from '../../../logic/debt';
+	import type { IDebtConfig, IItemData } from '@/typings';
+	import NumberFormat from '@/components/number-format.svelte';
+	import { DebtLogic } from '@/logic/debt';
 
 	export let data: IItemData<IDebtConfig>;
 

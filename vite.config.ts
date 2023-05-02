@@ -9,5 +9,8 @@ export default defineConfig({
 				additionalData: '@use "src/variables.scss" as *;'
 			}
 		}
-	}
+	},
+	resolve: {
+		alias: [{ find: '@', replacement: '/src' }],
+	},
 });

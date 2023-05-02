@@ -6,7 +6,7 @@
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
 	import { ItemStorage } from '../storage/item';
-	import Modal from './util/modal.svelte';
+	import Modal from '../components/modal.svelte';
 	import { CurrencyLogic, type ICurrencyContext } from '../logic/currency';
 
 	let list: IItemData[] = [];
