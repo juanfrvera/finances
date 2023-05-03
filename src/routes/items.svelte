@@ -139,13 +139,7 @@
 		list = list.filter((i) => i.id != item.id);
 		ItemStorage.deleteItem(item);
 
-		if (list.length > 1) {
-			calculateCurrencyItems();
-		} else if (list.length == 1 && list[0].type === CurrencyItem.getTypeString()) {
-			ItemStorage.deleteItem(list[0]);
-			list = [];
-		}
-
+		calculateCurrencyItems();
 		calculateViewList();
 
 		closeSeeModal();
