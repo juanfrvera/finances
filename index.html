@@ -2,31 +2,51 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<link rel="icon" href="/juanfrvera.github.io/favicon.png" />
+		<link rel="icon" href="./favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta http-equiv="content-security-policy" content="">
-		<link rel="modulepreload" href="/juanfrvera.github.io/_app/immutable/entry/start.cadb17bb.js">
-		<link rel="modulepreload" href="/juanfrvera.github.io/_app/immutable/chunks/index.a021736d.js">
-		<link rel="modulepreload" href="/juanfrvera.github.io/_app/immutable/chunks/singletons.1edd09c8.js">
-		<link rel="modulepreload" href="/juanfrvera.github.io/_app/immutable/entry/app.0be678f7.js">
+		<link href="./_app/immutable/assets/_layout.63d1a38d.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/_page.774dee6d.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.a9a01d27.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.a021736d.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.522000bc.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.b3091b37.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_layout.svelte.1ad54dae.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_page.svelte.27f3eb47.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/_page.ts.9c5eea7e.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/_page.da46b06b.js">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">
+
+
+<div id="container" class="svelte-g32lqp">
+</div>
+
+
+			
 			<script>
 				{
-					__sveltekit_1u7j0k2 = {
-						assets: "/juanfrvera.github.io",
-						base: "/juanfrvera.github.io",
+					__sveltekit_nkvl1v = {
+						assets: "/juanfrvera.github.io/finances",
+						base: new URL(".", location).pathname.slice(0, -1),
 						env: {}
 					};
 
 					const element = document.currentScript.parentElement;
 
+					const data = [null,null];
+
 					Promise.all([
-						import("/juanfrvera.github.io/_app/immutable/entry/start.cadb17bb.js"),
-						import("/juanfrvera.github.io/_app/immutable/entry/app.0be678f7.js")
+						import("./_app/immutable/entry/start.a9a01d27.js"),
+						import("./_app/immutable/entry/app.b3091b37.js")
 					]).then(([kit, app]) => {
-						kit.start(app, element);
+						kit.start(app, element, {
+							node_ids: [0, 2],
+							data,
+							form: null,
+							error: null
+						});
 					});
 				}
 			</script>
