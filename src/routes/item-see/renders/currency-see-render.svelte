@@ -1,4 +1,5 @@
 <script lang="ts">
+	import NumberFormat from '@/components/number-format.svelte';
 	import type { ICurrencyConfig, IItemData } from '../../../typings';
 
 	export let data: IItemData<ICurrencyConfig>;
@@ -7,7 +8,10 @@
 {#if data != null}
 	<div class="currency-see">
 		<div>This is the total of your accounts in <strong>{data.config.currency}</strong></div>
-		<div class="currency-total">{data.config.total} {data.config.currency}</div>
+		<div class="currency-total">
+			<NumberFormat value={data.config.total} />
+			{data.config.currency}
+		</div>
 		<div>You can delete this item if you want to delete the currency</div>
 	</div>
 {/if}

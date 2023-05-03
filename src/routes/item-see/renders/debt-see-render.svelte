@@ -2,6 +2,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { IDebtConfig, IItemData } from '../../../typings';
 	import { DebtLogic } from '../../../logic/debt';
+	import NumberFormat from '@/components/number-format.svelte';
 
 	export let data: IItemData<IDebtConfig>;
 	const dispatch = createEventDispatcher();
@@ -64,7 +65,7 @@
 {#if view != null}
 	<div class="debt-see">
 		<div>{view.payInfo}</div>
-		<div>{data.config.amount} {data.config.currency}</div>
+		<div><NumberFormat value={data.config.amount} /> {data.config.currency}</div>
 		{#if view.payDate != undefined}
 			{#if view.payDate.showPaidDate}
 				<div class="label-and-value">

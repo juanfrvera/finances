@@ -1,6 +1,8 @@
 <script lang="ts">
 	export let value: number;
-	$: intPart = Math.floor(value);
+	$: intPart = Math.floor(value)
+		.toString()
+		.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	$: decimalPart = ((value - Math.floor(value)) * 100).toFixed(0);
 </script>
 
