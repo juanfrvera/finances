@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { ServiceItem } from '../../../logic/item';
 	import type { IServiceConfig, IItemData } from '../../../typings';
+	import NumberFormat from '@/components/number-format.svelte';
 
 	export let data: IItemData<IServiceConfig>;
 	const view: { containerClass?: string } = {};
@@ -19,5 +20,8 @@
 
 <div class={view.containerClass}>
 	<div class="name">{data.config.name}</div>
-	<div class="data">{data.config.cost} {data.config.currency}</div>
+	<div class="data">
+		<NumberFormat value={data.config.cost} />
+		{data.config.currency}
+	</div>
 </div>
