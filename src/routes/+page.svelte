@@ -18,9 +18,13 @@
 </div>
 
 <style>
+	:global(html) {
+		height: 100%;
+	}
 	:global(body) {
 		margin: 0;
 		background-color: #dff1ec;
+		min-height: 100%;
 	}
 	#container {
 		display: flex;
