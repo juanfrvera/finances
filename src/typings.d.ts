@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IItemData<T = any> {
     id: string;
     type: string;
@@ -5,7 +6,7 @@ export interface IItemData<T = any> {
     updateDate?: Date;
 }
 
-export type IItemConfig = IAccountConfig | IServiceConfig;
+export type IItemConfig = IAccountConfig | IServiceConfig | IDebtConfig | ICurrencyConfig;
 export interface IAccountConfig {
     name: string;
     balance: number;
@@ -46,7 +47,7 @@ export interface IItemCreationData<T = ICreationConfig> {
     config: T;
 }
 
-export type ICreationConfig = IAccountCreationConfig | IServiceCreationConfig;
+export type ICreationConfig = IAccountCreationConfig | IServiceCreationConfig | IDebtCreationConfig | ICurrencyCreationConfig;
 
 export interface IAccountCreationConfig {
     name?: string;
@@ -66,5 +67,9 @@ export interface IDebtCreationConfig {
     currency?: string;
     theyPayMe?: boolean;
     description?: string;
+}
+export interface ICurrencyCreationConfig {
+    currency?: string;
+    total?: number;
 }
 //#endregion

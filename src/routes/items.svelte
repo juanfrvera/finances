@@ -1,13 +1,19 @@
 <script lang="ts">
 	import { onMount, setContext } from 'svelte';
 	import { AccountItem, DebtItem, ItemHelper, ServiceItem, CurrencyItem } from '../logic/item';
-	import type { IItemConfig, IItemCreationData, IItemData, ICurrencyConfig } from '../typings';
+	import type {
+		IItemConfig,
+		IItemCreationData,
+		IItemData,
+		ICurrencyCreationConfig
+	} from '../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
 	import { ItemStorage } from '../storage/item';
 	import Modal from '../components/modal.svelte';
 	import { CurrencyLogic, type ICurrencyContext } from '../logic/currency';
+	import { deepCopy } from '@/util/deep-copy';
 
 	let list: IItemData[] = [];
 	let currentSearchQuery: string = '';
@@ -20,10 +26,12 @@
 		editModal?: { item: IItemData };
 	} = { list: [] };
 
+	let afterCurrencyCreated: { creationModal?: { data: IItemCreationData } } | undefined;
+
 	// Currency context
 	const currencyContext: ICurrencyContext = {
 		getCurrencies: CurrencyLogic.getCurrencies,
-		onGoToCreation: goToCurrencyCreation
+		onGoToCreation: switchToCurrencyCreation
 	};
 	setContext(CurrencyLogic.contextKey, currencyContext);
 
@@ -67,7 +75,12 @@
 		list = [newItem, ...list];
 		calculateViewList();
 		calculateAndSave();
-		closeCreationModal();
+
+		if (view.creationModal?.data.type !== CurrencyItem.getTypeString()) {
+			closeCreationModal();
+		} else {
+			currencyCreated();
+		}
 	}
 	function closeCreationModal() {
 		view.creationModal = undefined;
@@ -144,12 +157,33 @@
 
 		closeSeeModal();
 	}
-	function goToCurrencyCreation() {
+	function switchToCurrencyCreation() {
 		if (view.creationModal == null) {
 			view.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
 		} else {
+			afterCurrencyCreated = {
+				creationModal: deepCopy(view.creationModal)
+			};
+
 			view.creationModal.data.type = CurrencyItem.getTypeString();
 			view.creationModal.data.config = {};
+		}
+	}
+	function currencyCreated() {
+		if (
+			afterCurrencyCreated != null &&
+			view.creationModal != null &&
+			afterCurrencyCreated.creationModal != null
+		) {
+			const currencyData: IItemCreationData<ICurrencyCreationConfig> = view.creationModal.data;
+			const currency = currencyData.config.currency;
+
+			view.creationModal = afterCurrencyCreated.creationModal;
+			view.creationModal.data.config.currency = currency;
+
+			afterCurrencyCreated = undefined;
+		} else {
+			closeCreationModal();
 		}
 	}
 </script>
@@ -179,38 +213,44 @@
 			{/each}
 		</main>
 	{:else}
-		<div>Welcome, let's start creating your first Item, choose one of the following:</div>
-		<div>
-			<div class="title">Account</div>
-			<div class="description">
-				Create an Account to keep track of the balance of an specific bank account or wallet you
-				want to track.
+		<!-- Empty State -->
+		<div id="empty-state">
+			<div id="empty-state-welcome">
+				Welcome, let's start creating your first Item, choose one of the following:
 			</div>
-			<button on:click={createAccount} class="button">Create Account</button>
-		</div>
-		<div>
-			<div class="title">Service</div>
-			<div class="description">
-				Create a Service to keep track of something you need to pay every month. We will help you
-				identify when was your last payment and the services you need to pay before the month ends.
+			<div>
+				<div class="title">Account</div>
+				<div class="description">
+					Create an Account to keep track of the balance of an specific bank account or wallet you
+					want to track.
+				</div>
+				<button on:click={createAccount} class="button">Create Account</button>
 			</div>
-			<button on:click={createService} class="button">Create Service</button>
-		</div>
-		<div>
-			<div class="title">Debt</div>
-			<div class="description">
-				Create a Debt to keep track of an amount someone owes you or that you owe to someone. You
-				can mark it as paid when is time.
+			<div>
+				<div class="title">Service</div>
+				<div class="description">
+					Create a Service to keep track of something you need to pay every month. We will help you
+					identify when was your last payment and the services you need to pay before the month
+					ends.
+				</div>
+				<button on:click={createService} class="button">Create Service</button>
 			</div>
-			<button on:click={createDebt} class="button">Create Debt</button>
-		</div>
-		<div>
-			<div class="title">Currency</div>
-			<div class="description">
-				Create a Currency to organize your accounts by linking them to it, then you will be able to
-				see the sum of all the accounts in the same currency.
+			<div>
+				<div class="title">Debt</div>
+				<div class="description">
+					Create a Debt to keep track of an amount someone owes you or that you owe to someone. You
+					can mark it as paid when is time.
+				</div>
+				<button on:click={createDebt} class="button">Create Debt</button>
 			</div>
-			<button on:click={createCurrency} class="button">Create Currency</button>
+			<div>
+				<div class="title">Currency</div>
+				<div class="description">
+					Create a Currency to organize your accounts by linking them to it, then you will be able
+					to see the sum of all the accounts in the same currency.
+				</div>
+				<button on:click={createCurrency} class="button">Create Currency</button>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -294,5 +334,15 @@
 		display: flex;
 		justify-content: space-around;
 		column-gap: 32px;
+	}
+
+	#empty-state {
+		margin-top: 32px;
+		display: flex;
+		flex-direction: column;
+		row-gap: 24px;
+	}
+	#empty-state-welcome {
+		font-size: 20px;
 	}
 </style>
