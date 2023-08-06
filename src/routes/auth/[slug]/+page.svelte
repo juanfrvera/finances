@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { AuthService } from '@/lib/services/auth.service';
+	import { getUIErrorString } from '@/lib/util/error-handling';
 
 	export let data: PageData;
 
@@ -32,9 +33,7 @@
 		try {
 			await AuthService.logIn({ username: ui.username, password: ui.password });
 		} catch (error) {
-			if (error instanceof Error) {
-				ui.login.error = error.message;
-			}
+			ui.login.error = getUIErrorString(error);
 		}
 	}
 </script>
