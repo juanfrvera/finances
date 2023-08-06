@@ -142,7 +142,9 @@
 			</div>
 			<div class="call-to-action">
 				<div class="call-to-action-info">Ready?</div>
-				<button class="call-to-action-button button is-primary">Start Now</button>
+				<a href="/start">
+					<button class="call-to-action-button button is-primary">Start Now</button>
+				</a>
 			</div>
 		</div>
 	{/if}
@@ -155,14 +157,6 @@
 </div>
 
 <style>
-	:global(html) {
-		height: 100%;
-	}
-	:global(body) {
-		margin: 0;
-		background-color: #dff1ec;
-		min-height: 100%;
-	}
 	#container {
 		max-width: 800px;
 		margin: auto;

@@ -4,6 +4,12 @@
 		"paths": {
 			"@/*": [
 				"./src/*"
+			],
+			"$lib": [
+				"./src/lib"
+			],
+			"$lib/*": [
+				"./src/lib/*"
 			]
 		},
 		"allowJs": true,
