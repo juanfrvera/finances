@@ -6,10 +6,12 @@
 			<p>Your data will be accessible only from this browser</p>
 			<p>You can always create an account and sync your data later</p>
 		</div>
-		<div class="option">
-			<h2 class="option-title">Create an account</h2>
-			<p>So you can have your data sync across all your devices</p>
-		</div>
+		<a href="auth/create">
+			<div class="option">
+				<h2 class="option-title">Create an account</h2>
+				<p>So you can have your data sync across all your devices</p>
+			</div>
+		</a>
 	</div>
 </div>
 
@@ -33,7 +35,7 @@
 		padding: 32px;
 		cursor: pointer;
 		background-color: #eee;
-        color: #444;
+		color: #444;
 	}
 	.option:hover {
 		box-shadow: 1px 0px 14px 6px rgba(0, 0, 0, 0.43) inset;

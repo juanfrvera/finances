@@ -4,13 +4,11 @@ import type { PageLoad } from './$types';
 export const load = (({ params }) => {
     if (params.slug === 'create') {
         return {
-            title: 'Create Account!',
-            content: 'Welcome to our blog. Lorem ipsum dolor sit amet...'
+            startWith: 'creation'
         };
     } else {
         return {
-            title: 'Log In',
-            content: 'Welcome to our blog. Lorem ipsum dolor sit amet...'
+            startWith: 'login'
         };
     }
 
