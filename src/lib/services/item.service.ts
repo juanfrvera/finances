@@ -5,6 +5,8 @@ export class ItemService {
     private static readonly url = `${PUBLIC_API_URL}/items`;
 
     public static async getItems() {
-        const response = await fetch(this.url, { method: 'GET', headers: { 'Authorization': `Bearer ${AuthService.getToken()}` } });
+        const token = AuthService.getToken();
+        const response = await fetch(this.url, { method: 'GET', headers: { 'Authorization': `Bearer ${token}` } });
+        return response.json();
     }
 }

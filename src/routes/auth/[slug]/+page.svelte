@@ -11,30 +11,37 @@
 		registering?: { name?: string };
 		username?: string;
 		password?: string;
+		sending?: boolean;
 	} = {};
 
 	onMount(() => {
 		if (data.startWith === 'creation') {
 			ui.registering = {};
+		} else {
+			ui.login = {};
 		}
 	});
 
 	function logInInstead() {
 		ui.registering = undefined;
 		ui.login = {};
+		ui.sending = false;
 	}
 	async function logIn() {
-		if (!ui.username || !ui.password || !ui.login) {
+		if (!ui.username || !ui.password || !ui.login || ui.sending) {
 			return;
 		}
 
 		ui.login.error = undefined;
+		ui.sending = true;
 
 		try {
 			await AuthService.logIn({ username: ui.username, password: ui.password });
 		} catch (error) {
 			ui.login.error = getUIErrorString(error);
 		}
+
+		ui.sending = false;
 	}
 </script>
 
@@ -100,7 +107,9 @@
 					</div>
 				</label>
 			</div>
-			<button on:click={logIn} class="button is-link is-fullwidth">Log in</button>
+			<button on:click={logIn} class="button is-link is-fullwidth {ui.sending ? 'is-loading' : ''}"
+				>Log in</button
+			>
 			{#if ui.login.error}
 				<div class="error">{ui.login.error}</div>
 			{/if}

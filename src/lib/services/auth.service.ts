@@ -1,4 +1,6 @@
+import { goto } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
+import { UserStore } from '../util/storage/user.storage';
 
 export class AuthService {
     private static readonly url = `${PUBLIC_API_URL}/auth`;
@@ -10,6 +12,10 @@ export class AuthService {
         const serverData: string = await response.json();
 
         if (response.status !== 200) throw new Error(serverData);
+
+        this.token = serverData;
+        UserStore.enableSync();
+        goto('/');
     }
 
     public static getToken() {
