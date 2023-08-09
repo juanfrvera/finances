@@ -21,13 +21,12 @@
 	import { CurrencyLogic, type ICurrencyContext } from '../../util/logic/currency';
 	import { deepCopy } from '@/lib/util/deep-copy';
 	import type { IStorage } from '@/lib/util/storage/typings';
-
-	export let storage: IStorage<IItemData>;
+	import { ItemService } from '@/lib/services/item.service';
 
 	let list: IItemData[] = [];
 	let currentSearchQuery: string = '';
 
-	const view: {
+	const ui: {
 		showEmptyState?: boolean;
 		list: IItemData[];
 		creationModal?: { data: IItemCreationData };
@@ -54,7 +53,7 @@
 	});
 
 	function loadItems() {
-		storage.getAll().then((data) => {
+		ItemService.getItems().then((data) => {
 			list = data;
 			calculateViewList();
 		});
@@ -70,12 +69,12 @@
 
 	//#region Creation
 	function addClicked() {
-		view.creationModal = {
+		ui.creationModal = {
 			data: { type: AccountItem.getTypeString(), config: {} }
 		};
 	}
 	function saveCreationModal() {
-		const data = view.creationModal!.data;
+		const data = ui.creationModal!.data;
 
 		const newItem: IItemData = {
 			id: Date.now().toString(),
@@ -87,22 +86,22 @@
 		calculateViewList();
 		calculateAndSave();
 
-		if (view.creationModal?.data.type !== CurrencyItem.getTypeString()) {
+		if (ui.creationModal?.data.type !== CurrencyItem.getTypeString()) {
 			closeCreationModal();
 		} else {
 			currencyCreated();
 		}
 	}
 	function closeCreationModal() {
-		view.creationModal = undefined;
+		ui.creationModal = undefined;
 	}
 	//#endregion Creation
 	//#region See
 	function itemClicked(event: CustomEvent<IItemData>) {
-		view.seeModal = { item: event.detail };
+		ui.seeModal = { item: event.detail };
 	}
 	function closeSeeModal() {
-		view.seeModal = undefined;
+		ui.seeModal = undefined;
 	}
 	function itemUpdated(event: CustomEvent<IItemData>) {
 		// Set update date of item so it is re-rendered
@@ -112,11 +111,11 @@
 	//#endregion See
 	//#region Edit
 	function openEditModalFromSee() {
-		view.editModal = { item: view.seeModal!.item };
+		ui.editModal = { item: ui.seeModal!.item };
 	}
 	function closeEditModal() {
 		calculateAndSave();
-		view.editModal = undefined;
+		ui.editModal = undefined;
 	}
 	//#endregion Edit
 	function calculateAndSave() {
@@ -129,39 +128,39 @@
 	}
 	function calculateViewList() {
 		if (list != null && list.length > 0) {
-			view.list = list.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
-			view.showEmptyState = false;
+			ui.list = list.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
+			ui.showEmptyState = false;
 		} else {
-			view.showEmptyState = true;
+			ui.showEmptyState = true;
 		}
 	}
 	//#region fromEmptyState
 	function createAccount() {
-		view.creationModal = {
+		ui.creationModal = {
 			data: { type: AccountItem.getTypeString(), config: {} }
 		};
 	}
 	function createService() {
-		view.creationModal = {
+		ui.creationModal = {
 			data: { type: ServiceItem.getTypeString(), config: {} }
 		};
 	}
 	function createDebt() {
-		view.creationModal = {
+		ui.creationModal = {
 			data: { type: DebtItem.getTypeString(), config: {} }
 		};
 	}
 	function createCurrency() {
-		view.creationModal = {
+		ui.creationModal = {
 			data: { type: CurrencyItem.getTypeString(), config: {} }
 		};
 	}
 	//#endregion
 	function deleteCurrentItem() {
-		const item = view.seeModal!.item;
+		const item = ui.seeModal!.item;
 
 		list = list.filter((i) => i.id != item.id);
-		storage.delete(item.id);
+		ItemService.delete(item.id);
 
 		calculateCurrencyItems();
 		calculateViewList();
@@ -169,28 +168,28 @@
 		closeSeeModal();
 	}
 	function switchToCurrencyCreation() {
-		if (view.creationModal == null) {
-			view.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
+		if (ui.creationModal == null) {
+			ui.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
 		} else {
 			afterCurrencyCreated = {
-				creationModal: deepCopy(view.creationModal)
+				creationModal: deepCopy(ui.creationModal)
 			};
 
-			view.creationModal.data.type = CurrencyItem.getTypeString();
-			view.creationModal.data.config = {};
+			ui.creationModal.data.type = CurrencyItem.getTypeString();
+			ui.creationModal.data.config = {};
 		}
 	}
 	function currencyCreated() {
 		if (
 			afterCurrencyCreated != null &&
-			view.creationModal != null &&
+			ui.creationModal != null &&
 			afterCurrencyCreated.creationModal != null
 		) {
-			const currencyData: IItemCreationData<ICurrencyCreationConfig> = view.creationModal.data;
+			const currencyData: IItemCreationData<ICurrencyCreationConfig> = ui.creationModal.data;
 			const currency = currencyData.config.currency;
 
-			view.creationModal = afterCurrencyCreated.creationModal;
-			view.creationModal.data.config.currency = currency;
+			ui.creationModal = afterCurrencyCreated.creationModal;
+			ui.creationModal.data.config.currency = currency;
 
 			afterCurrencyCreated = undefined;
 		} else {
@@ -204,7 +203,7 @@
 </svelte:head>
 
 <div id="container">
-	{#if !view.showEmptyState}
+	{#if !ui.showEmptyState}
 		<header id="header">
 			<div class="field">
 				<p class="control has-icons-left">
@@ -219,7 +218,7 @@
 			<button on:click={addClicked} class="square white-button">
 				<div class="title">Add</div>
 			</button>
-			{#each view.list as item (item.id + item.type + item.updateDate)}
+			{#each ui.list as item (item.id + item.type + item.updateDate)}
 				<ItemList data={item} on:click={itemClicked} />
 			{/each}
 		</main>
@@ -267,26 +266,26 @@
 </div>
 
 <!-- Modals -->
-{#if view.creationModal}
+{#if ui.creationModal}
 	<Modal
 		on:backgroundClick={closeCreationModal}
 		on:escapeKeyUp={closeCreationModal}
 		on:enterKeyUp={saveCreationModal}
 	>
-		<ItemEdit data={view.creationModal.data} />
+		<ItemEdit data={ui.creationModal.data} />
 		<div slot="footer" class="modal-footer-buttons">
 			<button on:click={saveCreationModal} class="button is-primary">Save</button>
 			<button on:click={closeCreationModal} class="button">Cancel</button>
 		</div>
 	</Modal>
 {/if}
-{#if view.seeModal != null}
+{#if ui.seeModal != null}
 	<Modal
 		on:backgroundClick={closeSeeModal}
 		on:escapeKeyUp={closeSeeModal}
 		on:enterKeyUp={closeSeeModal}
 	>
-		<ItemSee data={view.seeModal.item} on:update={itemUpdated} />
+		<ItemSee data={ui.seeModal.item} on:update={itemUpdated} />
 		<div slot="footer" class="modal-footer-buttons">
 			<button on:click={openEditModalFromSee} class="button">Edit</button>
 			<button on:click={deleteCurrentItem} class="button is-danger">Delete</button>
@@ -294,9 +293,9 @@
 		</div>
 	</Modal>
 {/if}
-{#if view.editModal != null}
+{#if ui.editModal != null}
 	<Modal on:backgroundClick={closeEditModal} on:escapeKeyUp={closeEditModal}>
-		<ItemEdit bind:data={view.editModal.item} />
+		<ItemEdit bind:data={ui.editModal.item} />
 	</Modal>
 {/if}
 

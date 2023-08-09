@@ -8,7 +8,7 @@ import CurrencyListRender from "@/lib/components/item/item-list/renders/currency
 import AccountSeeRender from "@/lib/components/item/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "@/lib/components/item/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig } from "@/lib/components/item/typings";
+import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig, ItemType } from "@/lib/components/item/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
 
@@ -17,7 +17,7 @@ export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | t
 export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender | typeof DebtSeeRender | typeof CurrencySeeRender;
 
 export abstract class Item {
-    public static getTypeString() { return ""; }
+    public static getTypeString(): ItemType { return 'account'; }
     public static getListRender(): ListRender { return AccountListRender; }
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
@@ -25,7 +25,7 @@ export abstract class Item {
 }
 
 export class AccountItem extends Item {
-    public static getTypeString(): string { return "Account"; }
+    public static getTypeString(): ItemType { return 'account'; }
     public static getListRender(): ListRender { return AccountListRender; }
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
@@ -43,7 +43,7 @@ export class AccountItem extends Item {
 }
 
 export class ServiceItem extends Item {
-    public static getTypeString(): string { return "Service"; }
+    public static getTypeString(): ItemType { return 'service'; }
     public static getListRender(): ListRender { return ServiceListRender; }
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
@@ -72,7 +72,7 @@ export class ServiceItem extends Item {
 }
 
 export class CurrencyItem extends Item {
-    public static getTypeString(): string { return "Currency"; }
+    public static getTypeString(): ItemType { return 'currency'; }
     public static getListRender(): ListRender { return CurrencyListRender; }
     public static getEditRender(): EditRender { return CurrencyEditRender; }
     public static getSeeRender(): SeeRender { return CurrencySeeRender; }
@@ -93,7 +93,7 @@ export class CurrencyItem extends Item {
 }
 
 export class DebtItem extends Item {
-    public static getTypeString(): string { return "Debt"; }
+    public static getTypeString(): ItemType { return 'debt'; }
     public static getListRender(): ListRender { return DebtListRender; }
     public static getEditRender(): EditRender { return DebtEditRender; }
     public static getSeeRender(): SeeRender { return DebtSeeRender; }

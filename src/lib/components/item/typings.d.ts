@@ -1,7 +1,9 @@
+type ItemType = 'account' | 'service' | 'currency' | 'debt';
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IItemData<T = any> {
     id: string;
-    type: 'account' | 'service' | 'currency' | 'debt';
+    type: ItemType;
     config: T;
     updateDate?: Date;
 }
@@ -43,7 +45,7 @@ export interface IAsyncOpResult<Success, Error> {
 
 //#region Creation
 export interface IItemCreationData<T = ICreationConfig> {
-    type: string;
+    type: ItemType;
     config: T;
 }
 

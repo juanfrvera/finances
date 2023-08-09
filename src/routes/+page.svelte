@@ -2,28 +2,25 @@
 	import { onMount } from 'svelte';
 	import { UserStore } from '../lib/util/storage/user.storage';
 	import Items from '@/lib/components/item/items.svelte';
-	import type { IStorage } from '@/lib/util/storage/typings';
-	import type { IItemData } from '@/lib/components/item/typings';
 	import Welcome from '@/lib/components/welcome.svelte';
+	import { AuthService } from '@/lib/services/auth.service';
+	import { goto } from '$app/navigation';
 
 	const ui: {
 		showNewcomerWelcome?: boolean;
-		loadingItems?: boolean;
 		showItems?: boolean;
-		items?: IItemData[];
 	} = {};
-	let storage: IStorage<IItemData>;
 
 	onMount(() => {
-		const isSyncEnabled = UserStore.isSyncEnabled();
-		if (isSyncEnabled) {
-			ui.loadingItems = true;
-		} else {
-			const hasLocalData = UserStore.hasLocalData();
-			if (hasLocalData) {
+		if (UserStore.isSyncEnabled()) {
+			if (AuthService.hasValidToken()) {
+				ui.showItems = true;
 			} else {
-				ui.showNewcomerWelcome = true;
+				goto('auth/login');
 			}
+		} else if (UserStore.hasLocalData()) {
+		} else {
+			ui.showNewcomerWelcome = true;
 		}
 	});
 </script>
@@ -32,11 +29,8 @@
 	{#if ui.showNewcomerWelcome}
 		<Welcome />
 	{/if}
-	{#if ui.loadingItems}
-		Welcome back, please wait while we load your items...
-	{/if}
 	{#if ui.showItems}
-		<Items {storage} />
+		<Items />
 	{/if}
 </div>
 
