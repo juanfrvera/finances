@@ -1,6 +1,6 @@
 export class UserStore {
-    public static enableSync() {
-        localStorage.setItem(localStorageKeys.syncEnabled, JSON.stringify(true));
+    public static setSyncEnabled(value: boolean) {
+        localStorage.setItem(localStorageKeys.syncEnabled, JSON.stringify(value));
     }
     public static isSyncEnabled() {
         return !!localStorage.getItem(localStorageKeys.syncEnabled);

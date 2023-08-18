@@ -4,34 +4,61 @@ import { UserStore } from '../util/storage/user.storage';
 
 export class AuthService {
     private static readonly url = `${PUBLIC_API_URL}/auth`;
+    private static token: string | null;
     private static readonly tokenStorageKey = 'token';
-    private static token: string;
+    private static readonly tokenExpirationDateKey = 'token_expiration';
+    private static tokenExpirationDate: Date | null;
 
     public static async logIn(data: { username: string; password: string; }) {
         const response = await fetch(`${this.url}/login`, { method: 'POST', body: JSON.stringify(data) });
 
-        const serverData: string = await response.json();
+        const serverData = await response.json();
 
         if (response.status !== 200) throw new Error(serverData);
 
         this.token = serverData;
-        localStorage.setItem(this.tokenStorageKey, this.token);
-        UserStore.enableSync();
+        this.setToken(serverData);
+        UserStore.setSyncEnabled(true);
         goto('/');
     }
 
     public static getToken() {
+        if (!this.token) this.token = localStorage.getItem(this.tokenStorageKey);
         return this.token;
     }
 
     public static hasValidToken() {
-        if (!this.token) {
-            const storedToken = localStorage.getItem(this.tokenStorageKey);
-            if (storedToken) {
-                this.token = storedToken;
-            }
+        const token = this.getToken();
+        if (!token) return false;
+
+        const expirationDate = this.getTokenExpirationDate();
+        if (expirationDate) {
+            if (Date.now() > expirationDate.getUTCMilliseconds()) return false;
         }
 
-        return !!this.token;
+        return true;
+    }
+
+    public static removeToken() {
+        this.token = null;
+        localStorage.setItem(this.tokenStorageKey, '');
+        localStorage.setItem(this.tokenExpirationDateKey, '');
+    }
+
+    private static setToken(data: { token: string, expirationDate: Date }) {
+        this.token = data.token;
+        localStorage.setItem(this.tokenStorageKey, data.token);
+        this.tokenExpirationDate = data.expirationDate;
+        localStorage.setItem(this.tokenExpirationDateKey, JSON.stringify(data.expirationDate));
+    }
+
+    private static getTokenExpirationDate() {
+        if (!this.tokenExpirationDate) {
+            const expirationDate = localStorage.getItem(this.tokenExpirationDateKey);
+            if (expirationDate) {
+                this.tokenExpirationDate = new Date(expirationDate);
+            }
+        }
+        return this.tokenExpirationDate;
     }
 }

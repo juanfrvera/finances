@@ -16,11 +16,9 @@
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
-	import { ItemStorage } from '../../util/storage/api/item';
 	import Modal from '../modal.svelte';
 	import { CurrencyLogic, type ICurrencyContext } from '../../util/logic/currency';
 	import { deepCopy } from '@/lib/util/deep-copy';
-	import type { IStorage } from '@/lib/util/storage/typings';
 	import { ItemService } from '@/lib/services/item.service';
 
 	let list: IItemData[] = [];

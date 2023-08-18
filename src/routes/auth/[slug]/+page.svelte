@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import { AuthService } from '@/lib/services/auth.service';
 	import { getUIErrorString } from '@/lib/util/error-handling';
+	import { goto } from '$app/navigation';
 
 	export let data: PageData;
 
@@ -37,6 +38,7 @@
 
 		try {
 			await AuthService.logIn({ username: ui.username, password: ui.password });
+			goto('/');
 		} catch (error) {
 			ui.login.error = getUIErrorString(error);
 		}
