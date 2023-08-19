@@ -16,7 +16,6 @@ export class AuthService {
 
         if (response.status !== 200) throw new Error(serverData);
 
-        this.token = serverData;
         this.setToken(serverData);
         UserStore.setSyncEnabled(true);
         goto('/');
@@ -33,7 +32,7 @@ export class AuthService {
 
         const expirationDate = this.getTokenExpirationDate();
         if (expirationDate) {
-            if (Date.now() > expirationDate.getUTCMilliseconds()) return false;
+            if (Date.now() > expirationDate.getTime()) return false;
         }
 
         return true;
@@ -45,11 +44,11 @@ export class AuthService {
         localStorage.setItem(this.tokenExpirationDateKey, '');
     }
 
-    private static setToken(data: { token: string, expirationDate: Date }) {
+    private static setToken(data: { token: string, expirationDate: string }) {
         this.token = data.token;
         localStorage.setItem(this.tokenStorageKey, data.token);
-        this.tokenExpirationDate = data.expirationDate;
-        localStorage.setItem(this.tokenExpirationDateKey, JSON.stringify(data.expirationDate));
+        this.tokenExpirationDate = new Date(data.expirationDate);
+        localStorage.setItem(this.tokenExpirationDateKey, data.expirationDate);
     }
 
     private static getTokenExpirationDate() {

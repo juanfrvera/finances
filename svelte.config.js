@@ -11,9 +11,13 @@ const config = {
 		preprocess({
 			scss: {
 				prependData: '@use "src/variables.scss" as *;'
-			}
+			},
+			sourceMap: true
 		})
 	],
+	compilerOptions: {
+		enableSourcemap: true
+	},
 
 	kit: {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
