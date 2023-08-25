@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, type ComponentType } from 'svelte';
 	import { ItemHelper } from '@/lib/util/logic/item';
-	import type { IItemCreationData } from '../typings';
+	import type { IItemCreationData, ItemType } from '../../../typings';
 	import AccountConfig from './renders/account-edit-render.svelte';
 
 	export let data: IItemCreationData;
@@ -9,16 +9,16 @@
 	let currentConfigComponent: ComponentType = AccountConfig;
 	$: currentConfigComponent = getConfigRenderer(data.type);
 
-	let view: { typeOptions: string[] };
+	let ui: { typeOptions: string[] };
 
 	onMount(() => {
-		view = {
+		ui = {
 			typeOptions: ItemHelper.getItemClasses().map((ic) => ic.getTypeString())
 		};
 	});
 
 	function typeSelectChanged(e: Event) {
-		const value = (e.target as HTMLSelectElement).value;
+		const value = (e.target as HTMLSelectElement).value as ItemType;
 		currentConfigComponent = getConfigRenderer(value);
 		data.type = value;
 	}
@@ -28,13 +28,13 @@
 	}
 </script>
 
-{#if view != null}
+{#if ui != null}
 	<div class="form">
 		<div class="label-and-input clickable-height">
 			<label for="type-input">Type</label>
 			<div class="select input-stretch">
 				<select id="type-input" bind:value={data.type} on:change={typeSelectChanged} class="w-100">
-					{#each view.typeOptions as option (option)}
+					{#each ui.typeOptions as option (option)}
 						<option>{option}</option>
 					{/each}
 				</select>

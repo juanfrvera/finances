@@ -1,4 +1,4 @@
-import type { IItemData } from "@/lib/components/item/typings";
+import type { IItemData } from "@/lib/typings";
 
 export class ItemStorage {
     private static readonly itemsLocalStorageKey = "items";

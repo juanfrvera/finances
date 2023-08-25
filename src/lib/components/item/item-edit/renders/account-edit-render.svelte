@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IAccountCreationConfig } from '../../../typings';
+	import type { IAccountCreationConfig } from '@/lib/typings';
 	import CurrencySelect from '../util/currency-select.svelte';
 
 	export let config: IAccountCreationConfig;

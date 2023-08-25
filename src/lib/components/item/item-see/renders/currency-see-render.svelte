@@ -1,6 +1,6 @@
 <script lang="ts">
 	import NumberFormat from '@/lib/components/number-format.svelte';
-	import type { ICurrencyConfig, IItemData } from '../../typings';
+	import type { ICurrencyConfig, IItemData } from '../../../../typings';
 
 	export let data: IItemData<ICurrencyConfig>;
 </script>

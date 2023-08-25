@@ -5,7 +5,7 @@
 		IDebtConfig,
 		IItemData,
 		IServiceConfig
-	} from '@/lib/components/item/typings';
+	} from '@/lib/typings';
 
 	import AccountSeeRender from '@/lib/components/item/item-see/renders/account-see-render.svelte';
 	import ServiceSeeRender from '@/lib/components/item/item-see/renders/service-see-render.svelte';

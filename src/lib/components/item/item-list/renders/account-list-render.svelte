@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IAccountConfig, IItemData } from '../../typings';
+	import type { IAccountConfig, IItemData } from '../../../../typings';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 
 	export let data: IItemData<IAccountConfig>;

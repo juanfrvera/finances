@@ -8,7 +8,7 @@ import CurrencyListRender from "@/lib/components/item/item-list/renders/currency
 import AccountSeeRender from "@/lib/components/item/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "@/lib/components/item/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig, ItemType } from "@/lib/components/item/typings";
+import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig, ItemType } from "@/lib/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
 

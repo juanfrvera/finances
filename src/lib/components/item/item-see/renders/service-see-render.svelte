@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { ServiceItem } from '@/lib/util/logic/item';
-	import type { IItemData, IServiceConfig } from '../../typings';
+	import type { IItemData, IServiceConfig } from '../../../../typings';
 
 	export let data: IItemData<IServiceConfig>;
 	const dispatch = createEventDispatcher();

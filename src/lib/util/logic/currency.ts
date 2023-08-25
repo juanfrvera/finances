@@ -1,18 +1,17 @@
 import { Subject } from 'rxjs';
-import { ItemStorage } from "../storage/api/item";
-import { CurrencyItem } from "./item";
-import type { ICurrencyConfig, IItemData } from "../typings";
+import type { ICurrencyConfig, IItemData } from "@/lib/typings";
+import { CurrencyService } from '@/lib/services/currency.service';
 
 export class CurrencyLogic {
     public static readonly contextKey = "currencyContext";
     public static readonly currencyAddedSubject = new Subject<string>();
 
     public static getCurrencies() {
-        return ItemStorage.getAll({ type: CurrencyItem.getTypeString() });
+        return CurrencyService.getList();
     }
 }
 
 export interface ICurrencyContext {
-    getCurrencies: () => Array<IItemData<ICurrencyConfig>>;
+    getCurrencies: () => Promise<Array<IItemData<ICurrencyConfig>>>;
     onGoToCreation: () => void;
 }

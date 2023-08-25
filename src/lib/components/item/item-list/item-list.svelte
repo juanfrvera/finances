@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, type ComponentType } from 'svelte';
 	import { ItemHelper } from '@/lib/util/logic/item';
-	import type { IItemData } from '../typings';
+	import type { IItemData } from '../../../typings';
 
 	export let data: IItemData;
 

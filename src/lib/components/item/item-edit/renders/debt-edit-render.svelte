@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IDebtCreationConfig } from '@/lib/components/item/typings';
+	import type { IDebtCreationConfig } from '@/lib/typings';
 	import Switch from '@/lib/components/switch.svelte';
 	import CurrencySelect from '../util/currency-select.svelte';
 

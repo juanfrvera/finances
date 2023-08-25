@@ -1,4 +1,4 @@
-import type { IItemData } from "@/lib/components/item/typings";
+import type { IItemData } from "@/lib/typings";
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { IStorage } from "../typings";
 

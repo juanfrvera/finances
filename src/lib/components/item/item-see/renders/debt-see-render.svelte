@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { IDebtConfig, IItemData } from '../../typings';
+	import type { IDebtConfig, IItemData } from '../../../../typings';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 

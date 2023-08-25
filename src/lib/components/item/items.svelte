@@ -12,7 +12,7 @@
 		IItemCreationData,
 		IItemData,
 		ICurrencyCreationConfig
-	} from './typings';
+	} from '../../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
