@@ -1,14 +1,31 @@
-type ItemType = 'account' | 'service' | 'currency' | 'debt';
+export type Item = IAccount | IService | ICurrency | IDebt;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IItemData<T = any> {
-    id: string;
-    type: ItemType;
-    config: T;
+export interface iItem<T = any> {
+    _id: string;
     updateDate?: Date;
 }
 
-export type IItemConfig = IAccountConfig | IServiceConfig | IDebtConfig | ICurrencyConfig;
+export interface IAccount extends iItem {
+    type: 'account';
+    config: IAccountConfig;
+}
+
+export interface IService extends iItem {
+    type: 'service';
+    config: IServiceConfig;
+}
+
+export interface ICurrency extends iItem {
+    type: 'currency';
+    config: ICurrencyConfig;
+}
+export interface IDebt extends iItem {
+    type: 'debt';
+    config: IDebtConfig;
+}
+
+export type iItemConfig = IAccountConfig | IServiceConfig | IDebtConfig | ICurrencyConfig;
 export interface IAccountConfig {
     name: string;
     balance: number;

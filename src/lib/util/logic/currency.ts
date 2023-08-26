@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import type { ICurrencyConfig, IItemData } from "@/lib/typings";
+import type { ICurrency } from "@/lib/typings";
 import { CurrencyService } from '@/lib/services/currency.service';
 
 export class CurrencyLogic {
@@ -12,6 +12,6 @@ export class CurrencyLogic {
 }
 
 export interface ICurrencyContext {
-    getCurrencies: () => Promise<Array<IItemData<ICurrencyConfig>>>;
+    getCurrencies: () => Promise<ICurrency[]>;
     onGoToCreation: () => void;
 }

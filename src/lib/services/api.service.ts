@@ -4,7 +4,7 @@ import { AuthService } from "./auth.service";
 
 export class ApiService {
     private static readonly url = PUBLIC_API_URL;
-    public static getUrl(){
+    public static getUrl() {
         return this.url;
     }
     public static getHeaders() {
@@ -13,7 +13,7 @@ export class ApiService {
     }
     public static async interceptResponse(response: Response) {
         const data = await response.json();
-        if (response.status !== 200) {
+        if (response.status !== 200 && response.status !== 201) {
             if (response.status === 401) {
                 goto('auth/login');
             }

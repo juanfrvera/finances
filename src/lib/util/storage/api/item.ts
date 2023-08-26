@@ -1,8 +1,8 @@
-import type { IItemData } from "@/lib/typings";
+import type { iItem } from "@/lib/typings";
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { IStorage } from "../typings";
 
-export class ItemStorage implements IStorage<IItemData> {
+export class ItemStorage implements IStorage<iItem> {
     private readonly url = `${PUBLIC_API_URL}/items`;
 
     public async getAll() {

@@ -7,12 +7,7 @@
 		ServiceItem,
 		CurrencyItem
 	} from '../../util/logic/item';
-	import type {
-		IItemConfig,
-		IItemCreationData,
-		IItemData,
-		ICurrencyCreationConfig
-	} from '../../typings';
+	import type { IItemCreationData, iItem, ICurrencyCreationConfig, Item } from '../../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
@@ -21,16 +16,15 @@
 	import { deepCopy } from '@/lib/util/deep-copy';
 	import { ItemService } from '@/lib/services/item.service';
 
-	let list: IItemData[] = [];
+	let list: Item[] = [];
 	let currentSearchQuery: string = '';
 
 	const ui: {
-		showEmptyState?: boolean;
-		list: IItemData[];
+		list?: Item[];
 		creationModal?: { data: IItemCreationData };
-		seeModal?: { item: IItemData };
-		editModal?: { item: IItemData };
-	} = { list: [] };
+		seeModal?: { item: Item };
+		editModal?: { item: Item };
+	} = {};
 
 	let afterCurrencyCreated: { creationModal?: { data: IItemCreationData } } | undefined;
 
@@ -59,7 +53,6 @@
 
 	function calculateCurrencyItems() {
 		const currencyItems = list.filter((i) => i.type === CurrencyItem.getTypeString());
-
 		for (const currencyItem of currencyItems) {
 			CurrencyItem.calculate(list, currencyItem);
 		}
@@ -71,16 +64,13 @@
 			data: { type: AccountItem.getTypeString(), config: {} }
 		};
 	}
-	function saveCreationModal() {
+	async function saveCreationModal() {
 		const data = ui.creationModal!.data;
 
-		const newItem: IItemData = {
-			id: Date.now().toString(),
-			type: data.type,
-			config: { ...(data.config as IItemConfig) }
-		};
+		const createdItem = await ItemService.create(data);
 
-		list = [newItem, ...list];
+		// Add new item at the top
+		list = [createdItem, ...list];
 		calculateViewList();
 		calculateAndSave();
 
@@ -95,13 +85,13 @@
 	}
 	//#endregion Creation
 	//#region See
-	function itemClicked(event: CustomEvent<IItemData>) {
+	function itemClicked(event: CustomEvent<Item>) {
 		ui.seeModal = { item: event.detail };
 	}
 	function closeSeeModal() {
 		ui.seeModal = undefined;
 	}
-	function itemUpdated(event: CustomEvent<IItemData>) {
+	function itemUpdated(event: CustomEvent<iItem>) {
 		// Set update date of item so it is re-rendered
 		event.detail.updateDate = new Date();
 		calculateAndSave();
@@ -125,40 +115,27 @@
 		calculateViewList();
 	}
 	function calculateViewList() {
-		if (list != null && list.length > 0) {
-			ui.list = list.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
-			ui.showEmptyState = false;
-		} else {
-			ui.showEmptyState = true;
-		}
+		ui.list = list?.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
 	}
 	//#region fromEmptyState
 	function createAccount() {
-		ui.creationModal = {
-			data: { type: AccountItem.getTypeString(), config: {} }
-		};
+		ui.creationModal = { data: { type: AccountItem.getTypeString(), config: {} } };
 	}
 	function createService() {
-		ui.creationModal = {
-			data: { type: ServiceItem.getTypeString(), config: {} }
-		};
+		ui.creationModal = { data: { type: ServiceItem.getTypeString(), config: {} } };
 	}
 	function createDebt() {
-		ui.creationModal = {
-			data: { type: DebtItem.getTypeString(), config: {} }
-		};
+		ui.creationModal = { data: { type: DebtItem.getTypeString(), config: {} } };
 	}
 	function createCurrency() {
-		ui.creationModal = {
-			data: { type: CurrencyItem.getTypeString(), config: {} }
-		};
+		ui.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
 	}
 	//#endregion
 	function deleteCurrentItem() {
 		const item = ui.seeModal!.item;
 
-		list = list.filter((i) => i.id != item.id);
-		ItemService.delete(item.id);
+		list = list.filter((i) => i._id != item._id);
+		ItemService.delete(item._id);
 
 		calculateCurrencyItems();
 		calculateViewList();
@@ -196,70 +173,74 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Finances</title>
-</svelte:head>
+<svelte:head><title>Finances</title></svelte:head>
 
 <div id="container">
-	{#if !ui.showEmptyState}
-		<header id="header">
-			<div class="field">
-				<p class="control has-icons-left">
-					<input id="search-bar" on:input={searchInputChanged} class="input" />
-					<span class="icon is-small is-left">
-						<i class="fa-solid fa-magnifying-glass" />
-					</span>
-				</p>
+	{#if ui.list}
+		{#if ui.list.length}
+			<!-- Loaded list with items -->
+			<header id="header">
+				<div class="field">
+					<p class="control has-icons-left">
+						<input id="search-bar" on:input={searchInputChanged} class="input" />
+						<span class="icon is-small is-left">
+							<i class="fa-solid fa-magnifying-glass" />
+						</span>
+					</p>
+				</div>
+			</header>
+			<main id="whiteboard">
+				<button on:click={addClicked} class="square white-button">
+					<div class="title">Add</div>
+				</button>
+				{#each ui.list as item (item._id + item.type + item.updateDate)}
+					<ItemList data={item} on:click={itemClicked} />
+				{/each}
+			</main>
+		{:else}
+			<!-- Empty State -->
+			<div id="empty-state">
+				<div id="empty-state-welcome">
+					Welcome, let's start creating your first Item, choose one of the following:
+				</div>
+				<div>
+					<div class="title">Account</div>
+					<div class="description">
+						Create an Account to keep track of the balance of an specific bank account or wallet you
+						want to track.
+					</div>
+					<button on:click={createAccount} class="button">Create Account</button>
+				</div>
+				<div>
+					<div class="title">Service</div>
+					<div class="description">
+						Create a Service to keep track of something you need to pay every month. We will help
+						you identify when was your last payment and the services you need to pay before the
+						month ends.
+					</div>
+					<button on:click={createService} class="button">Create Service</button>
+				</div>
+				<div>
+					<div class="title">Debt</div>
+					<div class="description">
+						Create a Debt to keep track of an amount someone owes you or that you owe to someone.
+						You can mark it as paid when is time.
+					</div>
+					<button on:click={createDebt} class="button">Create Debt</button>
+				</div>
+				<div>
+					<div class="title">Currency</div>
+					<div class="description">
+						Create a Currency to organize your accounts by linking them to it, then you will be able
+						to see the sum of all the accounts in the same currency.
+					</div>
+					<button on:click={createCurrency} class="button">Create Currency</button>
+				</div>
 			</div>
-		</header>
-		<main id="whiteboard">
-			<button on:click={addClicked} class="square white-button">
-				<div class="title">Add</div>
-			</button>
-			{#each ui.list as item (item.id + item.type + item.updateDate)}
-				<ItemList data={item} on:click={itemClicked} />
-			{/each}
-		</main>
+		{/if}
 	{:else}
-		<!-- Empty State -->
-		<div id="empty-state">
-			<div id="empty-state-welcome">
-				Welcome, let's start creating your first Item, choose one of the following:
-			</div>
-			<div>
-				<div class="title">Account</div>
-				<div class="description">
-					Create an Account to keep track of the balance of an specific bank account or wallet you
-					want to track.
-				</div>
-				<button on:click={createAccount} class="button">Create Account</button>
-			</div>
-			<div>
-				<div class="title">Service</div>
-				<div class="description">
-					Create a Service to keep track of something you need to pay every month. We will help you
-					identify when was your last payment and the services you need to pay before the month
-					ends.
-				</div>
-				<button on:click={createService} class="button">Create Service</button>
-			</div>
-			<div>
-				<div class="title">Debt</div>
-				<div class="description">
-					Create a Debt to keep track of an amount someone owes you or that you owe to someone. You
-					can mark it as paid when is time.
-				</div>
-				<button on:click={createDebt} class="button">Create Debt</button>
-			</div>
-			<div>
-				<div class="title">Currency</div>
-				<div class="description">
-					Create a Currency to organize your accounts by linking them to it, then you will be able
-					to see the sum of all the accounts in the same currency.
-				</div>
-				<button on:click={createCurrency} class="button">Create Currency</button>
-			</div>
-		</div>
+		<!-- Loading -->
+		<div class="loading">Loading, please wait...</div>
 	{/if}
 </div>
 

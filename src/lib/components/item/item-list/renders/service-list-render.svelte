@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { ServiceItem } from '@/lib/util/logic/item';
-	import type { IServiceConfig, IItemData } from '../../../../typings';
+	import type { IServiceConfig, iItem } from '../../../../typings';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 
-	export let data: IItemData<IServiceConfig>;
+	export let data: IService;
 	const view: { containerClass?: string } = {};
 
 	onMount(() => {

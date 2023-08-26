@@ -1,12 +1,12 @@
-import type { IItemData } from "@/lib/typings";
+import type { iItem } from "@/lib/typings";
 
 export class ItemStorage {
     private static readonly itemsLocalStorageKey = "items";
 
-    public static getItems(filter?: { type?: string }): IItemData[] {
+    public static getItems(filter?: { type?: string }): iItem[] {
         const listJsonString = localStorage.getItem(this.itemsLocalStorageKey);
         if (listJsonString != null) {
-            let list: IItemData[] = JSON.parse(listJsonString);
+            let list: iItem[] = JSON.parse(listJsonString);
 
             if (filter != null) {
                 if (filter.type != null) {
@@ -18,13 +18,13 @@ export class ItemStorage {
         }
         return [];
     }
-    public static saveItems(items: IItemData[]) {
+    public static saveItems(items: iItem[]) {
         localStorage.setItem(this.itemsLocalStorageKey, JSON.stringify(items));
     }
-    public static deleteItem(item: IItemData) {
+    public static deleteItem(item: iItem) {
         const list = this.getItems();
         if (list != null && list.length > 0) {
-            this.saveItems(list.filter((i) => i.id != item.id));
+            this.saveItems(list.filter((i) => i._id != item._id));
         }
     }
 }

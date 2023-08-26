@@ -8,7 +8,7 @@ import CurrencyListRender from "@/lib/components/item/item-list/renders/currency
 import AccountSeeRender from "@/lib/components/item/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "@/lib/components/item/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IDebtConfig, IItemData, IServiceConfig, ICurrencyConfig, ItemType } from "@/lib/typings";
+import type { IAccountConfig, IDebtConfig, iItem, IServiceConfig, ICurrencyConfig, ItemType } from "@/lib/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
 
@@ -21,7 +21,7 @@ export abstract class Item {
     public static getListRender(): ListRender { return AccountListRender; }
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
-    public static isItemOnQuery(item: IItemData, query: string) { return false; }
+    public static isItemOnQuery(item: iItem, query: string) { return false; }
 }
 
 export class AccountItem extends Item {
@@ -30,7 +30,7 @@ export class AccountItem extends Item {
     public static getEditRender(): EditRender { return AccountEditRender; }
     public static getSeeRender(): SeeRender { return AccountSeeRender; }
 
-    public static isItemOnQuery(item: IItemData<IAccountConfig>, query: string) {
+    public static isItemOnQuery(item: IAccount, query: string) {
         const lwQuery = query.toLowerCase();
         const config = item.config;
 
@@ -48,7 +48,7 @@ export class ServiceItem extends Item {
     public static getEditRender(): EditRender { return ServiceEditRender; }
     public static getSeeRender(): SeeRender { return ServiceSeeRender; }
 
-    public static isItemOnQuery(item: IItemData<IServiceConfig>, query: string) {
+    public static isItemOnQuery(item: IService, query: string) {
         const lwQuery = query.toLowerCase();
         const config = item.config;
 
@@ -61,7 +61,7 @@ export class ServiceItem extends Item {
         return false;
     }
 
-    public static wasThisMonthPaid(data: IItemData<IServiceConfig>) {
+    public static wasThisMonthPaid(data: IService) {
         if (data.config.lastPayDateString != null) {
             const today = new Date();
             const lastPayDate = new Date(data.config.lastPayDateString.substring(0, 10));
@@ -77,13 +77,13 @@ export class CurrencyItem extends Item {
     public static getEditRender(): EditRender { return CurrencyEditRender; }
     public static getSeeRender(): SeeRender { return CurrencySeeRender; }
 
-    public static calculate(list: IItemData[], totalItem: IItemData<ICurrencyConfig>) {
+    public static calculate(list: iItem[], totalItem: ICurrency) {
         totalItem.config.total = 0;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
 
             if (item.type === AccountItem.getTypeString()) {
-                const account = item as IItemData<IAccountConfig>;
+                const account = item as IAccount;
                 if (account.config.currency === totalItem.config.currency) {
                     totalItem.config.total += account.config.balance;
                 }
@@ -98,7 +98,7 @@ export class DebtItem extends Item {
     public static getEditRender(): EditRender { return DebtEditRender; }
     public static getSeeRender(): SeeRender { return DebtSeeRender; }
 
-    public static isItemOnQuery(item: IItemData<IDebtConfig>, query: string) {
+    public static isItemOnQuery(item: IDebt, query: string) {
         const lwQuery = query.toLowerCase();
         const config = item.config;
 
@@ -120,10 +120,10 @@ export class ItemHelper {
             return itemClass;
         }
     }
-    public static isItemOnQuery(item: IItemData, query: string) {
+    public static isItemOnQuery(item: iItem, query: string) {
         const lwQuery = query.toLowerCase();
 
-        if (item.id.includes(query)) return true;
+        if (item._id.includes(query)) return true;
         if (item.type.toLowerCase().includes(lwQuery)) return true;
 
         return this.getClassByTypeString(item.type)?.isItemOnQuery(item, query);

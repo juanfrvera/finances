@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { IDebtConfig, IItemData } from '@/lib/typings';
+	import type { IDebtConfig, iItem } from '@/lib/typings';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 
-	export let data: IItemData<IDebtConfig>;
+	export let data: IDebt;
 
 	let view: {
 		containerClass: string;

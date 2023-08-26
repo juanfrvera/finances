@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { IDebtConfig, IItemData } from '../../../../typings';
+	import type { IDebtConfig, iItem } from '../../../../typings';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 
-	export let data: IItemData<IDebtConfig>;
+	export let data: IDebt;
 	const dispatch = createEventDispatcher();
 
 	let view: {

@@ -1,11 +1,5 @@
 <script lang="ts">
-	import type {
-		IAccountConfig,
-		ICurrencyConfig,
-		IDebtConfig,
-		IItemData,
-		IServiceConfig
-	} from '@/lib/typings';
+	import type { IAccount, ICurrency, IDebt, IService } from '@/lib/typings';
 
 	import AccountSeeRender from '@/lib/components/item/item-see/renders/account-see-render.svelte';
 	import ServiceSeeRender from '@/lib/components/item/item-see/renders/service-see-render.svelte';
@@ -14,15 +8,15 @@
 
 	const ui: {
 		examples: {
-			account: IItemData<IAccountConfig>;
-			service: IItemData<IServiceConfig>;
-			debt: IItemData<IDebtConfig>;
-			currency: IItemData<ICurrencyConfig>;
+			account: IAccount;
+			service: IService;
+			debt: IDebt;
+			currency: ICurrency;
 		};
 	} = {
 		examples: {
 			account: {
-				id: 'account',
+				_id: 'account',
 				type: 'account',
 				config: {
 					name: 'Bank Account',
@@ -31,7 +25,7 @@
 				}
 			},
 			service: {
-				id: 'service',
+				_id: 'service',
 				type: 'service',
 				config: {
 					name: 'Service',
@@ -42,7 +36,7 @@
 				}
 			},
 			debt: {
-				id: 'debt',
+				_id: 'debt',
 				type: 'debt',
 				config: {
 					withWho: 'Pedro',
@@ -53,7 +47,7 @@
 				}
 			},
 			currency: {
-				id: 'currency',
+				_id: 'currency',
 				type: 'currency',
 				config: {
 					currency: 'usd',
