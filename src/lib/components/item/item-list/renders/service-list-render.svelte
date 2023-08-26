@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { ServiceItem } from '@/lib/util/logic/item';
-	import type { IServiceConfig, iItem } from '../../../../typings';
+	import type { IService } from '@/lib/typings';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 
 	export let data: IService;
 	const view: { containerClass?: string } = {};
 
 	onMount(() => {
-		if (data.config.isManual) {
+		if (data.isManual) {
 			if (ServiceItem.wasThisMonthPaid(data)) {
 				view.containerClass = 'paid';
 			} else {
@@ -19,9 +19,9 @@
 </script>
 
 <div class={view.containerClass}>
-	<div class="name">{data.config.name}</div>
+	<div class="name">{data.name}</div>
 	<div class="data">
-		<NumberFormat value={data.config.cost} />
-		{data.config.currency}
+		<NumberFormat value={data.cost} />
+		{data.currency}
 	</div>
 </div>

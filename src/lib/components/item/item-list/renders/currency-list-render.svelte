@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { iItem, ICurrencyConfig } from '../../../../typings';
+	import type { ICurrency } from '@/lib/typings';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 
 	export let data: ICurrency;
 </script>
 
-<div>{data.config.currency}</div>
-<div><NumberFormat value={data.config.total} /> {data.config.currency}</div>
+<div>{data.currency}</div>
+<div><NumberFormat value={data.total} /> {data.currency}</div>

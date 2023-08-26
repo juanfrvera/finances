@@ -7,7 +7,7 @@
 		ServiceItem,
 		CurrencyItem
 	} from '../../util/logic/item';
-	import type { IItemCreationData, iItem, ICurrencyCreationConfig, Item } from '../../typings';
+	import type { iItem, Item } from '../../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
@@ -21,12 +21,12 @@
 
 	const ui: {
 		list?: Item[];
-		creationModal?: { saving?: boolean; data: IItemCreationData };
+		creationModal?: { saving?: boolean; data: Partial<Item> };
 		seeModal?: { item: Item };
 		editModal?: { item: Item };
 	} = {};
 
-	let afterCurrencyCreated: { creationModal?: { data: IItemCreationData } } | undefined;
+	let afterCurrencyCreated: { creationModal?: { data: Partial<Item> } } | undefined;
 
 	// Currency context
 	const currencyContext: ICurrencyContext = {
@@ -61,7 +61,7 @@
 	//#region Creation
 	function addClicked() {
 		ui.creationModal = {
-			data: { type: AccountItem.getTypeString(), config: {} }
+			data: { type: AccountItem.getTypeString() }
 		};
 	}
 	async function saveCreationModal() {
@@ -120,36 +120,39 @@
 	}
 	//#region fromEmptyState
 	function createAccount() {
-		ui.creationModal = { data: { type: AccountItem.getTypeString(), config: {} } };
+		ui.creationModal = { data: { type: AccountItem.getTypeString() } };
 	}
 	function createService() {
-		ui.creationModal = { data: { type: ServiceItem.getTypeString(), config: {} } };
+		ui.creationModal = { data: { type: ServiceItem.getTypeString() } };
 	}
 	function createDebt() {
-		ui.creationModal = { data: { type: DebtItem.getTypeString(), config: {} } };
+		ui.creationModal = { data: { type: DebtItem.getTypeString() } };
 	}
 	function createCurrency() {
-		ui.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
+		ui.creationModal = { data: { type: CurrencyItem.getTypeString() } };
 	}
 	//#endregion
-	function deleteCurrentItem() {
+	async function deleteCurrentItem() {
 		const item = ui.seeModal!.item;
 
-		list = list.filter((i) => i._id != item._id);
-		ItemService.delete(item._id);
+		try {
+			await ItemService.delete(item._id);
+			list = list.filter((i) => i._id != item._id);
 
-		calculateCurrencyItems();
-		calculateUiList();
+			calculateCurrencyItems();
+			calculateUiList();
 
-		closeSeeModal();
+			closeSeeModal();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 	function switchToCurrencyCreation() {
 		if (ui.creationModal == null) {
-			ui.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
+			ui.creationModal = { data: { type: CurrencyItem.getTypeString() } };
 		} else {
 			afterCurrencyCreated = { creationModal: deepCopy(ui.creationModal) };
-			ui.creationModal.data.type = CurrencyItem.getTypeString();
-			ui.creationModal.data.config = {};
+			ui.creationModal.data = { type: CurrencyItem.getTypeString() };
 		}
 	}
 	function currencyCreated() {
@@ -158,11 +161,11 @@
 			ui.creationModal != null &&
 			afterCurrencyCreated.creationModal != null
 		) {
-			const currencyData: IItemCreationData<ICurrencyCreationConfig> = ui.creationModal.data;
-			const currency = currencyData.config.currency;
+			const currencyData = ui.creationModal.data;
+			const currency = currencyData.currency;
 
 			ui.creationModal = afterCurrencyCreated.creationModal;
-			ui.creationModal.data.config.currency = currency;
+			ui.creationModal.data.currency = currency;
 
 			afterCurrencyCreated = undefined;
 		} else {

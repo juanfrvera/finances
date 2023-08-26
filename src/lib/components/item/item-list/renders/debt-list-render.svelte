@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { IDebtConfig, iItem } from '@/lib/typings';
+	import type { IDebt } from '@/lib/typings';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 
@@ -12,7 +12,7 @@
 	};
 
 	onMount(() => {
-		const isPaid = data.config.paidDate != null;
+		const isPaid = data.paidDate != null;
 		const containerClass = isPaid ? 'paid' : 'unpaid';
 
 		view = { containerClass, payDirectionString: DebtLogic.calculatePayStateString(data) };
@@ -22,6 +22,6 @@
 {#if view != null}
 	<div class={view.containerClass}>
 		<div>{view.payDirectionString}</div>
-		<div class="data"><NumberFormat value={data.config.amount} /> {data.config.currency}</div>
+		<div class="data"><NumberFormat value={data.amount} /> {data.currency}</div>
 	</div>
 {/if}

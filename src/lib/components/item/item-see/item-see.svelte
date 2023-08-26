@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { createEventDispatcher, type ComponentType } from 'svelte';
 	import { ItemHelper } from '@/lib/util/logic/item';
-	import type { iItem } from '../../../typings';
+	import type { Item } from '../../../typings';
 
-	export let data: iItem;
+	export let data: Item;
 	const dispatch = createEventDispatcher();
 
 	let currentConfigComponent: ComponentType = ItemHelper.getClassByTypeString(
 		data.type
 	)!.getSeeRender();
 
-	function passUpdate(event: CustomEvent<iItem>) {
+	function passUpdate(event: CustomEvent<Item>) {
 		dispatch('update', event.detail);
 	}
 </script>

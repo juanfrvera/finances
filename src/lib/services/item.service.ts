@@ -9,11 +9,11 @@ export class ItemService {
         // Fill currencies with balance
         const currencies = list.filter(i => i.type === 'currency') as ICurrency[];
         currencies.forEach(c => {
-            const accounts = list.filter(l => l.type === 'account' && l.config.currency === c.config.currency) as IAccount[];
+            const accounts = list.filter(l => l.type === 'account' && l.currency === c.currency) as IAccount[];
             if (accounts && accounts.length) {
-                c.config.total = accounts.map(a => a.config.balance).reduce((accumulator, value) => accumulator + value);
+                c.total = accounts.map(a => a.balance).reduce((accumulator, value) => accumulator + value);
             } else {
-                c.config.total = 0;
+                c.total = 0;
             }
         });
 
@@ -22,6 +22,14 @@ export class ItemService {
 
     public static async create(data): Promise<Item> {
         const response = await fetch(this.getUrl(), { method: 'POST', body: JSON.stringify(data), headers: this.getHeaders() });
+        return ApiService.interceptResponse(response);
+    }
+
+    public static async update(id: string, updatedFields: Partial<Item>) {
+        const response = await fetch(
+            `${this.getUrl()}/${id}`,
+            { method: 'PATCH', body: JSON.stringify(updatedFields), headers: this.getHeaders() }
+        );
         return ApiService.interceptResponse(response);
     }
 

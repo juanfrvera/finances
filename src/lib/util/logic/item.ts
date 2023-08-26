@@ -32,7 +32,7 @@ export class AccountItem extends Item {
 
     public static isItemOnQuery(item: IAccount, query: string) {
         const lwQuery = query.toLowerCase();
-        const config = item.config;
+        const config = item;
 
         if (config.name.toLowerCase().includes(lwQuery)) return true;
         if (config.balance.toString().includes(query)) return true;
@@ -50,7 +50,7 @@ export class ServiceItem extends Item {
 
     public static isItemOnQuery(item: IService, query: string) {
         const lwQuery = query.toLowerCase();
-        const config = item.config;
+        const config = item;
 
         if (config.name.toLowerCase().includes(lwQuery)) return true;
         if (config.cost.toString().includes(query)) return true;
@@ -62,9 +62,9 @@ export class ServiceItem extends Item {
     }
 
     public static wasThisMonthPaid(data: IService) {
-        if (data.config.lastPayDateString != null) {
+        if (data.lastPayDateString != null) {
             const today = new Date();
-            const lastPayDate = new Date(data.config.lastPayDateString.substring(0, 10));
+            const lastPayDate = new Date(data.lastPayDateString.substring(0, 10));
             return lastPayDate != null && (lastPayDate.getMonth() === today.getMonth() && lastPayDate.getFullYear() === today.getFullYear());
         }
         return false;
@@ -78,14 +78,14 @@ export class CurrencyItem extends Item {
     public static getSeeRender(): SeeRender { return CurrencySeeRender; }
 
     public static calculate(list: iItem[], totalItem: ICurrency) {
-        totalItem.config.total = 0;
+        totalItem.total = 0;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];
 
             if (item.type === AccountItem.getTypeString()) {
                 const account = item as IAccount;
-                if (account.config.currency === totalItem.config.currency) {
-                    totalItem.config.total += account.config.balance;
+                if (account.currency === totalItem.currency) {
+                    totalItem.total += account.balance;
                 }
             }
         }
@@ -100,7 +100,7 @@ export class DebtItem extends Item {
 
     public static isItemOnQuery(item: IDebt, query: string) {
         const lwQuery = query.toLowerCase();
-        const config = item.config;
+        const config = item;
 
         if (config.withWho.toLowerCase().includes(lwQuery)) return true;
         if (config.amount.toString().includes(query)) return true;

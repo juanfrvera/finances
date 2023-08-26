@@ -38,7 +38,7 @@
 				</select>
 			</div>
 		</div>
-		<svelte:component this={currentConfigComponent} config={data.config} />
+		<svelte:component this={currentConfigComponent} config={data} />
 	</div>
 {/if}
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ICurrencyConfig } from '../../../typings';
+	import type { ICurrencyConfig } from '@/lib/typings';
 
 	export let config: ICurrencyConfig;
 </script>

@@ -9,13 +9,13 @@
 	let view: IView;
 	onMount(() => {
 		view = {};
-		if (data.config.isManual) {
+		if (data.isManual) {
 			let lastPayDateString = 'Never';
 			let showMarkAsPaidButton = true;
-			if (data.config.lastPayDateString != null) {
-				const lastPayDate = new Date(data.config.lastPayDateString);
-				showMarkAsPaidButton = data.config.isManual && !ServiceItem.wasThisMonthPaid(data);
-				lastPayDateString = data.config.lastPayDateString;
+			if (data.lastPayDateString != null) {
+				const lastPayDate = new Date(data.lastPayDateString);
+				showMarkAsPaidButton = data.isManual && !ServiceItem.wasThisMonthPaid(data);
+				lastPayDateString = data.lastPayDateString;
 			}
 
 			view.payDate = {
@@ -32,12 +32,12 @@
 	}
 	function changePaidDateClicked() {
 		view.payDate!.showChangePaidDateButton = false;
-		openMarkPaidDatePicker(new Date(data.config.lastPayDateString));
+		openMarkPaidDatePicker(new Date(data.lastPayDateString));
 	}
 	function confirmPaidDate() {
 		const date = new Date(view.payDate!.markPaidDatePicker!.dateInputString + 'T00:00');
-		data.config.lastPayDateString = date.toLocaleDateString();
-		view.payDate!.lastPayDateString = data.config.lastPayDateString;
+		data.lastPayDateString = date.toLocaleDateString();
+		view.payDate!.lastPayDateString = data.lastPayDateString;
 
 		view.payDate!.markPaidDatePicker = undefined;
 		view.payDate!.showChangePaidDateButton = true;
@@ -67,8 +67,8 @@
 
 {#if view != null}
 	<div class="service-see">
-		<div>{data.config.name}</div>
-		<div>{data.config.cost} {data.config.currency}</div>
+		<div>{data.name}</div>
+		<div>{data.cost} {data.currency}</div>
 		{#if view.payDate != undefined}
 			<div class="label-and-value">
 				<div class="value-label">Last pay date:</div>

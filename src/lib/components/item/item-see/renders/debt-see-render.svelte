@@ -1,59 +1,69 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { IDebtConfig, iItem } from '../../../../typings';
+	import type { IDebt } from '@/lib/typings';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
+	import { ItemService } from '@/lib/services/item.service';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
 
-	let view: {
+	let ui: {
 		payDate?: {
-			showPaidDate: boolean;
-			showMarkAsPaidButton: boolean;
-			markPaidDatePicker?: {
+			showPaidDate?: boolean;
+			showMarkAsPaidButton?: boolean;
+			markAsPaid?: {
 				dateInputString: string;
+				marking?: boolean;
 			};
-			showChangePaidDateButton: boolean;
+			showChangePaidDateButton?: boolean;
 		};
 		payInfo?: string;
 	} = {};
 
 	onMount(() => {
-		const isPaid = data.config.paidDate != null;
-		view.payDate = {
+		const isPaid = data.paidDate != null;
+		ui.payDate = {
 			showPaidDate: isPaid,
 			showMarkAsPaidButton: !isPaid,
 			showChangePaidDateButton: isPaid
 		};
 
-		view.payInfo = DebtLogic.calculatePayStateString(data);
-		if (data.config.description && data.config.description.length > 0) {
-			view.payInfo += ` ${data.config.description}`;
+		ui.payInfo = DebtLogic.calculatePayStateString(data);
+		if (data.description && data.description.length > 0) {
+			ui.payInfo += ` ${data.description}`;
 		}
 	});
 
 	function markAsPaidClicked() {
-		view.payDate!.showMarkAsPaidButton = false;
+		ui.payDate!.showMarkAsPaidButton = false;
 		openMarkPaidDatePicker(new Date(Date.now()));
 	}
 	function changePaidDateClicked() {
-		view.payDate!.showChangePaidDateButton = false;
-		openMarkPaidDatePicker(new Date(data.config.paidDate));
+		ui.payDate!.showChangePaidDateButton = false;
+		openMarkPaidDatePicker(new Date(data.paidDate ?? Date.now()));
 	}
-	function confirmPaidDate() {
-		const date = new Date(view.payDate!.markPaidDatePicker!.dateInputString + 'T00:00');
-		data.config.paidDate = date.toLocaleDateString();
+	async function confirmPaidDate() {
+		const dateString = ui.payDate!.markAsPaid!.dateInputString;
+		const date = new Date(dateString + 'T00:00');
 
-		view.payDate!.markPaidDatePicker = undefined;
-		view.payDate!.showChangePaidDateButton = true;
-		view.payDate!.showPaidDate;
+		ui.payDate!.markAsPaid!.marking = true;
+		try {
+			ItemService.update(data._id, { paidDate: dateString });
+			data.paidDate = date.toLocaleDateString();
+
+			ui.payDate!.markAsPaid = undefined;
+			ui.payDate!.showChangePaidDateButton = true;
+			ui.payDate!.showPaidDate = true;
+		} catch (error) {
+			ui.payDate!.markAsPaid!.marking = false;
+		}
 
 		triggerOnUpdate();
 	}
 	function openMarkPaidDatePicker(date: Date) {
 		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
-		view.payDate!.markPaidDatePicker = {
+		ui.payDate!.markAsPaid = {
 			dateInputString: date.toISOString().substring(0, 10)
 		};
 	}
@@ -62,25 +72,28 @@
 	}
 </script>
 
-{#if view != null}
+{#if ui != null}
 	<div class="debt-see">
-		<div>{view.payInfo}</div>
-		<div><NumberFormat value={data.config.amount} /> {data.config.currency}</div>
-		{#if view.payDate != undefined}
-			{#if view.payDate.showPaidDate}
+		<div>{ui.payInfo}</div>
+		<div><NumberFormat value={data.amount} /> {data.currency}</div>
+		{#if ui.payDate != undefined}
+			{#if ui.payDate.showPaidDate}
 				<div class="label-and-value">
 					<div class="value-label">Paid date:</div>
-					<div class="value">{data.config.paidDate}</div>
+					<div class="value">{data.paidDate}</div>
 				</div>
 			{/if}
-			{#if view.payDate.showMarkAsPaidButton}
+			{#if ui.payDate.showMarkAsPaidButton}
 				<button on:click={markAsPaidClicked}>Mark as Paid</button>
 			{/if}
-			{#if view.payDate.markPaidDatePicker != undefined}
-				<input bind:value={view.payDate.markPaidDatePicker.dateInputString} type="date" />
-				<button on:click={confirmPaidDate}>Confirm date</button>
+			{#if ui.payDate.markAsPaid}
+				<input bind:value={ui.payDate.markAsPaid.dateInputString} type="date" />
+				<button
+					on:click={confirmPaidDate}
+					class="button {ui.payDate.markAsPaid.marking ? 'is-loading' : ''}">Confirm date</button
+				>
 			{/if}
-			{#if view.payDate.showChangePaidDateButton}
+			{#if ui.payDate.showChangePaidDateButton}
 				<button on:click={changePaidDateClicked}>Change Date</button>
 			{/if}
 		{/if}

@@ -12,7 +12,7 @@
 	} = { createNewKey: 'create-new' };
 
 	onMount(async () => {
-		ui.list = (await context.getCurrencies()).map((c) => c.config.currency);
+		ui.list = (await context.getCurrencies()).map((c) => c.currency);
 	});
 
 	function onChange(ev: Event) {

@@ -6,8 +6,8 @@
 
 {#if data != null}
 	<div class="account-see">
-		<div>{data.config.name}</div>
-		<div>{data.config.balance} {data.config.currency}</div>
+		<div>{data.name}</div>
+		<div>{data.balance} {data.currency}</div>
 	</div>
 {/if}
 
