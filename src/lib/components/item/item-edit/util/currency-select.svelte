@@ -8,11 +8,19 @@
 
 	const ui: {
 		list?: string[];
-	} = {};
+		createNewKey: string;
+	} = { createNewKey: 'create-new' };
 
 	onMount(async () => {
 		ui.list = (await context.getCurrencies()).map((c) => c.config.currency);
 	});
+
+	function onChange(ev: Event) {
+		const select = ev.target as HTMLSelectElement;
+		if (select.value === ui.createNewKey) {
+			createButtonClicked();
+		}
+	}
 
 	function createButtonClicked() {
 		context.onGoToCreation();
@@ -24,9 +32,10 @@
 	{#if ui.list}
 		{#if ui.list.length}
 			<div class="select input-stretch">
-				<select bind:value id="currency-input" class="w-100">
+				<select bind:value on:change={onChange} id="currency-input" class="w-100">
 					{#each ui.list as currency}
 						<option>{currency}</option>
+						<option on:click={createButtonClicked} value="create-new">Create new currency</option>
 					{/each}
 				</select>
 			</div>

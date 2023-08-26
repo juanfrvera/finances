@@ -21,7 +21,7 @@
 
 	const ui: {
 		list?: Item[];
-		creationModal?: { data: IItemCreationData };
+		creationModal?: { saving?: boolean; data: IItemCreationData };
 		seeModal?: { item: Item };
 		editModal?: { item: Item };
 	} = {};
@@ -47,7 +47,7 @@
 	function loadItems() {
 		ItemService.getItems().then((data) => {
 			list = data;
-			calculateViewList();
+			calculateUiList();
 		});
 	}
 
@@ -65,20 +65,25 @@
 		};
 	}
 	async function saveCreationModal() {
-		const data = ui.creationModal!.data;
+		const modal = ui.creationModal!;
+		modal.saving = true;
+		try {
+			const createdItem = await ItemService.create(modal.data);
 
-		const createdItem = await ItemService.create(data);
+			// Add new item at the top
+			list = [createdItem, ...list];
+			calculateUiList();
+			calculateCurrencyItems();
 
-		// Add new item at the top
-		list = [createdItem, ...list];
-		calculateViewList();
-		calculateAndSave();
-
-		if (ui.creationModal?.data.type !== CurrencyItem.getTypeString()) {
-			closeCreationModal();
-		} else {
-			currencyCreated();
+			if (modal?.data.type !== CurrencyItem.getTypeString()) {
+				closeCreationModal();
+			} else {
+				currencyCreated();
+			}
+		} catch (error) {
+			console.error(error);
 		}
+		modal.saving = false;
 	}
 	function closeCreationModal() {
 		ui.creationModal = undefined;
@@ -94,7 +99,7 @@
 	function itemUpdated(event: CustomEvent<iItem>) {
 		// Set update date of item so it is re-rendered
 		event.detail.updateDate = new Date();
-		calculateAndSave();
+		calculateCurrencyItems();
 	}
 	//#endregion See
 	//#region Edit
@@ -102,19 +107,15 @@
 		ui.editModal = { item: ui.seeModal!.item };
 	}
 	function closeEditModal() {
-		calculateAndSave();
+		calculateCurrencyItems();
 		ui.editModal = undefined;
 	}
 	//#endregion Edit
-	function calculateAndSave() {
-		calculateCurrencyItems();
-		//storage.save(list);
-	}
 	function searchInputChanged(e: Event) {
 		currentSearchQuery = (e.target! as HTMLInputElement).value;
-		calculateViewList();
+		calculateUiList();
 	}
-	function calculateViewList() {
+	function calculateUiList() {
 		ui.list = list?.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
 	}
 	//#region fromEmptyState
@@ -138,7 +139,7 @@
 		ItemService.delete(item._id);
 
 		calculateCurrencyItems();
-		calculateViewList();
+		calculateUiList();
 
 		closeSeeModal();
 	}
@@ -146,10 +147,7 @@
 		if (ui.creationModal == null) {
 			ui.creationModal = { data: { type: CurrencyItem.getTypeString(), config: {} } };
 		} else {
-			afterCurrencyCreated = {
-				creationModal: deepCopy(ui.creationModal)
-			};
-
+			afterCurrencyCreated = { creationModal: deepCopy(ui.creationModal) };
 			ui.creationModal.data.type = CurrencyItem.getTypeString();
 			ui.creationModal.data.config = {};
 		}
@@ -253,12 +251,15 @@
 	>
 		<ItemEdit data={ui.creationModal.data} />
 		<div slot="footer" class="modal-footer-buttons">
-			<button on:click={saveCreationModal} class="button is-primary">Save</button>
+			<button
+				on:click={saveCreationModal}
+				class="button is-primary {ui.creationModal.saving ? 'is-loading' : ''}">Save</button
+			>
 			<button on:click={closeCreationModal} class="button">Cancel</button>
 		</div>
 	</Modal>
 {/if}
-{#if ui.seeModal != null}
+{#if ui.seeModal}
 	<Modal
 		on:backgroundClick={closeSeeModal}
 		on:escapeKeyUp={closeSeeModal}
@@ -272,7 +273,7 @@
 		</div>
 	</Modal>
 {/if}
-{#if ui.editModal != null}
+{#if ui.editModal}
 	<Modal on:backgroundClick={closeEditModal} on:escapeKeyUp={closeEditModal}>
 		<ItemEdit bind:data={ui.editModal.item} />
 	</Modal>

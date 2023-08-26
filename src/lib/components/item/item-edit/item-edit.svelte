@@ -12,9 +12,7 @@
 	let ui: { typeOptions: string[] };
 
 	onMount(() => {
-		ui = {
-			typeOptions: ItemHelper.getItemClasses().map((ic) => ic.getTypeString())
-		};
+		ui = { typeOptions: ItemHelper.getItemClasses().map((ic) => ic.getTypeString()) };
 	});
 
 	function typeSelectChanged(e: Event) {

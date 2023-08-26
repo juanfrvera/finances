@@ -1,4 +1,5 @@
 export type Item = IAccount | IService | ICurrency | IDebt;
+export type ItemType = 'account' | 'service' | 'currency' | 'debt';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface iItem<T = any> {
