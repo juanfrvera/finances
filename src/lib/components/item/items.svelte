@@ -22,7 +22,7 @@
 	const ui: {
 		list?: Item[];
 		creationModal?: { saving?: boolean; data: Partial<Item> };
-		seeModal?: { item: Item };
+		seeModal?: { item: Item; deleting?: boolean };
 		editModal?: { item: Item };
 	} = {};
 
@@ -65,17 +65,18 @@
 		};
 	}
 	async function saveCreationModal() {
-		const modal = ui.creationModal!;
-		modal.saving = true;
+		if (!ui.creationModal) return;
+
+		ui.creationModal.saving = true;
 		try {
-			const createdItem = await ItemService.create(modal.data);
+			const createdItem = await ItemService.create(ui.creationModal.data);
 
 			// Add new item at the top
 			list = [createdItem, ...list];
 			calculateUiList();
 			calculateCurrencyItems();
 
-			if (modal?.data.type !== CurrencyItem.getTypeString()) {
+			if (ui.creationModal.data.type !== CurrencyItem.getTypeString()) {
 				closeCreationModal();
 			} else {
 				currencyCreated();
@@ -83,7 +84,7 @@
 		} catch (error) {
 			console.error(error);
 		}
-		modal.saving = false;
+		ui.creationModal.saving = false;
 	}
 	function closeCreationModal() {
 		ui.creationModal = undefined;
@@ -133,8 +134,10 @@
 	}
 	//#endregion
 	async function deleteCurrentItem() {
-		const item = ui.seeModal!.item;
+		if (!ui.seeModal) return;
 
+		ui.seeModal.deleting = true;
+		const item = ui.seeModal.item;
 		try {
 			await ItemService.delete(item._id);
 			list = list.filter((i) => i._id != item._id);
@@ -146,6 +149,7 @@
 		} catch (error) {
 			console.error(error);
 		}
+		if (ui.seeModal) ui.seeModal.deleting = false;
 	}
 	function switchToCurrencyCreation() {
 		if (ui.creationModal == null) {
@@ -271,7 +275,10 @@
 		<ItemSee data={ui.seeModal.item} on:update={itemUpdated} />
 		<div slot="footer" class="modal-footer-buttons">
 			<button on:click={openEditModalFromSee} class="button">Edit</button>
-			<button on:click={deleteCurrentItem} class="button is-danger">Delete</button>
+			<button
+				on:click={deleteCurrentItem}
+				class="button is-danger {ui.seeModal.deleting ? 'is-loading' : ''}">Delete</button
+			>
 			<button on:click={closeSeeModal} class="button">Close</button>
 		</div>
 	</Modal>
