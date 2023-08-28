@@ -15,6 +15,7 @@
 	import { CurrencyLogic, type ICurrencyContext } from '../../util/logic/currency';
 	import { deepCopy } from '@/lib/util/deep-copy';
 	import { ItemService } from '@/lib/services/item.service';
+	import { CurrencyService } from '@/lib/services/currency.service';
 
 	let list: Item[] = [];
 	let currentSearchQuery: string = '';
@@ -23,7 +24,7 @@
 		list?: Item[];
 		creationModal?: { saving?: boolean; data: Partial<Item> };
 		seeModal?: { item: Item; deleting?: boolean };
-		editModal?: { item: Item };
+		editModal?: { item: Item; saving?: boolean };
 	} = {};
 
 	let afterCurrencyCreated: { creationModal?: { data: Partial<Item> } } | undefined;
@@ -69,7 +70,12 @@
 
 		ui.creationModal.saving = true;
 		try {
-			const createdItem = await ItemService.create(ui.creationModal.data);
+			let createdItem: Item;
+			if (ui.creationModal.data.type != 'currency') {
+				createdItem = await ItemService.create(ui.creationModal.data);
+			} else {
+				createdItem = await CurrencyService.create(ui.creationModal.data);
+			}
 
 			// Add new item at the top
 			list = [createdItem, ...list];
@@ -79,12 +85,13 @@
 			if (ui.creationModal.data.type !== CurrencyItem.getTypeString()) {
 				closeCreationModal();
 			} else {
+				ui.creationModal.saving = false;
 				currencyCreated();
 			}
 		} catch (error) {
 			console.error(error);
+			ui.creationModal.saving = false;
 		}
-		ui.creationModal.saving = false;
 	}
 	function closeCreationModal() {
 		ui.creationModal = undefined;
@@ -106,6 +113,25 @@
 	//#region Edit
 	function openEditModalFromSee() {
 		ui.editModal = { item: ui.seeModal!.item };
+	}
+	async function saveEditModal() {
+		if (!ui.editModal) return;
+
+		ui.editModal.saving = true;
+		try {
+			const item = ui.editModal.item;
+			const updatedItem = await ItemService.update(item._id, item);
+
+			list = list.filter((i) => (i._id === updatedItem._id ? updatedItem : i));
+
+			calculateUiList();
+			calculateCurrencyItems();
+
+			closeEditModal();
+		} catch (error) {
+			console.error(error);
+			ui.editModal.saving = false;
+		}
 	}
 	function closeEditModal() {
 		calculateCurrencyItems();
@@ -286,6 +312,13 @@
 {#if ui.editModal}
 	<Modal on:backgroundClick={closeEditModal} on:escapeKeyUp={closeEditModal}>
 		<ItemEdit bind:data={ui.editModal.item} />
+		<div slot="footer" class="modal-footer-buttons">
+			<button
+				on:click={saveEditModal}
+				class="button is-primary {ui.editModal.saving ? 'is-loading' : ''}">Save</button
+			>
+			<button on:click={closeEditModal} class="button">Cancel</button>
+		</div>
 	</Modal>
 {/if}
 

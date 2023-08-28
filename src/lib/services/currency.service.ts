@@ -1,14 +1,25 @@
+import type { ICurrency } from "../typings";
 import { ApiService } from "./api.service";
+import { ItemService } from "./item.service";
 
 export class CurrencyService {
+    private static list?: ICurrency[];
+
     public static async getList() {
-        const response = await fetch(this.getUrl(), { method: 'GET', headers: this.getHeaders() });
-        return ApiService.interceptResponse(response);
+        if (!this.list) {
+            const response = await fetch(this.getUrl(), { method: 'GET', headers: this.getHeaders() });
+            this.list = await ApiService.interceptResponse(response);
+        }
+
+        return this.list!;
     }
 
     public static async create(data) {
-        const response = await fetch(this.getUrl(), { method: 'POST', body: JSON.stringify(data), headers: this.getHeaders() });
-        return ApiService.interceptResponse(response);
+        const result = await ItemService.create(data);
+
+        if (this.list) this.list.unshift(result as ICurrency);
+
+        return result;
     }
 
     private static getUrl() {

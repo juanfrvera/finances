@@ -35,8 +35,8 @@
 				<select bind:value on:change={onChange} id="currency-input" class="w-100">
 					{#each ui.list as currency}
 						<option>{currency}</option>
-						<option on:click={createButtonClicked} value="create-new">Create new currency</option>
 					{/each}
+					<option on:click={createButtonClicked} value="create-new">Create new currency</option>
 				</select>
 			</div>
 		{:else}
