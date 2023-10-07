@@ -6,22 +6,28 @@
 
 	export let data: IDebt;
 
-	let view: {
+	let ui: {
 		containerClass: string;
 		payDirectionString: string;
+		amountToShow: number;
 	};
 
 	onMount(() => {
-		const isPaid = data.paidDate != null;
+		const paidAmonut = DebtLogic.getPaidAmount(data);
+		const isPaid = paidAmonut >= data.amount;
 		const containerClass = isPaid ? 'paid' : 'unpaid';
 
-		view = { containerClass, payDirectionString: DebtLogic.calculatePayStateString(data) };
+		ui = {
+			containerClass,
+			payDirectionString: DebtLogic.calculatePayStateString(data),
+			amountToShow: isPaid ? paidAmonut : data.amount - paidAmonut
+		};
 	});
 </script>
 
-{#if view != null}
-	<div class={view.containerClass}>
-		<div>{view.payDirectionString}</div>
-		<div class="data"><NumberFormat value={data.amount} /> {data.currency}</div>
+{#if ui != null}
+	<div class={ui.containerClass}>
+		<div>{ui.payDirectionString}</div>
+		<div class="data"><NumberFormat value={ui.amountToShow} /> {data.currency}</div>
 	</div>
 {/if}

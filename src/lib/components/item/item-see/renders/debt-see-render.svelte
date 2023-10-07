@@ -18,6 +18,7 @@
 		payWindow?: {
 			dateInputString: string;
 			amount: number;
+			note?: string;
 			saving?: boolean;
 			editing?: {
 				originalPayment: IPayment;
@@ -39,10 +40,7 @@
 	});
 
 	function checkPayStatus() {
-		let paidAmount = 0;
-		if (data.payments) {
-			data.payments.forEach((p) => (paidAmount += p.amount));
-		}
+		const paidAmount = DebtLogic.getPaidAmount(data);
 		const isPaid = paidAmount >= data.amount;
 
 		ui.showPayButton = !isPaid;
@@ -74,6 +72,7 @@
 	function cancelPay() {
 		ui.payWindow = undefined;
 		ui.showPayButton = true;
+		ui.showPayTable = true;
 	}
 
 	async function confirmPay() {
@@ -82,7 +81,8 @@
 		try {
 			const newPayment: IPayment = {
 				dateString: payWindow.dateInputString,
-				amount: payWindow.amount
+				amount: payWindow.amount,
+				note: payWindow.note
 			};
 			const payments = data.payments ?? [];
 
@@ -126,6 +126,7 @@
 		ui.payWindow = {
 			dateInputString: row.paymentObject.dateString,
 			amount: row.paymentObject.amount,
+			note: row.note,
 			editing: { originalPayment: row.paymentObject }
 		};
 		ui.showPayButton = false;
@@ -196,6 +197,7 @@
 					placeholder="Date"
 				/>
 				<input bind:value={ui.payWindow.amount} class="input" type="number" placeholder="Amount" />
+				<input bind:value={ui.payWindow.note} class="input" type="text" placeholder="Note" />
 				<div class="pay-window__footer">
 					<button on:click={confirmPay} class="button {ui.payWindow.saving ? 'is-loading' : ''}"
 						>Confirm</button
