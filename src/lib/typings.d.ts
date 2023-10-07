@@ -36,8 +36,9 @@ export interface IDebt extends iItem {
     amount: number;
     currency: string;
     theyPayMe: boolean;
-    paidDate?: string;
+    payments?: IPayment[];
 }
+export interface IPayment { dateString: string; amount: number; note?: string; };
 
 export interface IAsyncOp<Data, Success, Error> {
     data: Data;
