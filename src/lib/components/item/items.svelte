@@ -16,6 +16,7 @@
 	import { deepCopy } from '@/lib/util/deep-copy';
 	import { ItemService } from '@/lib/services/item.service';
 	import { CurrencyService } from '@/lib/services/currency.service';
+	import { ModalChannel } from '@/lib/services/modal-channel.service';
 
 	let list: Item[] = [];
 	let currentSearchQuery: string = '';
@@ -128,6 +129,8 @@
 			calculateCurrencyItems();
 
 			closeEditModal();
+
+			ModalChannel.$channel.next({ type: 'itemEdited', data: { item } });
 		} catch (error) {
 			console.error(error);
 			ui.editModal.saving = false;

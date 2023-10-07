@@ -1,18 +1,21 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import type { IDebt, IPayment } from '@/lib/typings';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 	import { ItemService } from '@/lib/services/item.service';
+	import { ModalChannel } from '@/lib/services/modal-channel.service';
+	import type { Subscription } from 'rxjs';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
 
 	let ui: {
 		payStatus?: {
-			owed: number;
+			amount: number;
 			total: number;
 			isPaid: boolean;
+			statusString: string;
 		};
 		showPayButton?: boolean;
 		payWindow?: {
@@ -28,15 +31,20 @@
 		payments?: Array<IPaymentRow>;
 		showPayTable?: boolean;
 	} = {};
-	interface IPaymentRow {
-		amount: number;
-		date: string;
-		note: string;
-		paymentObject: IPayment;
-	}
+
+	let subscription: Subscription;
 
 	onMount(() => {
+		subscription = ModalChannel.$channel.subscribe((signal) => {
+			if (signal.type === 'itemEdited') {
+				checkPayStatus();
+			}
+		});
 		checkPayStatus();
+	});
+
+	onDestroy(() => {
+		if (subscription) subscription.unsubscribe();
 	});
 
 	function checkPayStatus() {
@@ -64,8 +72,9 @@
 
 		ui.payStatus = {
 			isPaid,
-			owed: data.amount - paidAmount,
-			total: data.amount
+			amount: data.theyPayMe || isPaid ? paidAmount : data.amount - paidAmount,
+			total: data.amount,
+			statusString: DebtLogic.calculatePayStateString(data)
 		};
 	}
 
@@ -89,6 +98,9 @@
 			// If we have an original payment, we are editing
 			if (!payWindow.editing) {
 				payments.push(newPayment);
+				if (!data.payments) {
+					data.payments = payments;
+				}
 			} else {
 				// Just edit the original object before saving the array that includes it
 				payWindow.editing.originalPayment.amount = newPayment.amount;
@@ -139,6 +151,13 @@
 		ui.payWindow = undefined;
 		checkPayStatus();
 	}
+
+	interface IPaymentRow {
+		amount: number;
+		date: string;
+		note: string;
+		paymentObject: IPayment;
+	}
 </script>
 
 {#if ui != null}
@@ -146,9 +165,8 @@
 		<div>{ui.payInfo}</div>
 		{#if ui.payStatus}
 			<div>
-				You owe <NumberFormat value={ui.payStatus.owed} /> of <NumberFormat
-					value={ui.payStatus.total}
-				/>
+				{ui.payStatus.statusString}
+				<NumberFormat value={ui.payStatus.amount} /> of <NumberFormat value={ui.payStatus.total} />
 				{data.currency}
 			</div>
 		{/if}
