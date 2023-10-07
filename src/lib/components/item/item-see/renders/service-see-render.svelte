@@ -75,14 +75,14 @@
 				<div class="value">{view.payDate.lastPayDateString}</div>
 			</div>
 			{#if view.payDate.showMarkAsPaidButton}
-				<button on:click={markAsPaidClicked}>Mark as Paid</button>
+				<button on:click={markAsPaidClicked} class="button">Mark as Paid</button>
 			{/if}
 			{#if view.payDate.markPaidDatePicker != undefined}
 				<input bind:value={view.payDate.markPaidDatePicker.dateInputString} type="date" />
-				<button on:click={confirmPaidDate}>Confirm date</button>
+				<button on:click={confirmPaidDate} class="button">Confirm date</button>
 			{/if}
 			{#if view.payDate.showChangePaidDateButton}
-				<button on:click={changePaidDateClicked}>Change Date</button>
+				<button on:click={changePaidDateClicked} class="button">Change Date</button>
 			{/if}
 		{/if}
 	</div>
