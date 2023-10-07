@@ -4,19 +4,24 @@
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 	import { ItemService } from '@/lib/services/item.service';
-	import { flatMap } from 'rxjs';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
 
 	let ui: {
-		isPaid?: boolean;
+		payStatus?: {
+			owed: number;
+			total: number;
+			isPaid: boolean;
+		};
 		showPayButton?: boolean;
 		payWindow?: {
 			dateInputString: string;
 			amount: number;
 			saving?: boolean;
-			originalPayment?: IPayment;
+			editing?: {
+				originalPayment: IPayment;
+			};
 		};
 		payInfo?: string;
 		payments?: Array<IPaymentRow>;
@@ -40,14 +45,13 @@
 		}
 		const isPaid = paidAmount >= data.amount;
 
-		ui.isPaid = isPaid;
 		ui.showPayButton = !isPaid;
 		ui.payInfo = DebtLogic.calculatePayStateString(data);
 		if (data.description && data.description.length > 0) {
 			ui.payInfo += ` ${data.description}`;
 		}
 
-		if (data.payments) {
+		if (data.payments && data.payments.length) {
 			ui.payments = data.payments.map((p) => ({
 				amount: p.amount,
 				date: p.dateString,
@@ -59,6 +63,17 @@
 			ui.payments = undefined;
 			ui.showPayTable = false;
 		}
+
+		ui.payStatus = {
+			isPaid,
+			owed: data.amount - paidAmount,
+			total: data.amount
+		};
+	}
+
+	function cancelPay() {
+		ui.payWindow = undefined;
+		ui.showPayButton = true;
 	}
 
 	async function confirmPay() {
@@ -72,13 +87,13 @@
 			const payments = data.payments ?? [];
 
 			// If we have an original payment, we are editing
-			if (!payWindow.originalPayment) {
+			if (!payWindow.editing) {
 				payments.push(newPayment);
 			} else {
 				// Just edit the original object before saving the array that includes it
-				payWindow.originalPayment.amount = newPayment.amount;
-				payWindow.originalPayment.dateString = newPayment.dateString;
-				payWindow.originalPayment.note = newPayment.note;
+				payWindow.editing.originalPayment.amount = newPayment.amount;
+				payWindow.editing.originalPayment.dateString = newPayment.dateString;
+				payWindow.editing.originalPayment.note = newPayment.note;
 			}
 			ItemService.update(data._id, { payments });
 
@@ -111,29 +126,30 @@
 		ui.payWindow = {
 			dateInputString: row.paymentObject.dateString,
 			amount: row.paymentObject.amount,
-			originalPayment: row.paymentObject
+			editing: { originalPayment: row.paymentObject }
 		};
+		ui.showPayButton = false;
+	}
+
+	function deleteCurrentPayment() {
+		const payment = ui.payWindow!.editing!.originalPayment;
+		data.payments!.splice(data.payments!.indexOf(payment), 1);
+		ItemService.update(data._id, { payments: data.payments });
+		ui.payWindow = undefined;
+		checkPayStatus();
 	}
 </script>
 
 {#if ui != null}
 	<div class="debt-see">
 		<div>{ui.payInfo}</div>
-		<div><NumberFormat value={data.amount} /> {data.currency}</div>
-		{#if ui.showPayButton}
-			<button class="button" on:click={payClicked}>Pay</button>
-		{/if}
-		{#if ui.payWindow}
-			<input
-				bind:value={ui.payWindow.dateInputString}
-				type="date"
-				class="input"
-				placeholder="Date"
-			/>
-			<input bind:value={ui.payWindow.amount} class="input" type="number" placeholder="Amount" />
-			<button on:click={confirmPay} class="button {ui.payWindow.saving ? 'is-loading' : ''}"
-				>Confirm</button
-			>
+		{#if ui.payStatus}
+			<div>
+				You owe <NumberFormat value={ui.payStatus.owed} /> of <NumberFormat
+					value={ui.payStatus.total}
+				/>
+				{data.currency}
+			</div>
 		{/if}
 
 		<!-- Pay Table -->
@@ -163,6 +179,38 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Pay Window -->
+		{#if ui.payWindow}
+			<div class="pay-window">
+				{#if ui.payWindow.editing}
+					<div class="pay-window__editing-header">
+						<div class="pay-window__editing-title">Editing Payment</div>
+						<button on:click={deleteCurrentPayment} class="button">Delete</button>
+					</div>
+				{/if}
+				<input
+					bind:value={ui.payWindow.dateInputString}
+					type="date"
+					class="input"
+					placeholder="Date"
+				/>
+				<input bind:value={ui.payWindow.amount} class="input" type="number" placeholder="Amount" />
+				<div class="pay-window__footer">
+					<button on:click={confirmPay} class="button {ui.payWindow.saving ? 'is-loading' : ''}"
+						>Confirm</button
+					>
+					<button on:click={cancelPay} disabled={ui.payWindow.saving} class="button is-danger"
+						>Cancel</button
+					>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Add Payment -->
+		{#if ui.showPayButton}
+			<button on:click={payClicked} class="button">Register payment</button>
+		{/if}
 	</div>
 {/if}
 
@@ -172,6 +220,18 @@
 		flex-direction: column;
 		align-items: center;
 		row-gap: 8px;
+	}
+
+	.pay-window__editing-header {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 8px;
+	}
+
+	.pay-window__footer {
+		margin-top: 8px;
+		display: flex;
+		justify-content: space-around;
 	}
 
 	.pay-table {
