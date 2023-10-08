@@ -21,7 +21,7 @@ export interface IService extends iItem {
     currency: string;
     /** If the payment has to be done manually */
     isManual: boolean;
-    lastPayDateString: string;
+    payments?: IPayment[];
 }
 
 export interface ICurrency extends iItem {

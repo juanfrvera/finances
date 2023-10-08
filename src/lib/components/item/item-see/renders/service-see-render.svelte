@@ -1,103 +1,151 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { ServiceItem } from '@/lib/util/logic/item';
-	import type { IService } from '@/lib/typings';
+	import type { IPayment, IService } from '@/lib/typings';
+	import { ItemService } from '@/lib/services/item.service';
 
 	export let data: IService;
 	const dispatch = createEventDispatcher();
 
-	let ui: IView;
-	onMount(() => {
-		ui = {};
-		if (data.isManual) {
-			let lastPayDateString = 'Never';
-			let showMarkAsPaidButton = true;
-			if (data.lastPayDateString != null) {
-				const lastPayDate = new Date(data.lastPayDateString);
-				showMarkAsPaidButton = data.isManual && !ServiceItem.wasThisMonthPaid(data);
-				lastPayDateString = data.lastPayDateString;
-			}
-
-			ui.payDate = {
-				lastPayDateString,
-				showMarkAsPaidButton,
-				showChangePaidDateButton: !showMarkAsPaidButton
+	let ui: {
+		showRegisterPaymentButton?: boolean;
+		payWindow?: {
+			dateInputString: string;
+			note?: string;
+			editing?: {
+				originalPayment: IPayment;
 			};
+		};
+		lastPayment?: IPayment;
+		showChangePaidDateButton?: boolean;
+		showTabs?: boolean;
+	} = {};
+	onMount(() => {
+		if (data.isManual) {
+			if (data.payments) {
+				ui.lastPayment = ServiceItem.getLastPayment(data.payments);
+				if (ServiceItem.wasThisMonthPaid(data)) {
+					ui.showChangePaidDateButton = true;
+				} else {
+					ui.showRegisterPaymentButton = true;
+				}
+			} else {
+				ui.showRegisterPaymentButton = true;
+			}
 		}
 	});
 
-	function markAsPaidClicked() {
-		ui.payDate!.showMarkAsPaidButton = false;
-		openMarkPaidDatePicker(new Date(Date.now()));
-	}
-	function changePaidDateClicked() {
-		ui.payDate!.showChangePaidDateButton = false;
-		openMarkPaidDatePicker(new Date(data.lastPayDateString));
-	}
-	function confirmPaidDate() {
-		const date = new Date(ui.payDate!.markPaidDatePicker!.dateInputString + 'T00:00');
-		data.lastPayDateString = date.toLocaleDateString();
-		ui.payDate!.lastPayDateString = data.lastPayDateString;
+	function registerPaymentClicked() {
+		ui.showRegisterPaymentButton = false;
+		const date = new Date(Date.now());
 
-		ui.payDate!.markPaidDatePicker = undefined;
-		ui.payDate!.showChangePaidDateButton = true;
-		triggerOnUpdate();
-	}
-	function openMarkPaidDatePicker(date: Date) {
 		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
-		ui.payDate!.markPaidDatePicker = {
+		ui.payWindow = {
 			dateInputString: date.toISOString().substring(0, 10)
 		};
+	}
+	function changePaidDateClicked() {
+		ui.showChangePaidDateButton = false;
+		const date = new Date(ServiceItem.getLastPayment(data.payments!).dateString);
+
+		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
+		ui.payWindow = {
+			dateInputString: date.toISOString().substring(0, 10)
+		};
+	}
+	function confirmPayment() {
+		const window = ui.payWindow!;
+		const date = new Date(window.dateInputString + 'T00:00');
+
+		const newPayment: IPayment = {
+			dateString: date.toLocaleDateString(),
+			amount: data.cost,
+			note: window.note
+		};
+		const payments = data.payments ?? [];
+
+		// If we have an original payment, we are editing
+		if (!window.editing) {
+			payments.push(newPayment);
+			if (!data.payments) {
+				data.payments = payments;
+			}
+		} else {
+			// Just edit the original object before saving the array that includes it
+			window.editing.originalPayment.amount = newPayment.amount;
+			window.editing.originalPayment.dateString = newPayment.dateString;
+			window.editing.originalPayment.note = newPayment.note;
+		}
+
+		ItemService.update(data._id, { payments });
+
+		ui.payWindow = undefined;
+		ui.lastPayment = newPayment;
+
+		const monthPaid = ServiceItem.wasThisMonthPaid(data);
+		ui.showRegisterPaymentButton = !monthPaid;
+		ui.showChangePaidDateButton = monthPaid;
+
+		triggerOnUpdate();
 	}
 	function triggerOnUpdate() {
 		dispatch('update', data);
 	}
 
 	function cancelPaidDateMark() {
-		ui.payDate!.markPaidDatePicker = undefined;
-		ui.payDate!.showMarkAsPaidButton = true;
-	}
-
-	interface IView {
-		payDate?: {
-			lastPayDateString: string;
-			showMarkAsPaidButton: boolean;
-			markPaidDatePicker?: {
-				dateInputString: string;
-			};
-			showChangePaidDateButton: boolean;
-		};
+		ui.payWindow = undefined;
+		ui.showRegisterPaymentButton = true;
 	}
 </script>
 
-{#if ui != null}
+{#if ui}
 	<div class="service-see">
+		{#if ui.showTabs}
+			<div class="service-tabs">
+				<div class="service-tabs__tab">Service</div>
+				<div class="service-tabs__tab">Payments</div>
+			</div>
+		{/if}
+
 		<div>{data.name}</div>
 		<div>{data.cost} {data.currency}</div>
-		{#if ui.payDate != undefined}
+		{#if ui.lastPayment}
 			<div class="label-and-value">
 				<div class="value-label">Last pay date:</div>
-				<div class="value">{ui.payDate.lastPayDateString}</div>
+				<div class="value">{ui.lastPayment.dateString}</div>
 			</div>
-			{#if ui.payDate.showMarkAsPaidButton}
-				<button on:click={markAsPaidClicked} class="button">Mark as Paid</button>
-			{/if}
-			{#if ui.payDate.markPaidDatePicker != undefined}
-				<div class="mark-paid-window">
+		{/if}
+		{#if ui.showRegisterPaymentButton}
+			<button on:click={registerPaymentClicked} class="button">Register Payment</button>
+		{/if}
+		{#if ui.payWindow}
+			<div class="pay-window">
+				<div class="pay-window__body">
+					<!-- Set Date -->
 					<input
-						bind:value={ui.payDate.markPaidDatePicker.dateInputString}
+						bind:value={ui.payWindow.dateInputString}
 						type="date"
 						class="input"
+						placeholder="Date"
 					/>
-					<div class="mark-paid-window__footer">
-						<button on:click={confirmPaidDate} class="button">Confirm date</button>
-						<button on:click={cancelPaidDateMark} class="button">Cancel</button>
-					</div>
+
+					<!-- Optional Note -->
+					<input
+						bind:value={ui.payWindow.note}
+						type="text"
+						class="input"
+						placeholder="Note (optional)"
+					/>
 				</div>
-			{/if}
-			{#if ui.payDate.showChangePaidDateButton}
-				<button on:click={changePaidDateClicked} class="button">Change Date</button>
-			{/if}
+
+				<div class="pay-window__footer">
+					<button on:click={confirmPayment} class="button is-primary">Confirm</button>
+					<button on:click={cancelPaidDateMark} class="button">Cancel</button>
+				</div>
+			</div>
+		{/if}
+		{#if ui.showChangePaidDateButton}
+			<button on:click={changePaidDateClicked} class="button">Change Date</button>
 		{/if}
 	</div>
 {/if}
@@ -115,9 +163,16 @@
 		column-gap: 8px;
 	}
 
-	.mark-paid-window__footer {
+	.pay-window__body {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.pay-window__footer {
 		margin-top: 16px;
 		display: flex;
+		justify-content: space-between;
 		gap: 16px;
 	}
 </style>

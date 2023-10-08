@@ -8,7 +8,7 @@ import CurrencyListRender from "@/lib/components/item/item-list/renders/currency
 import AccountSeeRender from "@/lib/components/item/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "@/lib/components/item/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see-render.svelte";
-import type { IAccountConfig, IDebtConfig, iItem, IServiceConfig, ICurrencyConfig, ItemType } from "@/lib/typings";
+import type { iItem, ItemType, IService, IAccount, ICurrency, Item as ItemT, IDebt, IPayment } from "@/lib/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
 
@@ -62,12 +62,27 @@ export class ServiceItem extends Item {
     }
 
     public static wasThisMonthPaid(data: IService) {
-        if (data.lastPayDateString != null) {
+        if (!data.payments) return false;
+
+        const lastPayDateString = this.getLastPayment(data.payments);
+        if (lastPayDateString != null) {
             const today = new Date();
-            const lastPayDate = new Date(data.lastPayDateString.substring(0, 10));
+            const lastPayDate = new Date(lastPayDateString.dateString.substring(0, 10));
             return lastPayDate != null && (lastPayDate.getMonth() === today.getMonth() && lastPayDate.getFullYear() === today.getFullYear());
         }
         return false;
+    }
+
+    public static getLastPayment(payments: IPayment[]) {
+        let max: { date: Date, payment: IPayment } | undefined;
+        for (const payment of payments) {
+            const date = new Date(payment.dateString);
+            if (!max || date > max.date) {
+                max = { date, payment };
+            }
+        }
+
+        return max!.payment;
     }
 }
 
@@ -77,7 +92,7 @@ export class CurrencyItem extends Item {
     public static getEditRender(): EditRender { return CurrencyEditRender; }
     public static getSeeRender(): SeeRender { return CurrencySeeRender; }
 
-    public static calculate(list: iItem[], totalItem: ICurrency) {
+    public static calculate(list: ItemT[], totalItem: ICurrency) {
         totalItem.total = 0;
         for (let i = 0; i < list.length; i++) {
             const item = list[i];

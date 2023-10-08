@@ -7,7 +7,7 @@
 </script>
 
 <span class="int-part">{intPart}</span>{#if decimalPart != '0'}<span class="decimal-part"
-		>,{decimalPart}</span
+		>.{decimalPart}</span
 	>{/if}
 
 <style>
