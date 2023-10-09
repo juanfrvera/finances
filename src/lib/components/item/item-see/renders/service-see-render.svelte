@@ -21,19 +21,20 @@
 		showTabs?: boolean;
 	} = {};
 	onMount(() => {
-		if (data.isManual) {
-			if (data.payments) {
-				ui.lastPayment = ServiceItem.getLastPayment(data.payments);
-				if (ServiceItem.wasThisMonthPaid(data)) {
-					ui.showChangePaidDateButton = true;
-				} else {
-					ui.showRegisterPaymentButton = true;
-				}
-			} else {
-				ui.showRegisterPaymentButton = true;
-			}
-		}
+		checkPayStatus();
 	});
+
+	function checkPayStatus() {
+		if (!data.isManual) return;
+		if (data.payments) {
+			ui.lastPayment = ServiceItem.getLastPayment(data.payments);
+			const monthPaid = ServiceItem.wasThisMonthPaid(data);
+			ui.showRegisterPaymentButton = !monthPaid;
+			ui.showChangePaidDateButton = monthPaid;
+		} else {
+			ui.showRegisterPaymentButton = true;
+		}
+	}
 
 	function registerPaymentClicked() {
 		ui.showRegisterPaymentButton = false;
@@ -82,9 +83,7 @@
 		ui.payWindow = undefined;
 		ui.lastPayment = newPayment;
 
-		const monthPaid = ServiceItem.wasThisMonthPaid(data);
-		ui.showRegisterPaymentButton = !monthPaid;
-		ui.showChangePaidDateButton = monthPaid;
+		checkPayStatus();
 
 		triggerOnUpdate();
 	}

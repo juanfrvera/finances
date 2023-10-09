@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IAccountConfig, iItem } from '../../../../typings';
+	import type { IAccount } from '@/lib/typings';
 
 	export let data: IAccount;
 </script>

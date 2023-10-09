@@ -72,7 +72,7 @@
 
 		ui.payStatus = {
 			isPaid,
-			amount: data.theyPayMe || isPaid ? paidAmount : data.amount - paidAmount,
+			amount: (data.theyPayMe && isPaid) || isPaid ? paidAmount : data.amount - paidAmount,
 			total: data.amount,
 			statusString: DebtLogic.calculatePayStateString(data)
 		};
