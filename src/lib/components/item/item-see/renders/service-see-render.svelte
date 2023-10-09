@@ -18,7 +18,9 @@
 		};
 		lastPayment?: IPayment;
 		showChangePaidDateButton?: boolean;
-		showTabs?: boolean;
+		tabs?: {
+			active: 'main' | 'payments';
+		};
 	} = {};
 	onMount(() => {
 		checkPayStatus();
@@ -33,6 +35,14 @@
 			ui.showChangePaidDateButton = monthPaid;
 		} else {
 			ui.showRegisterPaymentButton = true;
+		}
+		if (data.payments && data.payments.length > 1) {
+			if (!ui.tabs) {
+				ui.tabs = { active: 'main' };
+			}
+		} else {
+			// We only want to show
+			ui.tabs = undefined;
 		}
 	}
 
@@ -99,10 +109,18 @@
 
 {#if ui}
 	<div class="service-see">
-		{#if ui.showTabs}
-			<div class="service-tabs">
-				<div class="service-tabs__tab">Service</div>
-				<div class="service-tabs__tab">Payments</div>
+		{#if ui.tabs}
+			<div class="service-tabs tabs">
+				<ul>
+					<li class="is-active">
+						<!-- svelte-ignore a11y-missing-attribute -->
+						<a>Service</a>
+					</li>
+					<li>
+						<!-- svelte-ignore a11y-missing-attribute -->
+						<a>Payments</a>
+					</li>
+				</ul>
 			</div>
 		{/if}
 
@@ -173,5 +191,9 @@
 		display: flex;
 		justify-content: space-between;
 		gap: 16px;
+	}
+
+	.service-tabs {
+		width: 100%;
 	}
 </style>
