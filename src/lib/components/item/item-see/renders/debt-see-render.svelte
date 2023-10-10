@@ -6,6 +6,7 @@
 	import { ItemService } from '@/lib/services/item.service';
 	import { ModalChannel } from '@/lib/services/modal-channel.service';
 	import type { Subscription } from 'rxjs';
+	import PaymentTable from './util/payment-table.svelte';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
@@ -28,7 +29,6 @@
 			};
 		};
 		payInfo?: string;
-		payments?: Array<IPaymentRow>;
 		showPayTable?: boolean;
 	} = {};
 
@@ -57,18 +57,7 @@
 			ui.payInfo += ` ${data.description}`;
 		}
 
-		if (data.payments && data.payments.length) {
-			ui.payments = data.payments.map((p) => ({
-				amount: p.amount,
-				date: p.dateString,
-				note: p.note ?? '',
-				paymentObject: p
-			}));
-			ui.showPayTable = true;
-		} else {
-			ui.payments = undefined;
-			ui.showPayTable = false;
-		}
+		ui.showPayTable = data.payments && data.payments.length > 0;
 
 		ui.payStatus = {
 			isPaid,
@@ -133,13 +122,13 @@
 		openPayWindow(new Date(Date.now()));
 	}
 
-	function paymentRowClicked(row: IPaymentRow) {
+	function paymentRowClicked(payment: IPayment) {
 		ui.showPayTable = false;
 		ui.payWindow = {
-			dateInputString: row.paymentObject.dateString,
-			amount: row.paymentObject.amount,
-			note: row.note,
-			editing: { originalPayment: row.paymentObject }
+			dateInputString: payment.dateString,
+			amount: payment.amount,
+			note: payment.note,
+			editing: { originalPayment: payment }
 		};
 		ui.showPayButton = false;
 	}
@@ -150,13 +139,6 @@
 		ItemService.update(data._id, { payments: data.payments });
 		ui.payWindow = undefined;
 		checkPayStatus();
-	}
-
-	interface IPaymentRow {
-		amount: number;
-		date: string;
-		note: string;
-		paymentObject: IPayment;
 	}
 </script>
 
@@ -172,31 +154,8 @@
 		{/if}
 
 		<!-- Pay Table -->
-		{#if ui.showPayTable && ui.payments && ui.payments.length}
-			<div class="pay-table">
-				<div class="pay-table__title">Payments</div>
-				<div class="pay-table__table">
-					<div class="pay-table__row">
-						<div class="pay-table__column">Amount</div>
-						<div class="pay-table__column">Date</div>
-						<div class="pay-table__column">Notes</div>
-					</div>
-
-					{#each ui.payments as payment (payment.amount + '//' + payment.date + payment.note)}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<div
-							on:click={() => paymentRowClicked(payment)}
-							class="pay-table__row pay-table__row_clickable"
-						>
-							<div class="pay-table__column pay-table__amount">
-								<NumberFormat value={payment.amount} />
-							</div>
-							<div class="pay-table__column pay-table__date">{payment.date}</div>
-							<div class="pay-table__column pay-table__note">{payment.note}</div>
-						</div>
-					{/each}
-				</div>
-			</div>
+		{#if ui.showPayTable && data.payments && data.payments.length}
+			<PaymentTable payments={data.payments} onRowClicked={paymentRowClicked} />
 		{/if}
 
 		<!-- Pay Window -->
@@ -252,43 +211,5 @@
 		margin-top: 8px;
 		display: flex;
 		justify-content: space-around;
-	}
-
-	.pay-table {
-		width: 100%;
-		padding-top: 8px;
-		padding-left: 16px;
-		padding-right: 16px;
-		padding-bottom: 16px;
-	}
-
-	.pay-table__title {
-		text-decoration: underline;
-		font-size: 18px;
-		margin-bottom: 8px;
-	}
-
-	.pay-table__table {
-		display: table;
-		width: 100%;
-	}
-
-	.pay-table__row {
-		height: 16px;
-		display: table-row;
-		justify-content: center;
-	}
-
-	.pay-table__row_clickable {
-		cursor: pointer;
-	}
-
-	.pay-table__row_clickable:hover {
-		background-color: #eee;
-	}
-
-	.pay-table__column {
-		text-align: center;
-		display: table-cell;
 	}
 </style>

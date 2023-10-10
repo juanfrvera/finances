@@ -7,7 +7,7 @@
 		ServiceItem,
 		CurrencyItem
 	} from '../../util/logic/item';
-	import type { iItem, Item } from '../../typings';
+	import type { ICurrency, iItem, Item } from '../../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
@@ -56,7 +56,7 @@
 	function calculateCurrencyItems() {
 		const currencyItems = list.filter((i) => i.type === CurrencyItem.getTypeString());
 		for (const currencyItem of currencyItems) {
-			CurrencyItem.calculate(list, currencyItem);
+			CurrencyItem.calculate(list, currencyItem as ICurrency);
 		}
 	}
 

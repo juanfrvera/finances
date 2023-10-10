@@ -3,6 +3,7 @@
 	import { ServiceItem } from '@/lib/util/logic/item';
 	import type { IPayment, IService } from '@/lib/typings';
 	import { ItemService } from '@/lib/services/item.service';
+	import PaymentTable from './util/payment-table.svelte';
 
 	export let data: IService;
 	const dispatch = createEventDispatcher();
@@ -18,10 +19,17 @@
 		};
 		lastPayment?: IPayment;
 		showChangePaidDateButton?: boolean;
-		tabs?: {
-			active: 'main' | 'payments';
-		};
-	} = {};
+		tabs: { readonly list: ITab[]; show?: boolean; activeTab: TabType };
+	} = {
+		tabs: {
+			list: [
+				{ title: 'Service', active: true, type: 'main' },
+				{ title: 'Payments', type: 'payments' }
+			],
+			activeTab: 'main'
+		}
+	};
+
 	onMount(() => {
 		checkPayStatus();
 	});
@@ -36,14 +44,7 @@
 		} else {
 			ui.showRegisterPaymentButton = true;
 		}
-		if (data.payments && data.payments.length > 1) {
-			if (!ui.tabs) {
-				ui.tabs = { active: 'main' };
-			}
-		} else {
-			// We only want to show
-			ui.tabs = undefined;
-		}
+		ui.tabs.show = data.payments && data.payments.length > 1;
 	}
 
 	function registerPaymentClicked() {
@@ -105,70 +106,94 @@
 		ui.payWindow = undefined;
 		ui.showRegisterPaymentButton = true;
 	}
+
+	function tabClicked(tab: ITab) {
+		ui.tabs.list.forEach((t) => (t.active = false));
+		tab.active = true;
+		ui.tabs.activeTab = tab.type;
+	}
+
+	function paymentRowClicked(payment: IPayment) {}
+
+	interface ITab {
+		title: string;
+		active?: boolean;
+		type: TabType;
+	}
+	type TabType = 'main' | 'payments';
 </script>
 
 {#if ui}
 	<div class="service-see">
-		{#if ui.tabs}
+		{#if ui.tabs.show}
 			<div class="service-tabs tabs">
 				<ul>
-					<li class="is-active">
-						<!-- svelte-ignore a11y-missing-attribute -->
-						<a>Service</a>
-					</li>
-					<li>
-						<!-- svelte-ignore a11y-missing-attribute -->
-						<a>Payments</a>
-					</li>
+					{#each ui.tabs.list as tab}
+						<li class={tab.active ? 'is-active' : ''}>
+							<!-- svelte-ignore a11y-missing-attribute -->
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<a on:click={() => tabClicked(tab)}>{tab.title}</a>
+						</li>
+					{/each}
 				</ul>
 			</div>
 		{/if}
 
-		<div>{data.name}</div>
-		<div>{data.cost} {data.currency}</div>
-		{#if ui.lastPayment}
-			<div class="label-and-value">
-				<div class="value-label">Last pay date:</div>
-				<div class="value">{ui.lastPayment.dateString}</div>
+		<!-- Main -->
+		{#if ui.tabs.activeTab === 'main'}
+			<div class="service-see__body">
+				<div>{data.name}</div>
+				<div>{data.cost} {data.currency}</div>
+				{#if ui.lastPayment}
+					<div class="label-and-value">
+						<div class="value-label">Last pay date:</div>
+						<div class="value">{ui.lastPayment.dateString}</div>
+					</div>
+				{/if}
+				{#if ui.showRegisterPaymentButton}
+					<button on:click={registerPaymentClicked} class="button">Register Payment</button>
+				{/if}
+				{#if ui.payWindow}
+					<div class="pay-window">
+						<div class="pay-window__body">
+							<!-- Set Date -->
+							<input
+								bind:value={ui.payWindow.dateInputString}
+								type="date"
+								class="input"
+								placeholder="Date"
+							/>
+
+							<!-- Optional Note -->
+							<input
+								bind:value={ui.payWindow.note}
+								type="text"
+								class="input"
+								placeholder="Note (optional)"
+							/>
+						</div>
+
+						<div class="pay-window__footer">
+							<button on:click={confirmPayment} class="button is-primary">Confirm</button>
+							<button on:click={cancelPaidDateMark} class="button">Cancel</button>
+						</div>
+					</div>
+				{/if}
+				{#if ui.showChangePaidDateButton}
+					<button on:click={changePaidDateClicked} class="button">Change Date</button>
+				{/if}
 			</div>
 		{/if}
-		{#if ui.showRegisterPaymentButton}
-			<button on:click={registerPaymentClicked} class="button">Register Payment</button>
-		{/if}
-		{#if ui.payWindow}
-			<div class="pay-window">
-				<div class="pay-window__body">
-					<!-- Set Date -->
-					<input
-						bind:value={ui.payWindow.dateInputString}
-						type="date"
-						class="input"
-						placeholder="Date"
-					/>
 
-					<!-- Optional Note -->
-					<input
-						bind:value={ui.payWindow.note}
-						type="text"
-						class="input"
-						placeholder="Note (optional)"
-					/>
-				</div>
-
-				<div class="pay-window__footer">
-					<button on:click={confirmPayment} class="button is-primary">Confirm</button>
-					<button on:click={cancelPaidDateMark} class="button">Cancel</button>
-				</div>
-			</div>
-		{/if}
-		{#if ui.showChangePaidDateButton}
-			<button on:click={changePaidDateClicked} class="button">Change Date</button>
+		<!-- Payments -->
+		{#if ui.tabs.activeTab === 'payments'}
+			<PaymentTable payments={data.payments} onRowClicked={paymentRowClicked} />
 		{/if}
 	</div>
 {/if}
 
 <style>
-	.service-see {
+	.service-see__body {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
