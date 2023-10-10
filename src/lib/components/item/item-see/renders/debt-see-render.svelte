@@ -21,13 +21,9 @@
 		};
 		showPayButton?: boolean;
 		payWindow?: {
-			dateInputString: string;
-			amount: number;
-			note?: string;
+			defaultAmount: number;
 			saving?: boolean;
-			editing?: {
-				originalPayment: IPayment;
-			};
+			editedPayment?: IPayment;
 		};
 		payInfo?: string;
 		showPayTable?: boolean;
@@ -74,28 +70,23 @@
 		ui.showPayTable = true;
 	}
 
-	async function confirmPay() {
+	async function confirmPay(payment: IPayment) {
 		const payWindow = ui.payWindow!;
 		payWindow.saving = true;
 		try {
-			const newPayment: IPayment = {
-				dateString: payWindow.dateInputString,
-				amount: payWindow.amount,
-				note: payWindow.note
-			};
 			const payments = data.payments ?? [];
 
 			// If we have an original payment, we are editing
-			if (!payWindow.editing) {
-				payments.push(newPayment);
+			if (!payWindow.editedPayment) {
+				payments.push(payment);
 				if (!data.payments) {
 					data.payments = payments;
 				}
 			} else {
 				// Just edit the original object before saving the array that includes it
-				payWindow.editing.originalPayment.amount = newPayment.amount;
-				payWindow.editing.originalPayment.dateString = newPayment.dateString;
-				payWindow.editing.originalPayment.note = newPayment.note;
+				payWindow.editedPayment.amount = payment.amount;
+				payWindow.editedPayment.dateString = payment.dateString;
+				payWindow.editedPayment.note = payment.note;
 			}
 			ItemService.update(data._id, { payments });
 
@@ -108,34 +99,27 @@
 			payWindow.saving = false;
 		}
 	}
-	function openPayWindow(date: Date) {
-		ui.payWindow = {
-			// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
-			dateInputString: date.toISOString().substring(0, 10),
-			amount: 0
-		};
-	}
 	function triggerOnUpdate() {
 		dispatch('update', data);
 	}
 	function payClicked() {
 		ui.showPayButton = false;
-		openPayWindow(new Date(Date.now()));
+		ui.payWindow = {
+			defaultAmount: DebtLogic.getOwedAmountOrZero(data)
+		};
 	}
 
 	function paymentRowClicked(payment: IPayment) {
 		ui.showPayTable = false;
 		ui.payWindow = {
-			dateInputString: payment.dateString,
-			amount: payment.amount,
-			note: payment.note,
-			editing: { originalPayment: payment }
+			editedPayment: payment,
+			defaultAmount: payment.amount
 		};
 		ui.showPayButton = false;
 	}
 
 	function deleteCurrentPayment() {
-		const payment = ui.payWindow!.editing!.originalPayment;
+		const payment = ui.payWindow!.editedPayment!;
 		data.payments!.splice(data.payments!.indexOf(payment), 1);
 		ItemService.update(data._id, { payments: data.payments });
 		ui.payWindow = undefined;
@@ -161,7 +145,13 @@
 
 		<!-- Pay Window -->
 		{#if ui.payWindow}
-			<PayWindow editing={ui.payWindow.editing}></PayWindow>
+			<PayWindow
+				editedPayment={ui.payWindow.editedPayment}
+				defaultAmount={ui.payWindow.defaultAmount}
+				onConfirm={confirmPay}
+				onCancel={cancelPay}
+				onDelete={deleteCurrentPayment}
+			/>
 		{/if}
 
 		<!-- Add Payment -->
@@ -177,17 +167,5 @@
 		flex-direction: column;
 		align-items: center;
 		row-gap: 8px;
-	}
-
-	.pay-window__editing-header {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 8px;
-	}
-
-	.pay-window__footer {
-		margin-top: 8px;
-		display: flex;
-		justify-content: space-around;
 	}
 </style>

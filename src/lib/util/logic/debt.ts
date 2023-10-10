@@ -22,4 +22,10 @@ export class DebtLogic {
         }
         return paidAmount;
     }
+
+    public static getOwedAmountOrZero(data: IDebt) {
+        const paidAmount = this.getPaidAmount(data);
+        const owed = data.amount - paidAmount;
+        return owed > 0 ? owed : 0;
+    }
 }
