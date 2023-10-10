@@ -7,6 +7,7 @@
 	import { ModalChannel } from '@/lib/services/modal-channel.service';
 	import type { Subscription } from 'rxjs';
 	import PaymentTable from './util/payment-table.svelte';
+	import PayWindow from './util/pay-window.svelte';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
@@ -160,30 +161,7 @@
 
 		<!-- Pay Window -->
 		{#if ui.payWindow}
-			<div class="pay-window">
-				{#if ui.payWindow.editing}
-					<div class="pay-window__editing-header">
-						<div class="pay-window__editing-title">Editing Payment</div>
-						<button on:click={deleteCurrentPayment} class="button">Delete</button>
-					</div>
-				{/if}
-				<input
-					bind:value={ui.payWindow.dateInputString}
-					type="date"
-					class="input"
-					placeholder="Date"
-				/>
-				<input bind:value={ui.payWindow.amount} class="input" type="number" placeholder="Amount" />
-				<input bind:value={ui.payWindow.note} class="input" type="text" placeholder="Note" />
-				<div class="pay-window__footer">
-					<button on:click={confirmPay} class="button {ui.payWindow.saving ? 'is-loading' : ''}"
-						>Confirm</button
-					>
-					<button on:click={cancelPay} disabled={ui.payWindow.saving} class="button is-danger"
-						>Cancel</button
-					>
-				</div>
-			</div>
+			<PayWindow editing={ui.payWindow.editing}></PayWindow>
 		{/if}
 
 		<!-- Add Payment -->
