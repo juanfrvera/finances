@@ -54,7 +54,7 @@
 	}
 </script>
 
-<div>
+<div class="welcome">
 	<div class="main-info-container">
 		<p class="main-info">Welcome, I can help you remember about your finances.</p>
 		<p class="main-info">Here are the things I can help you with:</p>
@@ -115,6 +115,10 @@
 </div>
 
 <style>
+	.welcome {
+		padding: 32px;
+	}
+
 	.main-info-container {
 		padding: 16px 0;
 	}

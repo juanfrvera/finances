@@ -380,4 +380,8 @@
 	#empty-state-welcome {
 		font-size: 20px;
 	}
+
+	.loading {
+		text-align: center;
+	}
 </style>
