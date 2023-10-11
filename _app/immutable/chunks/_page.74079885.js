@@ -1,0 +1,1 @@
+new TextEncoder;const t=({params:e})=>e.slug==="create"?{startWith:"creation"}:{startWith:"login"},r=!0,o=Object.freeze(Object.defineProperty({__proto__:null,load:t,prerender:r},Symbol.toStringTag,{value:"Module"}));export{o as _,t as l,r as p};

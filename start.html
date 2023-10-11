@@ -6,23 +6,26 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta http-equiv="content-security-policy" content="">
 		<link href="./_app/immutable/assets/_layout.84c5feb8.css" rel="stylesheet">
-		<link href="./_app/immutable/assets/_page.76d2a08d.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/_page.1989883f.css" rel="stylesheet">
 		<link rel="modulepreload" href="./_app/immutable/entry/start.513bd019.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/index.02c9dc20.js">
 		<link rel="modulepreload" href="./_app/immutable/chunks/singletons.22e1de3f.js">
 		<link rel="modulepreload" href="./_app/immutable/entry/app.5d89af35.js">
 		<link rel="modulepreload" href="./_app/immutable/entry/_layout.svelte.a242264a.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/_page.svelte.2a447495.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/auth.service.0a3e82bd.js">
-		<link rel="modulepreload" href="./_app/immutable/entry/_page.ts.9c5eea7e.js">
-		<link rel="modulepreload" href="./_app/immutable/chunks/_page.fca24c55.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/start-page.svelte.9cd72026.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/start-page.ts.9c5eea7e.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/_page.da46b06b.js">
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">
 
 
-<div id="container" class="svelte-givrce"><div id="container" class="svelte-1vb8cez">
-	
+<div id="container" class="svelte-givrce"><div id="main" class="svelte-uymxwt"><h1 id="main-info" class="svelte-uymxwt">Please choose how do you want to store your data:</h1>
+	<div id="options" class="svelte-uymxwt"><div class="option svelte-uymxwt"><h2 class="option-title svelte-uymxwt">Store data on my browser</h2>
+			<p>Your data will be accessible only from this browser</p>
+			<p>You can always create an account and sync your data later</p></div>
+		<a href="auth/create"><div class="option svelte-uymxwt"><h2 class="option-title svelte-uymxwt">Create an account</h2>
+				<p>So you can have your data sync across all your devices</p></div></a></div>
 </div>
 	<footer class="svelte-givrce">Created by Juan Vera</footer>
 </div>
@@ -45,7 +48,7 @@
 						import("./_app/immutable/entry/app.5d89af35.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element, {
-							node_ids: [0, 2],
+							node_ids: [0, 4],
 							data,
 							form: null,
 							error: null
