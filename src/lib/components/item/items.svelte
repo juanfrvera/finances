@@ -209,14 +209,14 @@
 
 <svelte:head><title>Finances</title></svelte:head>
 
-<div id="container">
+<div class="items">
 	{#if ui.list}
 		{#if ui.list.length}
 			<!-- Loaded list with items -->
 			<header id="header">
 				<div class="field">
 					<p class="control has-icons-left">
-						<input id="search-bar" on:input={searchInputChanged} class="input" />
+						<input on:input={searchInputChanged} class="search-bar input" />
 						<span class="icon is-small is-left">
 							<i class="fa-solid fa-magnifying-glass" />
 						</span>
@@ -346,9 +346,8 @@
 		background-color: lightgray;
 	}
 
-	#container {
-		margin: 16px;
-		width: 100%;
+	.items {
+		margin: 8px;
 
 		display: flex;
 		flex-direction: column;

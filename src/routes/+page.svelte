@@ -25,7 +25,7 @@
 	});
 </script>
 
-<div id="container">
+<div class="home">
 	{#if ui.showNewcomerWelcome}
 		<Welcome />
 	{/if}
@@ -35,8 +35,14 @@
 </div>
 
 <style>
-	#container {
-		max-width: 800px;
+	.home {
+		width: 80%;
 		margin: auto;
+	}
+
+	@media (max-width: 800px) {
+		.home {
+			width: 100%;
+		}
 	}
 </style>

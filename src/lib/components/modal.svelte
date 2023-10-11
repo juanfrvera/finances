@@ -27,8 +27,8 @@
 <style>
 	.modal {
 		position: fixed;
-		left: 0;
-		right: 0;
+		left: 4px;
+		right: 4px;
 		top: 0;
 		bottom: 0;
 
@@ -47,6 +47,7 @@
 		width: 100%;
 		height: 100%;
 		background-color: rgba(255, 255, 255, 0.75);
+		border: none;
 	}
 	.modal-body {
 		margin-top: 8px;
@@ -54,5 +55,12 @@
 	}
 	.modal-footer {
 		display: flex;
+	}
+
+	@media (max-width: 768px) {
+		.modal-content {
+			padding-left: 0;
+			padding-right: 0;
+		}
 	}
 </style>

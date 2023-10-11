@@ -2,13 +2,13 @@
 	import '../app.scss';
 </script>
 
-<div id="container">
+<div class="layout">
 	<slot />
 	<footer>Created by Juan Vera</footer>
 </div>
 
 <style>
-	#container {
+	.layout {
 		background-color: #dff1ec;
 		min-height: 100vh;
 		display: flex;
