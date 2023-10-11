@@ -18,7 +18,6 @@ export class AuthService {
 
         this.setToken(serverData);
         UserStore.setSyncEnabled(true);
-        goto('/');
     }
 
     public static getToken() {

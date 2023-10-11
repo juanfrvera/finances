@@ -4,6 +4,7 @@
 	import { AuthService } from '@/lib/services/auth.service';
 	import { getUIErrorString } from '@/lib/util/error-handling';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 
 	export let data: PageData;
 
@@ -38,7 +39,7 @@
 
 		try {
 			await AuthService.logIn({ username: ui.username, password: ui.password });
-			goto('/');
+			goto(base);
 		} catch (error) {
 			ui.login.error = getUIErrorString(error);
 		}

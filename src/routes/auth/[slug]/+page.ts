@@ -14,3 +14,5 @@ export const load = (({ params }) => {
 
     throw error(404, 'Not found');
 }) satisfies PageLoad;
+
+export const prerender = true;

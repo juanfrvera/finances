@@ -5,6 +5,7 @@
 	import ServiceSeeRender from '@/lib/components/item/item-see/renders/service-see-render.svelte';
 	import DebtSeeRender from '@/lib/components/item/item-see/renders/debt-see-render.svelte';
 	import CurrencySeeRender from '@/lib/components/item/item-see/renders/currency-see-render.svelte';
+	import { goto } from '$app/navigation';
 
 	const ui: {
 		examples: {
@@ -18,44 +19,39 @@
 			account: {
 				_id: 'account',
 				type: 'account',
-				config: {
-					name: 'Bank Account',
-					balance: 5700,
-					currency: 'usd'
-				}
+				name: 'Bank Account',
+				balance: 5700,
+				currency: 'usd'
 			},
 			service: {
 				_id: 'service',
 				type: 'service',
-				config: {
-					name: 'Service',
-					cost: 200,
-					currency: 'usd',
-					isManual: true,
-					lastPayDateString: '2023/05/06'
-				}
+				name: 'Service',
+				cost: 200,
+				currency: 'usd',
+				isManual: true
 			},
 			debt: {
 				_id: 'debt',
 				type: 'debt',
-				config: {
-					withWho: 'Pedro',
-					description: 'Pizzas',
-					amount: 20,
-					currency: 'usd',
-					theyPayMe: false
-				}
+				withWho: 'Pedro',
+				description: 'Pizzas',
+				amount: 20,
+				currency: 'usd',
+				theyPayMe: false
 			},
 			currency: {
 				_id: 'currency',
 				type: 'currency',
-				config: {
-					currency: 'usd',
-					total: 8600
-				}
+				currency: 'usd',
+				total: 8600
 			}
 		}
 	};
+
+	function startNowClicked() {
+		goto('start');
+	}
 </script>
 
 <div>
@@ -112,7 +108,7 @@
 	</div>
 	<div class="call-to-action">
 		<div class="call-to-action-info">Ready?</div>
-		<a href="/start">
+		<a on:click={startNowClicked}>
 			<button class="call-to-action-button button is-primary">Start Now</button>
 		</a>
 	</div>

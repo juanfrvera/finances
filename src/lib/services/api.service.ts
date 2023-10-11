@@ -1,4 +1,5 @@
 import { goto } from "$app/navigation";
+import { base } from "$app/paths";
 import { PUBLIC_API_URL } from "$env/static/public";
 import { AuthService } from "./auth.service";
 
@@ -15,7 +16,7 @@ export class ApiService {
         const data = await response.json();
         if (response.status !== 200 && response.status !== 201) {
             if (response.status === 401) {
-                goto('auth/login');
+                goto(`${base}/auth/login`);
             }
             throw new Error(data);
         }
