@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { IPayment } from '@/lib/typings';
+	import type { IPayment } from '@/lib/util/typings/payment.typings';
 	import { onMount } from 'svelte';
 
 	export let defaultAmount = 0;

@@ -1,25 +1,22 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { ServiceItem } from '@/lib/util/logic/item';
-	import type { IPayment, IService } from '@/lib/typings';
+	import type { IService } from '@/lib/typings';
 	import { ItemService } from '@/lib/services/item.service';
 	import PaymentTable from './util/payment-table.svelte';
+	import PayWindow from './util/pay-window.svelte';
+	import type { IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
 
 	export let data: IService;
 	const dispatch = createEventDispatcher();
 
 	let ui: {
-		showRegisterPaymentButton?: boolean;
-		payWindow?: {
-			dateInputString: string;
-			note?: string;
-			editing?: {
-				originalPayment: IPayment;
-			};
-		};
+		showPayButton?: boolean;
+		payWindow?: IPayWindow;
 		lastPayment?: IPayment;
 		showChangePaidDateButton?: boolean;
 		tabs: { readonly list: ITab[]; show?: boolean; activeTab: TabType };
+		showPayTable?: boolean;
 	} = {
 		tabs: {
 			list: [
@@ -39,72 +36,71 @@
 		if (data.payments) {
 			ui.lastPayment = ServiceItem.getLastPayment(data.payments);
 			const monthPaid = ServiceItem.wasThisMonthPaid(data);
-			ui.showRegisterPaymentButton = !monthPaid;
+			ui.showPayButton = !monthPaid;
 			ui.showChangePaidDateButton = monthPaid;
 		} else {
-			ui.showRegisterPaymentButton = true;
+			ui.showPayButton = true;
 		}
-		ui.tabs.show = data.payments && data.payments.length > 1;
+		ui.tabs.show = ui.showPayTable = data.payments && data.payments.length > 1;
 	}
 
 	function registerPaymentClicked() {
-		ui.showRegisterPaymentButton = false;
-		const date = new Date(Date.now());
+		ui.showPayButton = false;
 
 		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
 		ui.payWindow = {
-			dateInputString: date.toISOString().substring(0, 10)
+			defaultAmount: data.cost
 		};
 	}
 	function changePaidDateClicked() {
 		ui.showChangePaidDateButton = false;
-		const date = new Date(ServiceItem.getLastPayment(data.payments!).dateString);
+		const lastPayment = ServiceItem.getLastPayment(data.payments!);
 
-		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
 		ui.payWindow = {
-			dateInputString: date.toISOString().substring(0, 10)
+			editedPayment: lastPayment,
+			defaultAmount: lastPayment.amount
 		};
 	}
-	function confirmPayment() {
-		const window = ui.payWindow!;
-		const date = new Date(window.dateInputString + 'T00:00');
 
-		const newPayment: IPayment = {
-			dateString: date.toLocaleDateString(),
-			amount: data.cost,
-			note: window.note
-		};
-		const payments = data.payments ?? [];
+	function confirmPay(payment: IPayment) {
+		const payWindow = ui.payWindow!;
+		if (!data.payments) data.payments = [];
 
 		// If we have an original payment, we are editing
-		if (!window.editing) {
-			payments.push(newPayment);
-			if (!data.payments) {
-				data.payments = payments;
-			}
+		if (!payWindow.editedPayment) {
+			data.payments = [...data.payments, payment];
 		} else {
 			// Just edit the original object before saving the array that includes it
-			window.editing.originalPayment.amount = newPayment.amount;
-			window.editing.originalPayment.dateString = newPayment.dateString;
-			window.editing.originalPayment.note = newPayment.note;
+			payWindow.editedPayment.amount = payment.amount;
+			payWindow.editedPayment.dateString = payment.dateString;
+			payWindow.editedPayment.note = payment.note;
 		}
 
-		ItemService.update(data._id, { payments });
+		ItemService.update(data._id, { payments: data.payments });
 
 		ui.payWindow = undefined;
-		ui.lastPayment = newPayment;
+		ui.lastPayment = payment;
 
 		checkPayStatus();
-
 		triggerOnUpdate();
 	}
+
 	function triggerOnUpdate() {
 		dispatch('update', data);
 	}
 
-	function cancelPaidDateMark() {
+	function cancelPay() {
 		ui.payWindow = undefined;
-		ui.showRegisterPaymentButton = true;
+		ui.showPayButton = true;
+		ui.showPayTable = true;
+	}
+
+	function deletePayment() {
+		const payment = ui.payWindow!.editedPayment!;
+		data.payments!.splice(data.payments!.indexOf(payment), 1);
+		ItemService.update(data._id, { payments: data.payments });
+		ui.payWindow = undefined;
+		checkPayStatus();
 	}
 
 	function tabClicked(tab: ITab) {
@@ -113,7 +109,14 @@
 		ui.tabs.activeTab = tab.type;
 	}
 
-	function paymentRowClicked(payment: IPayment) {}
+	function paymentRowClicked(payment: IPayment) {
+		ui.showPayTable = false;
+		ui.payWindow = {
+			editedPayment: payment,
+			defaultAmount: payment.amount
+		};
+		ui.showPayButton = false;
+	}
 
 	interface ITab {
 		title: string;
@@ -150,35 +153,6 @@
 						<div class="value">{ui.lastPayment.dateString}</div>
 					</div>
 				{/if}
-				{#if ui.showRegisterPaymentButton}
-					<button on:click={registerPaymentClicked} class="button">Register Payment</button>
-				{/if}
-				{#if ui.payWindow}
-					<div class="pay-window">
-						<div class="pay-window__body">
-							<!-- Set Date -->
-							<input
-								bind:value={ui.payWindow.dateInputString}
-								type="date"
-								class="input"
-								placeholder="Date"
-							/>
-
-							<!-- Optional Note -->
-							<input
-								bind:value={ui.payWindow.note}
-								type="text"
-								class="input"
-								placeholder="Note (optional)"
-							/>
-						</div>
-
-						<div class="pay-window__footer">
-							<button on:click={confirmPayment} class="button is-primary">Confirm</button>
-							<button on:click={cancelPaidDateMark} class="button">Cancel</button>
-						</div>
-					</div>
-				{/if}
 				{#if ui.showChangePaidDateButton}
 					<button on:click={changePaidDateClicked} class="button">Change Date</button>
 				{/if}
@@ -186,13 +160,33 @@
 		{/if}
 
 		<!-- Payments -->
-		{#if ui.tabs.activeTab === 'payments'}
+		{#if ui.tabs.activeTab === 'payments' && ui.showPayTable}
 			<PaymentTable payments={data.payments} onRowClicked={paymentRowClicked} />
+		{/if}
+
+		{#if ui.payWindow}
+			<PayWindow
+				editedPayment={ui.payWindow.editedPayment}
+				defaultAmount={ui.payWindow.defaultAmount}
+				onConfirm={confirmPay}
+				onCancel={cancelPay}
+				onDelete={deletePayment}
+			/>
+		{/if}
+
+		{#if ui.showPayButton}
+			<button on:click={registerPaymentClicked} class="button">Register Payment</button>
 		{/if}
 	</div>
 {/if}
 
 <style>
+	.service-see {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 8px;
+	}
 	.service-see__body {
 		display: flex;
 		flex-direction: column;
@@ -203,19 +197,6 @@
 	.label-and-value {
 		display: flex;
 		column-gap: 8px;
-	}
-
-	.pay-window__body {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.pay-window__footer {
-		margin-top: 16px;
-		display: flex;
-		justify-content: space-between;
-		gap: 16px;
 	}
 
 	.service-tabs {

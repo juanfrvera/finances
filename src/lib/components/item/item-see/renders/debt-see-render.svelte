@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import type { IDebt, IPayment } from '@/lib/typings';
+	import type { IDebt } from '@/lib/typings';
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 	import { ItemService } from '@/lib/services/item.service';
@@ -8,6 +8,7 @@
 	import type { Subscription } from 'rxjs';
 	import PaymentTable from './util/payment-table.svelte';
 	import PayWindow from './util/pay-window.svelte';
+	import type { IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
@@ -20,11 +21,7 @@
 			statusString: string;
 		};
 		showPayButton?: boolean;
-		payWindow?: {
-			defaultAmount: number;
-			saving?: boolean;
-			editedPayment?: IPayment;
-		};
+		payWindow?: IPayWindow;
 		payInfo?: string;
 		showPayTable?: boolean;
 	} = {};

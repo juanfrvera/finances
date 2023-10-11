@@ -1,6 +1,6 @@
 <script lang="ts">
 	import NumberFormat from '@/lib/components/number-format.svelte';
-	import type { IPayment } from '@/lib/typings';
+	import type { IPayment } from '@/lib/util/typings/payment.typings';
 
 	export let onRowClicked: (payment: IPayment) => any;
 	export let payments: IPayment[] | undefined;
