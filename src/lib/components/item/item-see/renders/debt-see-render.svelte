@@ -8,7 +8,14 @@
 	import type { Subscription } from 'rxjs';
 	import PaymentTable from './util/payment-table.svelte';
 	import PayWindow from './util/pay-window.svelte';
-	import type { IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
+	import type {
+		IPayTable,
+		IPayWindow,
+		IPayment,
+		IPaymentUI
+	} from '@/lib/util/typings/payment.typings';
+	import { CurrencyService } from '@/lib/services/currency.service';
+	import { PaymentLogic } from '@/lib/util/logic/payment.logic';
 
 	export let data: IDebt;
 	const dispatch = createEventDispatcher();
@@ -23,7 +30,7 @@
 		showPayButton?: boolean;
 		payWindow?: IPayWindow;
 		payInfo?: string;
-		showPayTable?: boolean;
+		payTable?: IPayTable;
 	} = {};
 
 	let subscription: Subscription;
@@ -51,7 +58,7 @@
 			ui.payInfo += ` ${data.description}`;
 		}
 
-		ui.showPayTable = data.payments && data.payments.length > 0;
+		ui.payTable = PaymentLogic.getPayTable(data.payments, data.currency, ui.payTable);
 
 		ui.payStatus = {
 			isPaid,
@@ -64,7 +71,7 @@
 	function cancelPay() {
 		ui.payWindow = undefined;
 		ui.showPayButton = true;
-		ui.showPayTable = true;
+		if (ui.payTable) ui.payTable.show = true;
 	}
 
 	async function confirmPay(payment: IPayment) {
@@ -107,7 +114,7 @@
 	}
 
 	function paymentRowClicked(payment: IPayment) {
-		ui.showPayTable = false;
+		ui.payTable!.show = false;
 		ui.payWindow = {
 			editedPayment: payment,
 			defaultAmount: payment.amount
@@ -136,8 +143,12 @@
 		{/if}
 
 		<!-- Pay Table -->
-		{#if ui.showPayTable && data.payments && data.payments.length}
-			<PaymentTable payments={data.payments} onRowClicked={paymentRowClicked} />
+		{#if ui.payTable && ui.payTable.show}
+			<PaymentTable
+				payments={ui.payTable.payments}
+				showUsdColumn={ui.payTable.showUsdColumn}
+				onRowClicked={paymentRowClicked}
+			/>
 		{/if}
 
 		<!-- Pay Window -->

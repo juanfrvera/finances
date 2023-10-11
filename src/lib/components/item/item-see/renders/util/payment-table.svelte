@@ -1,11 +1,12 @@
 <script lang="ts">
 	import NumberFormat from '@/lib/components/number-format.svelte';
-	import type { IPayment } from '@/lib/util/typings/payment.typings';
+	import type { IPaymentUI } from '@/lib/util/typings/payment.typings';
 
-	export let onRowClicked: (payment: IPayment) => any;
-	export let payments: IPayment[] | undefined;
+	export let onRowClicked: (payment: IPaymentUI) => any;
+	export let payments: IPaymentUI[] | undefined;
+	export let showUsdColumn: boolean | undefined;
 
-	function rowClicked(payment: IPayment) {
+	function rowClicked(payment: IPaymentUI) {
 		onRowClicked(payment);
 	}
 </script>
@@ -18,6 +19,7 @@
 				<div class="pay-table__column">Amount</div>
 				<div class="pay-table__column">Date</div>
 				<div class="pay-table__column">Notes</div>
+				{#if showUsdColumn}<div class="pay-table__column">USD</div>{/if}
 			</div>
 
 			{#each payments as payment (payment.amount + '//' + payment.dateString + payment.note)}
@@ -30,6 +32,15 @@
 					<div class="pay-table__column pay-table__note">
 						{payment.note ?? '-'}
 					</div>
+					{#if showUsdColumn}
+						<div class="pay-table__column pay-table__usd">
+							{#if payment.usdAmount}
+								<NumberFormat value={payment.usdAmount} />
+							{:else}
+								Loading...
+							{/if}
+						</div>
+					{/if}
 				</div>
 			{/each}
 		</div>

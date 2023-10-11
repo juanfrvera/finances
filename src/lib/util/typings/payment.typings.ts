@@ -5,3 +5,13 @@ export interface IPayWindow {
     saving?: boolean;
     editedPayment?: IPayment;
 };
+
+export interface IPaymentUI extends IPayment {
+    usdAmount?: number;
+}
+
+export interface IPayTable {
+    payments: IPaymentUI[];
+    show?: boolean;
+    showUsdColumn?: boolean;
+}

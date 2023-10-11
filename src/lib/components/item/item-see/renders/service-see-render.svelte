@@ -5,7 +5,8 @@
 	import { ItemService } from '@/lib/services/item.service';
 	import PaymentTable from './util/payment-table.svelte';
 	import PayWindow from './util/pay-window.svelte';
-	import type { IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
+	import type { IPayTable, IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
+	import { PaymentLogic } from '@/lib/util/logic/payment.logic';
 
 	export let data: IService;
 	const dispatch = createEventDispatcher();
@@ -16,7 +17,7 @@
 		lastPayment?: IPayment;
 		showChangePaidDateButton?: boolean;
 		tabs: { readonly list: ITab[]; show?: boolean; activeTab: TabType };
-		showPayTable?: boolean;
+		payTable?: IPayTable;
 	} = {
 		tabs: {
 			list: [
@@ -41,7 +42,8 @@
 		} else {
 			ui.showPayButton = true;
 		}
-		ui.tabs.show = ui.showPayTable = data.payments && data.payments.length > 1;
+		ui.payTable = PaymentLogic.getPayTable(data.payments, data.currency, ui.payTable);
+		ui.tabs.show = data.payments && data.payments.length > 1;
 	}
 
 	function registerPaymentClicked() {
@@ -92,7 +94,7 @@
 	function cancelPay() {
 		ui.payWindow = undefined;
 		ui.showPayButton = true;
-		ui.showPayTable = true;
+		if (ui.payTable) ui.payTable.show = true;
 	}
 
 	function deletePayment() {
@@ -110,7 +112,7 @@
 	}
 
 	function paymentRowClicked(payment: IPayment) {
-		ui.showPayTable = false;
+		ui.payTable!.show = false;
 		ui.payWindow = {
 			editedPayment: payment,
 			defaultAmount: payment.amount
@@ -160,8 +162,12 @@
 		{/if}
 
 		<!-- Payments -->
-		{#if ui.tabs.activeTab === 'payments' && ui.showPayTable}
-			<PaymentTable payments={data.payments} onRowClicked={paymentRowClicked} />
+		{#if ui.tabs.activeTab === 'payments' && ui.payTable && ui.payTable.show}
+			<PaymentTable
+				payments={ui.payTable.payments}
+				showUsdColumn={ui.payTable.showUsdColumn}
+				onRowClicked={paymentRowClicked}
+			/>
 		{/if}
 
 		{#if ui.payWindow}
