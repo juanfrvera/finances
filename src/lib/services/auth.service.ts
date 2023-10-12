@@ -20,6 +20,17 @@ export class AuthService {
         UserStore.setSyncEnabled(true);
     }
 
+    public static async register(data: { username: string; password: string; name?: string; }) {
+        const response = await fetch(`${this.url}/register`, { method: 'POST', body: JSON.stringify(data) });
+
+        const serverData = await response.json();
+
+        if (response.status !== 200) throw new Error(serverData);
+
+        this.setToken(serverData);
+        UserStore.setSyncEnabled(true);
+    }
+
     public static getToken() {
         if (!this.token) this.token = localStorage.getItem(this.tokenStorageKey);
         return this.token;

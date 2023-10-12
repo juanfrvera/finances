@@ -10,7 +10,7 @@
 
 	const ui: {
 		login?: { error?: string };
-		registering?: { name?: string };
+		registering?: { name?: string; error?: string };
 		username?: string;
 		password?: string;
 		sending?: boolean;
@@ -30,9 +30,7 @@
 		ui.sending = false;
 	}
 	async function logIn() {
-		if (!ui.username || !ui.password || !ui.login || ui.sending) {
-			return;
-		}
+		if (!ui.username || !ui.password || !ui.login || ui.sending) return;
 
 		ui.login.error = undefined;
 		ui.sending = true;
@@ -46,9 +44,28 @@
 
 		ui.sending = false;
 	}
+	async function register() {
+		if (!ui.username || !ui.password || !ui.registering || ui.sending) return;
+
+		ui.registering.error = undefined;
+		ui.sending = true;
+
+		try {
+			await AuthService.register({
+				username: ui.username,
+				password: ui.password,
+				name: ui.registering.name
+			});
+			goto(base);
+		} catch (error) {
+			ui.registering.error = getUIErrorString(error);
+		}
+
+		ui.sending = false;
+	}
 </script>
 
-<div id="main">
+<div class="auth">
 	{#if ui.registering}
 		<p class="main-info">Please fill the following fields to create your account:</p>
 		<div class="auth-form">
@@ -82,7 +99,10 @@
 				</label>
 			</div>
 
-			<button class="button is-primary is-fullwidth">Register</button>
+			<button
+				on:click={register}
+				class="button is-primary is-fullwidth {ui.sending ? 'is-loading' : ''}">Register</button
+			>
 		</div>
 		<div class="alternative">
 			<p>Do you have an account already?</p>
@@ -118,14 +138,14 @@
 			{/if}
 		</div>
 		<div class="alternative">
-			<p>You don't have an account?</p>
+			<p>Want to register instead?</p>
 			<button on:click={logInInstead} class="button is-success">Register</button>
 		</div>
 	{/if}
 </div>
 
 <style>
-	#main {
+	.auth {
 		width: 512px;
 		margin-left: auto;
 		margin-right: auto;
@@ -149,5 +169,12 @@
 	}
 	.error {
 		color: #a00;
+	}
+
+	@media (max-width: 768px) {
+		.auth {
+			width: 100%;
+			padding: 16px;
+		}
 	}
 </style>
