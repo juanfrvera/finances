@@ -50,7 +50,7 @@
 	};
 
 	function startNowClicked() {
-		goto('start');
+		goto('auth/create');
 	}
 </script>
 
