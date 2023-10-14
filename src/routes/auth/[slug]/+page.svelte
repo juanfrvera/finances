@@ -29,6 +29,12 @@
 		ui.login = {};
 		ui.sending = false;
 	}
+	function registerInstead() {
+		ui.login = undefined;
+		ui.registering = {};
+		ui.sending = false;
+	}
+
 	async function logIn() {
 		if (!ui.username || !ui.password || !ui.login || ui.sending) return;
 
@@ -139,7 +145,7 @@
 		</div>
 		<div class="alternative">
 			<p>Want to register instead?</p>
-			<button on:click={logInInstead} class="button is-success">Register</button>
+			<button on:click={registerInstead} class="button is-success">Register</button>
 		</div>
 	{/if}
 </div>
