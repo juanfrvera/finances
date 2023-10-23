@@ -8,9 +8,10 @@ import CurrencyListRender from "@/lib/components/item/item-list/renders/currency
 import AccountSeeRender from "@/lib/components/item/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "@/lib/components/item/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see-render.svelte";
-import type { iItem, ItemType, IService, IAccount, ICurrency, Item as ItemT, IDebt, IPayment } from "@/lib/typings";
+import type { iItem, ItemType, IService, IAccount, ICurrency, Item as ItemT, IDebt } from "@/lib/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
+import type { IPayment } from "../typings/payment.typings";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof CurrencyListRender | typeof DebtListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender | typeof CurrencyEditRender;
@@ -64,10 +65,10 @@ export class ServiceItem extends Item {
     public static wasThisMonthPaid(data: IService) {
         if (!data.payments) return false;
 
-        const lastPayDateString = this.getLastPayment(data.payments);
-        if (lastPayDateString != null) {
+        const lastPayment = this.getLastPayment(data.payments);
+        if (lastPayment != null) {
             const today = new Date();
-            const lastPayDate = new Date(lastPayDateString.dateString.substring(0, 10));
+            const lastPayDate = new Date(lastPayment.dateString.substring(0, 10));
             return lastPayDate != null && (lastPayDate.getMonth() === today.getMonth() && lastPayDate.getFullYear() === today.getFullYear());
         }
         return false;
@@ -82,7 +83,8 @@ export class ServiceItem extends Item {
             }
         }
 
-        return max!.payment;
+        if (!max) return null;
+        return max.payment;
     }
 }
 
@@ -120,7 +122,6 @@ export class DebtItem extends Item {
         if (config.withWho.toLowerCase().includes(lwQuery)) return true;
         if (config.amount.toString().includes(query)) return true;
         if (config.currency.toLowerCase().includes(query)) return true;
-        if (config.paidDate != null && config.paidDate.includes(query)) return true;
 
         return false;
     }
@@ -135,7 +136,7 @@ export class ItemHelper {
             return itemClass;
         }
     }
-    public static isItemOnQuery(item: iItem, query: string) {
+    public static isItemOnQuery(item: ItemT, query: string) {
         const lwQuery = query.toLowerCase();
 
         if (item._id.includes(query)) return true;
