@@ -211,7 +211,7 @@
 
 <div class="items">
 	{#if ui.list}
-		{#if ui.list.length}
+		{#if ui.list.length || currentSearchQuery}
 			<!-- Loaded list with items -->
 			<header id="header">
 				<div class="field">

@@ -1,5 +1,7 @@
-import type { IAccount, ICurrency, Item, iItem } from "../typings";
+import type { IAccount, ICurrency, Item } from "../typings";
+import type { IPayment } from "../util/typings/payment.typings";
 import { ApiService } from "./api.service";
+import { PaymentService } from "./payment.service";
 
 export class ItemService {
     public static async getItems() {
@@ -36,6 +38,11 @@ export class ItemService {
     public static async delete(id: string) {
         const response = await fetch(`${this.getUrl()}/${id}`, { method: 'DELETE', headers: this.getHeaders() });
         return ApiService.interceptResponse(response);
+    }
+
+    /** Creates a payment and returns the created one from the server */
+    public static addPayment(itemId: string, payment: IPayment) {
+        return PaymentService.create({ ...payment, itemId });
     }
 
     private static getUrl() {

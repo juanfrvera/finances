@@ -11,7 +11,7 @@ import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see
 import type { iItem, ItemType, IService, IAccount, ICurrency, Item as ItemT, IDebt } from "@/lib/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
-import type { IPayment } from "../typings/payment.typings";
+import { PaymentLogic } from "./payment.logic";
 
 export type ListRender = typeof AccountListRender | typeof ServiceListRender | typeof CurrencyListRender | typeof DebtListRender;
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender | typeof CurrencyEditRender;
@@ -65,26 +65,13 @@ export class ServiceItem extends Item {
     public static wasThisMonthPaid(data: IService) {
         if (!data.payments) return false;
 
-        const lastPayment = this.getLastPayment(data.payments);
+        const lastPayment = PaymentLogic.getLastPayment(data.payments);
         if (lastPayment != null) {
             const today = new Date();
             const lastPayDate = new Date(lastPayment.dateString.substring(0, 10));
             return lastPayDate != null && (lastPayDate.getMonth() === today.getMonth() && lastPayDate.getFullYear() === today.getFullYear());
         }
         return false;
-    }
-
-    public static getLastPayment(payments: IPayment[]) {
-        let max: { date: Date, payment: IPayment } | undefined;
-        for (const payment of payments) {
-            const date = new Date(payment.dateString);
-            if (!max || date > max.date) {
-                max = { date, payment };
-            }
-        }
-
-        if (!max) return null;
-        return max.payment;
     }
 }
 

@@ -8,13 +8,7 @@
 	import type { Subscription } from 'rxjs';
 	import PaymentTable from './util/payment-table.svelte';
 	import PayWindow from './util/pay-window.svelte';
-	import type {
-		IPayTable,
-		IPayWindow,
-		IPayment,
-		IPaymentUI
-	} from '@/lib/util/typings/payment.typings';
-	import { CurrencyService } from '@/lib/services/currency.service';
+	import type { IPayTable, IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
 	import { PaymentLogic } from '@/lib/util/logic/payment.logic';
 
 	export let data: IDebt;
@@ -76,23 +70,8 @@
 
 	async function confirmPay(payment: IPayment) {
 		const payWindow = ui.payWindow!;
-		payWindow.saving = true;
 		try {
-			const payments = data.payments ?? [];
-
-			// If we have an original payment, we are editing
-			if (!payWindow.editedPayment) {
-				payments.push(payment);
-				if (!data.payments) {
-					data.payments = payments;
-				}
-			} else {
-				// Just edit the original object before saving the array that includes it
-				payWindow.editedPayment.amount = payment.amount;
-				payWindow.editedPayment.dateString = payment.dateString;
-				payWindow.editedPayment.note = payment.note;
-			}
-			ItemService.update(data._id, { payments });
+			await PaymentLogic.addPayment(data, payment, payWindow, ui.payTable);
 
 			checkPayStatus();
 

@@ -24,6 +24,7 @@
 	});
 
 	function confirmClicked() {
+		ui.loading = true;
 		onConfirm(ui.payment);
 	}
 

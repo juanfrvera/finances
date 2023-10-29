@@ -35,7 +35,7 @@
 	function checkPayStatus() {
 		if (!data.isManual) return;
 		if (data.payments) {
-			ui.lastPayment = ServiceItem.getLastPayment(data.payments);
+			ui.lastPayment = PaymentLogic.getLastPayment(data.payments);
 			const monthPaid = ServiceItem.wasThisMonthPaid(data);
 			ui.showPayButton = !monthPaid;
 			ui.showChangePaidDateButton = monthPaid;
@@ -56,32 +56,19 @@
 	}
 	function changePaidDateClicked() {
 		ui.showChangePaidDateButton = false;
-		const lastPayment = ServiceItem.getLastPayment(data.payments!);
+		const lastPayment = PaymentLogic.getLastPayment(data.payments!);
 
 		ui.payWindow = {
 			editedPayment: lastPayment,
-			defaultAmount: lastPayment.amount
+			defaultAmount: lastPayment!.amount
 		};
 	}
 
-	function confirmPay(payment: IPayment) {
-		const payWindow = ui.payWindow!;
-		if (!data.payments) data.payments = [];
-
-		// If we have an original payment, we are editing
-		if (!payWindow.editedPayment) {
-			data.payments = [...data.payments, payment];
-		} else {
-			// Just edit the original object before saving the array that includes it
-			payWindow.editedPayment.amount = payment.amount;
-			payWindow.editedPayment.dateString = payment.dateString;
-			payWindow.editedPayment.note = payment.note;
-		}
-
-		ItemService.update(data._id, { payments: data.payments });
+	async function confirmPay(payment: IPayment) {
+		await PaymentLogic.addPayment(data, payment, ui.payWindow!, ui.payTable);
 
 		ui.payWindow = undefined;
-		ui.lastPayment = payment;
+		ui.lastPayment = PaymentLogic.getLastPayment(data.payments!);
 
 		checkPayStatus();
 		triggerOnUpdate();
