@@ -27,7 +27,7 @@
 				<div class="pay-table__column">Notes</div>
 			</div>
 
-			{#each payments as payment (payment.amount + '//' + payment.dateString + payment.note)}
+			{#each payments as payment (payment._id + '//' + payment.amount + '//' + payment.dateString + payment.note)}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<div
 					on:click={() => rowClicked(payment)}

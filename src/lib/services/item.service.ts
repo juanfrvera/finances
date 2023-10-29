@@ -45,6 +45,10 @@ export class ItemService {
         return PaymentService.create({ ...payment, itemId });
     }
 
+    public static updatePayment(itemId: string, payment: IPayment) {
+        return PaymentService.update({ ...payment, itemId });
+    }
+
     private static getUrl() {
         return `${ApiService.getUrl()}/items`;
     }

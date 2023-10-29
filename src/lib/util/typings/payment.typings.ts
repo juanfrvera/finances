@@ -1,4 +1,4 @@
-export interface IPayment { dateString: string; amount: number; note?: string; };
+export interface IPayment { _id?: string; dateString: string; amount: number; note?: string; };
 
 export interface IPayWindow {
     defaultAmount: number;

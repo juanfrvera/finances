@@ -7,6 +7,11 @@ export class PaymentService {
         return ApiService.interceptResponse(response);
     }
 
+    public static async update(data: IPayment & { itemId: string }): Promise<IPayment> {
+        const response = await fetch(`${this.getUrl()}/${data._id}`, { method: 'PATCH', body: JSON.stringify(data), headers: this.getHeaders() });
+        return ApiService.interceptResponse(response);
+    }
+
     private static getUrl() {
         return `${ApiService.getUrl()}/payments`;
     }
