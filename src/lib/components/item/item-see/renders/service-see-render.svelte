@@ -7,6 +7,7 @@
 	import PayWindow from './util/pay-window.svelte';
 	import type { IPayTable, IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
 	import { PaymentLogic } from '@/lib/util/logic/payment.logic';
+	import type { ITab } from '@/lib/util/typings/tab.typings';
 
 	export let data: IService;
 	const dispatch = createEventDispatcher();
@@ -16,7 +17,7 @@
 		payWindow?: IPayWindow;
 		lastPayment?: IPayment;
 		showChangePaidDateButton?: boolean;
-		tabs: { readonly list: ITab[]; show?: boolean; activeTab: TabType };
+		tabs: { readonly list: ITab<TabType>[]; show?: boolean; activeTab: TabType };
 		payTable?: IPayTable;
 	} = {
 		tabs: {
@@ -92,7 +93,7 @@
 		checkPayStatus();
 	}
 
-	function tabClicked(tab: ITab) {
+	function tabClicked(tab: ITab<TabType>) {
 		ui.tabs.list.forEach((t) => (t.active = false));
 		tab.active = true;
 		ui.tabs.activeTab = tab.type;
@@ -106,19 +107,13 @@
 		};
 		ui.showPayButton = false;
 	}
-
-	interface ITab {
-		title: string;
-		active?: boolean;
-		type: TabType;
-	}
 	type TabType = 'main' | 'payments';
 </script>
 
 {#if ui}
 	<div class="service-see">
 		{#if ui.tabs.show}
-			<div class="service-tabs tabs">
+			<div class="see-tabs tabs">
 				<ul>
 					{#each ui.tabs.list as tab}
 						<li class={tab.active ? 'is-active' : ''}>
@@ -190,9 +185,5 @@
 	.label-and-value {
 		display: flex;
 		column-gap: 8px;
-	}
-
-	.service-tabs {
-		width: 100%;
 	}
 </style>

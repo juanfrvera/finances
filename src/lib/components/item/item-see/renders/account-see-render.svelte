@@ -1,13 +1,134 @@
 <script lang="ts">
 	import type { IAccount } from '@/lib/typings';
+	import type { ITab } from '@/lib/util/typings/tab.typings';
 
 	export let data: IAccount;
+
+	const ui: {
+		tabs: { readonly list: ITab<TabType>[]; show?: boolean; activeTab: TabType };
+		transactions: { creator?: { t: ITransaction; loading?: boolean } };
+	} = {
+		tabs: {
+			list: [
+				{ title: 'Account', active: true, type: 'main' },
+				{ title: 'Transactions', type: 'transactions' }
+			],
+			activeTab: 'main'
+		},
+		transactions: {}
+	};
+	type TabType = 'main' | 'transactions';
+	type TransactionType = 'add' | 'subtract';
+	interface ITransaction {
+		type: TransactionType;
+		amount: number;
+		notes?: string;
+		id?: string;
+	}
+
+	function tabClicked(tab: ITab<TabType>) {
+		ui.tabs.list.forEach((t) => (t.active = false));
+		tab.active = true;
+		ui.tabs.activeTab = tab.type;
+	}
+
+	function newTransactionClicked() {
+		ui.transactions.creator = { type: 'add', amount: 0 };
+	}
+
+	function transactionTypeSelectChanged(e: Event) {
+		const value = (e.target as HTMLSelectElement).value as TransactionType;
+	}
+
+	function confirmTransaction(transaction: ITransaction) {}
+
+	function cancelTransaction(transaction: ITransaction) {
+		if (!transaction.id) ui.transactions.creator = undefined;
+	}
 </script>
 
 {#if data != null}
 	<div class="account-see">
-		<div>{data.name}</div>
-		<div>{data.balance} {data.currency}</div>
+		<div class="see-tabs tabs">
+			<ul>
+				{#each ui.tabs.list as tab}
+					<li class={tab.active ? 'is-active' : ''}>
+						<!-- svelte-ignore a11y-missing-attribute -->
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<a on:click={() => tabClicked(tab)}>{tab.title}</a>
+					</li>
+				{/each}
+			</ul>
+		</div>
+
+		<div class="account-see__body">
+			<!-- Main -->
+			{#if ui.tabs.activeTab === 'main'}
+				<div>{data.name}</div>
+				<div>{data.balance} {data.currency}</div>
+			{/if}
+
+			<!-- Transactions -->
+			{#if ui.tabs.activeTab === 'transactions'}
+				<div class="account-see__transactions">
+					{#if !ui.transactions.creator}
+						<button on:click={newTransactionClicked} class="button">New Transaction</button>
+					{:else}
+						<div class="account-see__transaction-creator transaction-creator">
+							<div class="form">
+								<div class="label-and-input clickable-height">
+									<label for="type-input">Type</label>
+									<div class="select input-stretch">
+										<select
+											id="type-input"
+											bind:value={ui.transactions.creator.type}
+											on:change={transactionTypeSelectChanged}
+											class="w-100"
+										>
+											<option value="add">Add to this account</option>
+											<option value="subtract">Subtract from this account</option>
+										</select>
+									</div>
+								</div>
+
+								<!-- Amount -->
+								<div class="label-and-input">
+									<label for="amount-input">Amount</label>
+									<input
+										bind:value={ui.transactions.creator.amount}
+										type="number"
+										class="input-stretch"
+										id="amount-input"
+									/>
+								</div>
+
+								<!-- Notes -->
+								<div class="label-and-input">
+									<label for="notes-input">Notes</label>
+									<input
+										bind:value={ui.transactions.creator.notes}
+										type="text"
+										class="input-stretch"
+										id="notes-input"
+									/>
+								</div>
+							</div>
+							<div class="transaction-creator__footer">
+								<button
+									on:click={() => confirmTransaction(ui.transactions.creator.t)}
+									class="button">Confirm</button
+								>
+								<button
+									on:click={() => cancelTransaction(ui.transactions.creator.t)}
+									class="button is-danger {ui.transactions.creator.loading ? 'is-loading' : ''}"
+									>Cancel</button
+								>
+							</div>
+						</div>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 {/if}
 
@@ -17,5 +138,6 @@
 		flex-direction: column;
 		align-items: center;
 		row-gap: 8px;
+		padding-bottom: 32px;
 	}
 </style>

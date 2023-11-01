@@ -1,5 +1,6 @@
 $primary: green;
-/* Write your global styles here, in SCSS syntax. Variables and mixins from the src/variables.scss file are available here without importing */ /* Import only what you need from Bulma */
+/* Write your global styles here, in SCSS syntax. Variables and mixins from the src/variables.scss file are available here without importing */
+/* Import only what you need from Bulma */
 @import 'bulma/sass/utilities/_all';
 @import 'bulma/sass/base/_all';
 @import 'bulma/sass/elements/_all';
@@ -8,3 +9,31 @@ $primary: green;
 @import 'bulma/sass/grid/_all';
 @import 'bulma/sass/helpers/_all';
 @import 'bulma/sass/layout/_all';
+
+.form {
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+}
+
+.label-and-input {
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+}
+
+.label-and-input>label {
+    min-width: 100px;
+}
+
+.input-stretch {
+    flex-grow: 1;
+    align-self: stretch;
+}
+
+.see-tabs {
+    width: 100%;
+}
+
+@import './lib/styles/transaction.styles.scss';

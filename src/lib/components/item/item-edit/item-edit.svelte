@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount, type ComponentType } from 'svelte';
 	import { ItemHelper } from '@/lib/util/logic/item';
-	import type { IItemCreationData, ItemType } from '../../../typings';
+	import type { Item, ItemType } from '../../../typings';
 	import AccountConfig from './renders/account-edit-render.svelte';
 
-	export let data: IItemCreationData;
+	export let data: Item;
 
 	let currentConfigComponent: ComponentType = AccountConfig;
 	$: currentConfigComponent = getConfigRenderer(data.type);
@@ -43,27 +43,7 @@
 {/if}
 
 <style>
-	:global(.label-and-input) {
-		height: 40px;
-
-		display: flex;
-		align-items: center;
-	}
-
-	:global(.label-and-input > label) {
-		min-width: 100px;
-	}
-	:global(.input-stretch) {
-		flex-grow: 1;
-		align-self: stretch;
-	}
 	:global(.w-100) {
 		width: 100%;
-	}
-
-	.form {
-		display: flex;
-		flex-direction: column;
-		row-gap: 8px;
 	}
 </style>
