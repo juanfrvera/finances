@@ -17,6 +17,17 @@ export type ListRender = typeof AccountListRender | typeof ServiceListRender | t
 export type EditRender = typeof AccountEditRender | typeof ServiceEditRender | typeof DebtEditRender | typeof CurrencyEditRender;
 export type SeeRender = typeof AccountSeeRender | typeof ServiceSeeRender | typeof DebtSeeRender | typeof CurrencySeeRender;
 
+export const ItemHelpText: iItemHelpText = {
+    account:
+        'Create an Account to keep track of the balance of an specific bank account or wallet you want to track.',
+    service:
+        'Create a Service to keep track of something you need to pay every month. We will help you identify when was your last payment and the services you need to pay before the month ends.',
+    debt: 'Create a Debt to keep track of an amount someone owes you or that you owe to someone. You can mark it as paid when is time.',
+    currency:
+        'Create a Currency to organize your accounts by linking them to it, then you will be able to see the sum of all the accounts in the same currency.'
+}
+export interface iItemHelpText { account: string; service: string; debt: string; currency: string };
+
 export abstract class Item {
     public static getTypeString(): ItemType { return 'account'; }
     public static getListRender(): ListRender { return AccountListRender; }

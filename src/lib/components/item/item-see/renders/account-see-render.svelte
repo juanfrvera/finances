@@ -1,12 +1,15 @@
 <script lang="ts">
 	import type { IAccount } from '@/lib/typings';
 	import type { ITab } from '@/lib/util/typings/tab.typings';
+	import TransactionTable from './util/transaction-table.svelte';
+	import type { IPayment, TransactionType } from '@/lib/util/typings/payment.typings';
+	import { AccountService } from '@/lib/services/account.service';
 
 	export let data: IAccount;
 
 	const ui: {
 		tabs: { readonly list: ITab<TabType>[]; show?: boolean; activeTab: TabType };
-		transactions: { creator?: { t: ITransaction; loading?: boolean } };
+		transactions: { creator?: { t: IPayment; loading?: boolean } };
 	} = {
 		tabs: {
 			list: [
@@ -18,13 +21,6 @@
 		transactions: {}
 	};
 	type TabType = 'main' | 'transactions';
-	type TransactionType = 'add' | 'subtract';
-	interface ITransaction {
-		type: TransactionType;
-		amount: number;
-		notes?: string;
-		id?: string;
-	}
 
 	function tabClicked(tab: ITab<TabType>) {
 		ui.tabs.list.forEach((t) => (t.active = false));
@@ -33,18 +29,42 @@
 	}
 
 	function newTransactionClicked() {
-		ui.transactions.creator = { type: 'add', amount: 0 };
+		const date = new Date(Date.now());
+		const dateString = date.toISOString().substring(0, 10);
+		ui.transactions.creator = { t: { transactionType: 'add', amount: 0, dateString } };
 	}
 
 	function transactionTypeSelectChanged(e: Event) {
 		const value = (e.target as HTMLSelectElement).value as TransactionType;
 	}
 
-	function confirmTransaction(transaction: ITransaction) {}
+	async function confirmTransactionCreator() {
+		const creator = ui.transactions.creator!;
+		creator.loading = true;
+		try {
+			const result = await AccountService.addTransaction(data, creator.t);
 
-	function cancelTransaction(transaction: ITransaction) {
-		if (!transaction.id) ui.transactions.creator = undefined;
+			if (data.payments) data.payments = [result.createdPayment, ...data.payments];
+			else data.payments = [result.createdPayment];
+
+			data.balance = result.balance;
+
+			ui.transactions.creator = undefined;
+		} catch (error) {
+			creator.loading = false;
+		}
 	}
+
+	function cancelTransactionCreator() {
+		cancelTransaction(ui.transactions.creator!.t);
+		ui.transactions.creator = undefined;
+	}
+
+	function transactionRowClicked(row: IPayment) {}
+
+	function confirmTransaction(transaction: IPayment) {}
+
+	function cancelTransaction(transaction: IPayment) {}
 </script>
 
 {#if data != null}
@@ -74,14 +94,14 @@
 					{#if !ui.transactions.creator}
 						<button on:click={newTransactionClicked} class="button">New Transaction</button>
 					{:else}
-						<div class="account-see__transaction-creator transaction-creator">
+						<div class="account-see__transaction-creator transaction-creator creator">
 							<div class="form">
 								<div class="label-and-input clickable-height">
 									<label for="type-input">Type</label>
 									<div class="select input-stretch">
 										<select
 											id="type-input"
-											bind:value={ui.transactions.creator.type}
+											bind:value={ui.transactions.creator.t.transactionType}
 											on:change={transactionTypeSelectChanged}
 											class="w-100"
 										>
@@ -95,7 +115,7 @@
 								<div class="label-and-input">
 									<label for="amount-input">Amount</label>
 									<input
-										bind:value={ui.transactions.creator.amount}
+										bind:value={ui.transactions.creator.t.amount}
 										type="number"
 										class="input-stretch"
 										id="amount-input"
@@ -106,26 +126,29 @@
 								<div class="label-and-input">
 									<label for="notes-input">Notes</label>
 									<input
-										bind:value={ui.transactions.creator.notes}
+										bind:value={ui.transactions.creator.t.note}
 										type="text"
 										class="input-stretch"
 										id="notes-input"
 									/>
 								</div>
 							</div>
-							<div class="transaction-creator__footer">
+							<div class="transaction-creator__footer creator__footer">
 								<button
-									on:click={() => confirmTransaction(ui.transactions.creator.t)}
-									class="button">Confirm</button
+									on:click={() => confirmTransactionCreator()}
+									class="button {ui.transactions.creator.loading ? 'is-loading' : ''}"
+									>Confirm</button
 								>
 								<button
-									on:click={() => cancelTransaction(ui.transactions.creator.t)}
+									on:click={() => cancelTransactionCreator()}
 									class="button is-danger {ui.transactions.creator.loading ? 'is-loading' : ''}"
 									>Cancel</button
 								>
 							</div>
 						</div>
 					{/if}
+
+					<TransactionTable rows={data.payments} onRowClicked={transactionRowClicked} />
 				</div>
 			{/if}
 		</div>
@@ -139,5 +162,11 @@
 		align-items: center;
 		row-gap: 8px;
 		padding-bottom: 32px;
+	}
+
+	.account-see__transactions {
+		display: flex;
+		flex-direction: column;
+		gap: 32px;
 	}
 </style>

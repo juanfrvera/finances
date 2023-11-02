@@ -36,4 +36,15 @@ $primary: green;
     width: 100%;
 }
 
+.creator {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+.creator__footer {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+}
+
 @import './lib/styles/transaction.styles.scss';

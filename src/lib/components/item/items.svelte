@@ -5,7 +5,9 @@
 		DebtItem,
 		ItemHelper,
 		ServiceItem,
-		CurrencyItem
+		CurrencyItem,
+		ItemHelpText,
+		type iItemHelpText
 	} from '../../util/logic/item';
 	import type { ICurrency, iItem, Item } from '../../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
@@ -26,7 +28,10 @@
 		creationModal?: { saving?: boolean; data: Partial<Item> };
 		seeModal?: { item: Item; deleting?: boolean };
 		editModal?: { item: Item; saving?: boolean };
-	} = {};
+		help: iItemHelpText;
+	} = {
+		help: ItemHelpText
+	};
 
 	let afterCurrencyCreated: { creationModal?: { data: Partial<Item> } } | undefined;
 
@@ -239,35 +244,22 @@
 				</div>
 				<div>
 					<div class="title">Account</div>
-					<div class="description">
-						Create an Account to keep track of the balance of an specific bank account or wallet you
-						want to track.
-					</div>
+					<div class="description">{ui.help.account}</div>
 					<button on:click={createAccount} class="button">Create Account</button>
 				</div>
 				<div>
 					<div class="title">Service</div>
-					<div class="description">
-						Create a Service to keep track of something you need to pay every month. We will help
-						you identify when was your last payment and the services you need to pay before the
-						month ends.
-					</div>
+					<div class="description">{ui.help.service}</div>
 					<button on:click={createService} class="button">Create Service</button>
 				</div>
 				<div>
 					<div class="title">Debt</div>
-					<div class="description">
-						Create a Debt to keep track of an amount someone owes you or that you owe to someone.
-						You can mark it as paid when is time.
-					</div>
+					<div class="description">{ui.help.debt}</div>
 					<button on:click={createDebt} class="button">Create Debt</button>
 				</div>
 				<div>
 					<div class="title">Currency</div>
-					<div class="description">
-						Create a Currency to organize your accounts by linking them to it, then you will be able
-						to see the sum of all the accounts in the same currency.
-					</div>
+					<div class="description">{ui.help.currency}</div>
 					<button on:click={createCurrency} class="button">Create Currency</button>
 				</div>
 			</div>

@@ -1,18 +1,21 @@
 <script lang="ts">
 	import { onMount, type ComponentType } from 'svelte';
-	import { ItemHelper } from '@/lib/util/logic/item';
+	import { ItemHelpText, ItemHelper, type iItemHelpText } from '@/lib/util/logic/item';
 	import type { Item, ItemType } from '../../../typings';
 	import AccountConfig from './renders/account-edit-render.svelte';
 
-	export let data: Item;
+	export let data: Partial<Item>;
 
 	let currentConfigComponent: ComponentType = AccountConfig;
-	$: currentConfigComponent = getConfigRenderer(data.type);
+	$: currentConfigComponent = getConfigRenderer(data.type!);
 
-	let ui: { typeOptions: string[] };
+	let ui: { typeOptions: string[]; help: iItemHelpText };
 
 	onMount(() => {
-		ui = { typeOptions: ItemHelper.getItemClasses().map((ic) => ic.getTypeString()) };
+		ui = {
+			typeOptions: ItemHelper.getItemClasses().map((ic) => ic.getTypeString()),
+			help: ItemHelpText
+		};
 	});
 
 	function typeSelectChanged(e: Event) {
@@ -28,6 +31,9 @@
 
 {#if ui != null}
 	<div class="form">
+		{#if !data._id && data.type}
+			<div class="help-string">{ui.help[data.type]}</div>
+		{/if}
 		<div class="label-and-input clickable-height">
 			<label for="type-input">Type</label>
 			<div class="select input-stretch">
@@ -45,5 +51,8 @@
 <style>
 	:global(.w-100) {
 		width: 100%;
+	}
+	.help-string {
+		padding-bottom: 16px;
 	}
 </style>

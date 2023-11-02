@@ -1,3 +1,5 @@
+import type { IPayment } from "./util/typings/payment.typings";
+
 export type Item = IAccount | IService | ICurrency | IDebt;
 export type ItemWithPayments = IDebt | IService;
 export type ItemType = 'account' | 'service' | 'currency' | 'debt';
@@ -13,6 +15,7 @@ export interface IAccount extends iItem {
     name: string;
     balance: number;
     currency: string;
+    payments?: IPayment[];
 }
 
 export interface IService extends iItem {

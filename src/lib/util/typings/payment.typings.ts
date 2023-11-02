@@ -1,4 +1,5 @@
-export interface IPayment { _id?: string; dateString: string; amount: number; note?: string; };
+export type TransactionType = 'add' | 'subtract';
+export interface IPayment { _id?: string; dateString: string; amount: number; note?: string; transactionType?: TransactionType };
 
 export interface IPayWindow {
     defaultAmount: number;
