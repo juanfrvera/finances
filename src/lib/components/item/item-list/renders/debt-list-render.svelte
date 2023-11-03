@@ -28,7 +28,9 @@
 {#if ui != null}
 	<div class={ui.containerClass}>
 		<div>{ui.payDirectionString}</div>
-		<div>{data.description}</div>
+		{#if data.description}
+			<div>{data.description}</div>
+		{/if}
 		<div class="data"><NumberFormat value={ui.amountToShow} /> {data.currency}</div>
 	</div>
 {/if}
