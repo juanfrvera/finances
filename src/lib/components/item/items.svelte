@@ -111,14 +111,16 @@
 		ui.seeModal = undefined;
 	}
 	function itemUpdated(event: CustomEvent<iItem>) {
-		// Set update date of item so it is re-rendered
-		event.detail.updateDate = new Date();
+		reRenderUpdatedItem(event.detail);
 		calculateCurrencyItems();
+	}
+	function reRenderUpdatedItem(item: iItem) {
+		item.updateDate = new Date();
 	}
 	//#endregion See
 	//#region Edit
 	function openEditModalFromSee() {
-		ui.editModal = { item: ui.seeModal!.item };
+		ui.editModal = { item: { ...ui.seeModal!.item } };
 	}
 	async function saveEditModal() {
 		if (!ui.editModal) return;
@@ -126,9 +128,10 @@
 		ui.editModal.saving = true;
 		try {
 			const item = ui.editModal.item;
-			const updatedItem = await ItemService.update(item._id, item);
+			const serverItem = await ItemService.update(item._id, item);
 
-			list = list.filter((i) => (i._id === updatedItem._id ? updatedItem : i));
+			const index = list.findIndex(i => i._id === serverItem._id);
+			list[index] = serverItem;
 
 			calculateUiList();
 			calculateCurrencyItems();
@@ -136,6 +139,8 @@
 			closeEditModal();
 
 			ModalChannel.$channel.next({ type: 'itemEdited', data: { item } });
+			reRenderUpdatedItem(serverItem);
+			if(ui.seeModal) ui.seeModal.item = serverItem;
 		} catch (error) {
 			console.error(error);
 			ui.editModal.saving = false;

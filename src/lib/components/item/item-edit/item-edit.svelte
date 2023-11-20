@@ -6,8 +6,9 @@
 
 	export let data: Partial<Item>;
 
-	let currentConfigComponent: ComponentType = AccountConfig;
-	$: currentConfigComponent = getConfigRenderer(data.type!);
+	// Component rendered based on the type of the item
+	let currentComponent: ComponentType = AccountConfig;
+	$: currentComponent = getEditRenderer(data.type!);
 
 	let ui: { typeOptions: string[]; help: iItemHelpText };
 
@@ -20,11 +21,11 @@
 
 	function typeSelectChanged(e: Event) {
 		const value = (e.target as HTMLSelectElement).value as ItemType;
-		currentConfigComponent = getConfigRenderer(value);
+		currentComponent = getEditRenderer(value);
 		data.type = value;
 	}
 
-	function getConfigRenderer(type: string) {
+	function getEditRenderer(type: string) {
 		return ItemHelper.getClassByTypeString(type)!.getEditRender();
 	}
 </script>
@@ -44,7 +45,7 @@
 				</select>
 			</div>
 		</div>
-		<svelte:component this={currentConfigComponent} config={data} />
+		<svelte:component this={currentComponent} config={data} />
 	</div>
 {/if}
 
