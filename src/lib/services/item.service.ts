@@ -1,4 +1,4 @@
-import type { IAccount, ICurrency, Item } from "../typings";
+import type { IAccount, ICurrencyUI, Item } from "../typings";
 import type { IPayment } from "../util/typings/payment.typings";
 import { ApiService } from "./api.service";
 import { PaymentService } from "./payment.service";
@@ -9,11 +9,12 @@ export class ItemService {
         const list: Item[] = await ApiService.interceptResponse(response);
 
         // Fill currencies with balance
-        const currencies = list.filter(i => i.type === 'currency') as ICurrency[];
+        const currencies = list.filter(i => i.type === 'currency') as ICurrencyUI[];
         currencies.forEach(c => {
             const accounts = list.filter(l => l.type === 'account' && l.currency === c.currency) as IAccount[];
             if (accounts && accounts.length) {
                 c.total = accounts.map(a => a.balance).reduce((accumulator, value) => accumulator + value);
+                c.accounts = accounts.map(a => ({ _id: a._id, name: a.name, balance: a.balance }));
             } else {
                 c.total = 0;
             }

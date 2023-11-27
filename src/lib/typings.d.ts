@@ -33,6 +33,9 @@ export interface ICurrency extends iItem {
     currency: string;
     total: number;
 }
+export interface ICurrencyUI extends ICurrency {
+    accounts?: Array<{ _id: string, name: string, balance: number }>;
+}
 export interface IDebt extends iItem {
     type: 'debt';
     withWho: string;
