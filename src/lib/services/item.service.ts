@@ -1,31 +1,40 @@
-import type { IAccount, ICurrencyUI, Item } from "../typings";
+import type { IAccount, ICurrencyUI, Item, iItem } from "../typings";
 import type { IPayment } from "../util/typings/payment.typings";
 import { ApiService } from "./api.service";
 import { PaymentService } from "./payment.service";
 
 export class ItemService {
+    private static list: Item[];
+
     public static async getItems() {
         const response = await fetch(this.getUrl(), { method: 'GET', headers: this.getHeaders() });
-        const list: Item[] = await ApiService.interceptResponse(response);
+        this.list = await ApiService.interceptResponse(response);
 
         // Fill currencies with balance
-        const currencies = list.filter(i => i.type === 'currency') as ICurrencyUI[];
-        currencies.forEach(c => {
-            const accounts = list.filter(l => l.type === 'account' && l.currency === c.currency) as IAccount[];
-            if (accounts && accounts.length) {
-                c.total = accounts.map(a => a.balance).reduce((accumulator, value) => accumulator + value);
-                c.accounts = accounts.map(a => ({ _id: a._id, name: a.name, balance: a.balance }));
-            } else {
-                c.total = 0;
-            }
-        });
+        const currencies = this.list.filter(i => i.type === 'currency') as ICurrencyUI[];
+        currencies.forEach(c => this.updateCurrencyUI(c, this.list));
 
-        return list;
+        return this.list;
     }
 
-    public static async create(data): Promise<Item> {
+    private static updateCurrencyUI(c: ICurrencyUI, list: Item[]) {
+        const accounts = list.filter(l => l.type === 'account' && l.currency === c.currency) as IAccount[];
+        if (accounts && accounts.length) {
+            c.total = accounts.map(a => a.balance).reduce((accumulator, value) => accumulator + value);
+            c.accounts = accounts.map(a => ({ _id: a._id, name: a.name, balance: a.balance }));
+        } else c.total = 0;
+    }
+
+    public static async create(data: iItem): Promise<Item> {
         const response = await fetch(this.getUrl(), { method: 'POST', body: JSON.stringify(data), headers: this.getHeaders() });
-        return ApiService.interceptResponse(response);
+        const item: Item = await ApiService.interceptResponse(response);
+
+        if (item.type === 'account' && item.currency) {
+            const currency: ICurrencyUI | undefined = this.list.find(i => i.type === 'currency' && i._id === item.currency) as ICurrencyUI;
+            if (currency) this.updateCurrencyUI(currency, this.list);
+        }
+
+        return item;
     }
 
     public static async update(id: string, updatedFields: Partial<Item>) {

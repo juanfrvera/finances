@@ -9,12 +9,12 @@
 		Legend,
 		ArcElement,
 		CategoryScale,
-		type ChartData,
-		Colors
+		type ChartData
 	} from 'chart.js';
 	import { onMount } from 'svelte';
 	import { ItemService } from '@/lib/services/item.service';
-	ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, Colors);
+	import { PASTEL_COLORS } from '@/lib/util/color';
+	ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
 	export let data: ICurrencyUI;
 
@@ -22,7 +22,8 @@
 		labels: data.accounts?.map((a) => a.name) ?? [],
 		datasets: [
 			{
-				data: data.accounts?.map((a) => a.balance) ?? []
+				data: data.accounts?.map((a) => a.balance) ?? [],
+				backgroundColor: PASTEL_COLORS
 			}
 		]
 	};
