@@ -1,6 +1,6 @@
 import type { IPayment } from "./util/typings/payment.typings";
 
-export type Item = IAccount | IService | ICurrency | IDebt;
+export type ItemT = IAccount | IService | ICurrency | IDebt;
 export type ItemWithPayments = IDebt | IService;
 export type ItemType = 'account' | 'service' | 'currency' | 'debt';
 

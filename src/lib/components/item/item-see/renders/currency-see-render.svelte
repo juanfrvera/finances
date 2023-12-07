@@ -11,26 +11,40 @@
 		CategoryScale,
 		type ChartData
 	} from 'chart.js';
-	import { onMount } from 'svelte';
-	import { ItemService } from '@/lib/services/item.service';
 	import { PASTEL_COLORS } from '@/lib/util/color';
+	import { onDestroy, onMount } from 'svelte';
+	import type { Subscription } from 'rxjs';
+	import { ItemChannel } from '@/lib/services/channel.service';
 	ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
+	let subscription: Subscription;
 	export let data: ICurrencyUI;
 
-	const pieData: ChartData<'pie', number[]> = {
-		labels: data.accounts?.map((a) => a.name) ?? [],
-		datasets: [
-			{
-				data: data.accounts?.map((a) => a.balance) ?? [],
-				backgroundColor: PASTEL_COLORS
-			}
-		]
-	};
+	let pieData: ChartData<'pie', number[]> = calculatePieData();
 
 	onMount(() => {
-		ItemService;
+		subscription = ItemChannel.$channel.subscribe((signal) => {
+			if (signal.type === 'itemEdited' && signal.data.item.currency === data.currency) {
+				pieData = calculatePieData();
+			}
+		});
 	});
+
+	onDestroy(() => {
+		subscription.unsubscribe();
+	});
+
+	function calculatePieData() {
+		return {
+			labels: data.accounts?.map((a) => a.name) ?? [],
+			datasets: [
+				{
+					data: data.accounts?.map((a) => a.balance) ?? [],
+					backgroundColor: PASTEL_COLORS
+				}
+			]
+		};
+	}
 </script>
 
 {#if data != null}

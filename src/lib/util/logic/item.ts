@@ -8,7 +8,7 @@ import CurrencyListRender from "@/lib/components/item/item-list/renders/currency
 import AccountSeeRender from "@/lib/components/item/item-see/renders/account-see-render.svelte";
 import DebtSeeRender from "@/lib/components/item/item-see/renders/debt-see-render.svelte";
 import ServiceSeeRender from "@/lib/components/item/item-see/renders/service-see-render.svelte";
-import type { iItem, ItemType, IService, IAccount, ICurrency, Item as ItemT, IDebt } from "@/lib/typings";
+import type { iItem, ItemType, IService, IAccount, ItemT, IDebt, ICurrencyUI } from "@/lib/typings";
 import CurrencySeeRender from "@/lib/components/item/item-see/renders/currency-see-render.svelte";
 import CurrencyEditRender from "@/lib/components/item/item-edit/renders/currency-edit-render.svelte";
 import { PaymentLogic } from "./payment.logic";
@@ -92,18 +92,16 @@ export class CurrencyItem extends Item {
     public static getEditRender(): EditRender { return CurrencyEditRender; }
     public static getSeeRender(): SeeRender { return CurrencySeeRender; }
 
-    public static calculate(list: ItemT[], totalItem: ICurrency) {
-        totalItem.total = 0;
-        for (let i = 0; i < list.length; i++) {
-            const item = list[i];
-
-            if (item.type === AccountItem.getTypeString()) {
-                const account = item as IAccount;
-                if (account.currency === totalItem.currency) {
-                    totalItem.total += account.balance;
-                }
-            }
+    public static calculate(list: ItemT[], currencyItem: ICurrencyUI) {
+        currencyItem.total = 0;
+        const accounts = list.filter(i => i.type === 'account' && i.currency === currencyItem.currency) as IAccount[];
+        let total = 0;
+        for (const account of accounts) {
+            total += account.balance;
         }
+        currencyItem.total = total;
+        currencyItem.accounts = accounts;
+        currencyItem.updateDate = new Date(Date.now());
     }
 }
 

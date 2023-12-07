@@ -4,7 +4,7 @@
 	import { DebtLogic } from '@/lib/util/logic/debt';
 	import NumberFormat from '@/lib/components/number-format.svelte';
 	import { ItemService } from '@/lib/services/item.service';
-	import { ModalChannel } from '@/lib/services/modal-channel.service';
+	import { ItemChannel } from '@/lib/services/channel.service';
 	import type { Subscription } from 'rxjs';
 	import PaymentTable from './util/payment-table.svelte';
 	import PayWindow from './util/pay-window.svelte';
@@ -30,7 +30,7 @@
 	let subscription: Subscription;
 
 	onMount(() => {
-		subscription = ModalChannel.$channel.subscribe((signal) => {
+		subscription = ItemChannel.$channel.subscribe((signal) => {
 			if (signal.type === 'itemEdited') {
 				checkPayStatus();
 			}

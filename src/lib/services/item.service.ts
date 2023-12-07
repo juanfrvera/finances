@@ -1,10 +1,10 @@
-import type { IAccount, ICurrencyUI, Item, iItem } from "../typings";
+import type { IAccount, ICurrencyUI, ItemT, iItem } from "../typings";
 import type { IPayment } from "../util/typings/payment.typings";
 import { ApiService } from "./api.service";
 import { PaymentService } from "./payment.service";
 
 export class ItemService {
-    private static list: Item[];
+    private static list: ItemT[];
 
     public static async getItems() {
         const response = await fetch(this.getUrl(), { method: 'GET', headers: this.getHeaders() });
@@ -17,7 +17,7 @@ export class ItemService {
         return this.list;
     }
 
-    private static updateCurrencyUI(c: ICurrencyUI, list: Item[]) {
+    private static updateCurrencyUI(c: ICurrencyUI, list: ItemT[]) {
         const accounts = list.filter(l => l.type === 'account' && l.currency === c.currency) as IAccount[];
         if (accounts && accounts.length) {
             c.total = accounts.map(a => a.balance).reduce((accumulator, value) => accumulator + value);
@@ -25,9 +25,9 @@ export class ItemService {
         } else c.total = 0;
     }
 
-    public static async create(data: iItem): Promise<Item> {
+    public static async create(data: Partial<ItemT>): Promise<ItemT> {
         const response = await fetch(this.getUrl(), { method: 'POST', body: JSON.stringify(data), headers: this.getHeaders() });
-        const item: Item = await ApiService.interceptResponse(response);
+        const item: ItemT = await ApiService.interceptResponse(response);
 
         if (item.type === 'account' && item.currency) {
             const currency: ICurrencyUI | undefined = this.list.find(i => i.type === 'currency' && i._id === item.currency) as ICurrencyUI;
@@ -37,7 +37,7 @@ export class ItemService {
         return item;
     }
 
-    public static async update(id: string, updatedFields: Partial<Item>) {
+    public static async update(id: string, updatedFields: Partial<ItemT>): Promise<ItemT> {
         const response = await fetch(
             `${this.getUrl()}/${id}`,
             { method: 'PATCH', body: JSON.stringify(updatedFields), headers: this.getHeaders() }

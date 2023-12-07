@@ -9,7 +9,7 @@
 		ItemHelpText,
 		type iItemHelpText
 	} from '../../util/logic/item';
-	import type { ICurrency, iItem, Item } from '../../typings';
+	import type { ICurrencyUI, iItem, ItemT } from '../../typings';
 	import ItemEdit from './item-edit/item-edit.svelte';
 	import ItemList from './item-list/item-list.svelte';
 	import ItemSee from './item-see/item-see.svelte';
@@ -18,22 +18,22 @@
 	import { deepCopy } from '@/lib/util/deep-copy';
 	import { ItemService } from '@/lib/services/item.service';
 	import { CurrencyService } from '@/lib/services/currency.service';
-	import { ModalChannel } from '@/lib/services/modal-channel.service';
+	import { ItemChannel } from '@/lib/services/channel.service';
 
-	let list: Item[] = [];
+	let list: ItemT[] = [];
 	let currentSearchQuery: string = '';
 
 	const ui: {
-		list?: Item[];
-		creationModal?: { saving?: boolean; data: Partial<Item> };
-		seeModal?: { item: Item; deleting?: boolean };
-		editModal?: { item: Item; saving?: boolean };
+		list?: ItemT[];
+		creationModal?: { saving?: boolean; data: Partial<ItemT> };
+		seeModal?: { item: ItemT; deleting?: boolean };
+		editModal?: { item: ItemT; saving?: boolean };
 		help: iItemHelpText;
 	} = {
 		help: ItemHelpText
 	};
 
-	let afterCurrencyCreated: { creationModal?: { data: Partial<Item> } } | undefined;
+	let afterCurrencyCreated: { creationModal?: { data: Partial<ItemT> } } | undefined;
 
 	// Currency context
 	const currencyContext: ICurrencyContext = {
@@ -49,6 +49,9 @@
 				console.log(`Currency added received in items, currency: ${currency}`);
 			}
 		});
+		ItemChannel.$channel.subscribe((signal) => {
+			if (signal.type === 'itemEdited') itemWasUpdated(signal.data.item);
+		});
 	});
 
 	function loadItems() {
@@ -58,10 +61,12 @@
 		});
 	}
 
-	function calculateCurrencyItems() {
-		const currencyItems = list.filter((i) => i.type === CurrencyItem.getTypeString());
+	function calculateCurrencyItems(currency: string) {
+		const currencyItems = list.filter(
+			(i) => i.type === CurrencyItem.getTypeString() && i.currency === currency
+		);
 		for (const currencyItem of currencyItems) {
-			CurrencyItem.calculate(list, currencyItem as ICurrency);
+			CurrencyItem.calculate(list, currencyItem as ICurrencyUI);
 		}
 	}
 
@@ -76,7 +81,7 @@
 
 		ui.creationModal.saving = true;
 		try {
-			let createdItem: Item;
+			let createdItem: ItemT;
 			if (ui.creationModal.data.type != 'currency') {
 				createdItem = await ItemService.create(ui.creationModal.data);
 			} else {
@@ -86,7 +91,8 @@
 			// Add new item at the top
 			list = [createdItem, ...list];
 			calculateUiList();
-			calculateCurrencyItems();
+			calculateCurrencyItems(createdItem.currency);
+			ItemChannel.$channel.next({ type: 'itemEdited', data: { item: createdItem } });
 
 			if (ui.creationModal.data.type !== CurrencyItem.getTypeString()) {
 				closeCreationModal();
@@ -104,15 +110,16 @@
 	}
 	//#endregion Creation
 	//#region See
-	function itemClicked(event: CustomEvent<Item>) {
+	function itemClicked(event: CustomEvent<ItemT>) {
 		ui.seeModal = { item: event.detail };
 	}
 	function closeSeeModal() {
 		ui.seeModal = undefined;
 	}
-	function itemUpdated(event: CustomEvent<iItem>) {
-		reRenderUpdatedItem(event.detail);
-		calculateCurrencyItems();
+	function itemUpdated(event: CustomEvent<ItemT>) {
+		const item = event.detail;
+		reRenderUpdatedItem(item);
+		if (item.type === 'account') calculateCurrencyItems(item.currency);
 	}
 	function reRenderUpdatedItem(item: iItem) {
 		item.updateDate = new Date();
@@ -130,24 +137,17 @@
 			const item = ui.editModal.item;
 			const serverItem = await ItemService.update(item._id, item);
 
-			const index = list.findIndex(i => i._id === serverItem._id);
-			list[index] = serverItem;
-
-			calculateUiList();
-			calculateCurrencyItems();
-
 			closeEditModal();
 
-			ModalChannel.$channel.next({ type: 'itemEdited', data: { item } });
+			ItemChannel.$channel.next({ type: 'itemEdited', data: { item } });
 			reRenderUpdatedItem(serverItem);
-			if(ui.seeModal) ui.seeModal.item = serverItem;
+			if (ui.seeModal) ui.seeModal.item = serverItem;
 		} catch (error) {
 			console.error(error);
 			ui.editModal.saving = false;
 		}
 	}
 	function closeEditModal() {
-		calculateCurrencyItems();
 		ui.editModal = undefined;
 	}
 	//#endregion Edit
@@ -181,7 +181,7 @@
 			await ItemService.delete(item._id);
 			list = list.filter((i) => i._id != item._id);
 
-			calculateCurrencyItems();
+			calculateCurrencyItems(item.currency);
 			calculateUiList();
 
 			closeSeeModal();
@@ -214,6 +214,14 @@
 		} else {
 			closeCreationModal();
 		}
+	}
+	function itemWasUpdated(serverItem: ItemT) {
+		const index = list.findIndex((i) => i._id === serverItem._id);
+		list[index] = serverItem;
+
+		calculateUiList();
+
+		if (serverItem.type === 'account') calculateCurrencyItems(serverItem.currency);
 	}
 </script>
 

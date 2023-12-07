@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher, type ComponentType } from 'svelte';
 	import { ItemHelper } from '@/lib/util/logic/item';
-	import type { Item } from '@/lib/typings';
+	import type { ItemT } from '@/lib/typings';
 
-	export let data: Item;
+	export let data: ItemT;
 
 	let currentItemRenderComponent: ComponentType = ItemHelper.getClassByTypeString(
 		data.type

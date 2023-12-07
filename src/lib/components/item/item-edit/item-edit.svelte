@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount, type ComponentType } from 'svelte';
 	import { ItemHelpText, ItemHelper, type iItemHelpText } from '@/lib/util/logic/item';
-	import type { Item, ItemType } from '../../../typings';
+	import type { ItemT, ItemType } from '../../../typings';
 	import AccountConfig from './renders/account-edit-render.svelte';
 
-	export let data: Partial<Item>;
+	export let data: Partial<ItemT>;
 
 	// Component rendered based on the type of the item
 	let currentComponent: ComponentType = AccountConfig;

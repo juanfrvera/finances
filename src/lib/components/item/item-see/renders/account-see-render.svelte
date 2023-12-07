@@ -4,6 +4,7 @@
 	import TransactionTable from './util/transaction-table.svelte';
 	import type { IPayment, TransactionType } from '@/lib/util/typings/payment.typings';
 	import { AccountService } from '@/lib/services/account.service';
+	import { ItemChannel } from '@/lib/services/channel.service';
 
 	export let data: IAccount;
 
@@ -50,6 +51,7 @@
 			data.balance = result.balance;
 
 			ui.transactions.creator = undefined;
+			ItemChannel.$channel.next({ type: 'itemEdited', data: { item: data } });
 		} catch (error) {
 			creator.loading = false;
 		}
