@@ -41,7 +41,19 @@
 
 	async function confirmTransactionCreator() {
 		const creator = ui.transactions.creator!;
-		creator.loading = true;
+		ui.transactions.creator!.loading = true;
+		if (creator.t.transactionType == 'update') {
+			// Convert from an absolute balance into a transaction that adds or remove that ammount
+			creator.t.amount = creator.t.amount - data.balance;
+
+			// New balance is lower than current balance, it will be a subtraction
+			if (creator.t.amount < 0) {
+				creator.t.transactionType = 'subtract';
+				creator.t.amount *= -1;
+			} else {
+				creator.t.transactionType = 'add';
+			}
+		}
 		try {
 			const result = await AccountService.addTransaction(data, creator.t);
 
@@ -67,6 +79,20 @@
 	function confirmTransaction(transaction: IPayment) {}
 
 	function cancelTransaction(transaction: IPayment) {}
+
+	function selectTabProgramatically(tabType: TabType) {
+		tabClicked(ui.tabs.list.find((t) => t.type === tabType)!);
+	}
+
+	function updateBalanceFromMainClicked() {
+		newTransactionFromMainClicked();
+		ui.transactions.creator!.t.transactionType = 'update';
+	}
+
+	function newTransactionFromMainClicked() {
+		selectTabProgramatically('transactions');
+		newTransactionClicked();
+	}
 </script>
 
 {#if data != null}
@@ -86,8 +112,14 @@
 		<div class="account-see__body">
 			<!-- Main -->
 			{#if ui.tabs.activeTab === 'main'}
-				<div>{data.name}</div>
-				<div>{data.balance} {data.currency}</div>
+				<div class="account-see__main">
+					<div>{data.name}</div>
+					<div class="account-see__balance">{data.balance} {data.currency}</div>
+					<div class="account-see__quick-actions">
+						<button on:click={updateBalanceFromMainClicked} class="button">Update Balance</button>
+						<button on:click={newTransactionFromMainClicked} class="button">New Transaction</button>
+					</div>
+				</div>
 			{/if}
 
 			<!-- Transactions -->
@@ -109,20 +141,36 @@
 										>
 											<option value="add">Add to this account</option>
 											<option value="subtract">Subtract from this account</option>
+											<option value="update">Update balance</option>
 										</select>
 									</div>
 								</div>
 
-								<!-- Amount -->
-								<div class="label-and-input">
-									<label for="amount-input">Amount</label>
-									<input
-										bind:value={ui.transactions.creator.t.amount}
-										type="number"
-										class="input-stretch"
-										id="amount-input"
-									/>
-								</div>
+								{#if ui.transactions.creator.t.transactionType === 'update'}
+									<!-- New Balance -->
+									<div class="label-and-input">
+										<label for="new-balance-input">New Balance</label>
+										<input
+											bind:value={ui.transactions.creator.t.amount}
+											type="number"
+											class="input-stretch"
+											id="new-balance-input"
+										/>
+									</div>
+								{/if}
+
+								{#if ui.transactions.creator.t.transactionType !== 'update'}
+									<!-- Amount -->
+									<div class="label-and-input">
+										<label for="amount-input">Amount</label>
+										<input
+											bind:value={ui.transactions.creator.t.amount}
+											type="number"
+											class="input-stretch"
+											id="amount-input"
+										/>
+									</div>
+								{/if}
 
 								<!-- Notes -->
 								<div class="label-and-input">
@@ -164,6 +212,22 @@
 		align-items: center;
 		row-gap: 8px;
 		padding-bottom: 32px;
+	}
+
+	.account-see__main {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.account-see__balance {
+		font-size: 24px;
+	}
+
+	.account-see__quick-actions {
+		display: flex;
+		gap: 16px;
 	}
 
 	.account-see__transactions {

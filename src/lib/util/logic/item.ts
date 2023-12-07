@@ -137,6 +137,7 @@ export class ItemHelper {
 
         if (item._id.includes(query)) return true;
         if (item.type.toLowerCase().includes(lwQuery)) return true;
+        if (item.currency.toLocaleLowerCase().includes(lwQuery)) return true;
 
         return this.getClassByTypeString(item.type)?.isItemOnQuery(item, query);
     }
