@@ -1,4 +1,3 @@
-import { goto } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { UserStore } from '../util/storage/user.storage';
 

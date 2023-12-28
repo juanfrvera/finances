@@ -9,7 +9,7 @@
 
 <style>
 	.layout {
-		background-color: #dff1ec;
+		background-color: rgb(198, 224, 203);
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;

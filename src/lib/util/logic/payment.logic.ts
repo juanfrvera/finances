@@ -23,7 +23,7 @@ export class PaymentLogic {
         return undefined;
     }
 
-    public static async addPayment(item: ItemWithPayments, payment: IPayment, payWindow: IPayWindow, payTable?: IPayTable) {
+    public static async savePayment(item: ItemWithPayments, payment: IPayment, payWindow: IPayWindow, payTable?: IPayTable) {
         const isCreating = !payWindow.editedPayment;
 
         payWindow.saving = true;
@@ -41,18 +41,18 @@ export class PaymentLogic {
             item.payments.unshift(savedPayment);
 
             // Sort: Recent dates first
-            item.payments = item.payments.sort((a, b) => a.date > b.date ? -1 : (a.date < b.date ? 1 : 0));
+            item.payments = item.payments.sort((a, b) => a.dateString > b.dateString ? -1 : (a.dateString < b.dateString ? 1 : 0));
             if (payTable && payTable.payments) {
                 payTable.payments.unshift(savedPayment);
 
                 // Sort: Recent dates first
                 payTable.payments = payTable.payments.sort((a, b) => a.dateString > b.dateString ? -1 : (a.dateString < b.dateString ? 1 : 0));
             }
-        } else {
+        } else if (payWindow.editedPayment) {
             // Just edit the original object
-            payWindow.editedPayment!.amount = savedPayment.amount;
-            payWindow.editedPayment!.dateString = savedPayment.dateString;
-            payWindow.editedPayment!.note = savedPayment.note;
+            payWindow.editedPayment.amount = savedPayment.amount;
+            payWindow.editedPayment.dateString = savedPayment.dateString;
+            payWindow.editedPayment.note = savedPayment.note;
         }
     }
 

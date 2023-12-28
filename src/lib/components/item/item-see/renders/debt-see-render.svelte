@@ -71,7 +71,7 @@
 	async function confirmPay(payment: IPayment) {
 		const payWindow = ui.payWindow!;
 		try {
-			await PaymentLogic.addPayment(data, payment, payWindow, ui.payTable);
+			await PaymentLogic.savePayment(data, payment, payWindow, ui.payTable);
 
 			checkPayStatus();
 

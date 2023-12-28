@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { ServiceItem } from '@/lib/util/logic/item';
 	import type { IService } from '@/lib/typings';
 	import { ItemService } from '@/lib/services/item.service';
@@ -8,9 +8,9 @@
 	import type { IPayTable, IPayWindow, IPayment } from '@/lib/util/typings/payment.typings';
 	import { PaymentLogic } from '@/lib/util/logic/payment.logic';
 	import type { ITab } from '@/lib/util/typings/tab.typings';
+	import { ItemChannel } from '@/lib/services/channel.service';
 
 	export let data: IService;
-	const dispatch = createEventDispatcher();
 
 	let ui: {
 		showPayButton?: boolean;
@@ -49,12 +49,9 @@
 
 	function registerPaymentClicked() {
 		ui.showPayButton = false;
-
-		// We use a 10 length string to cut the time from the date so it ends up being yyyy/mm/dd
-		ui.payWindow = {
-			defaultAmount: data.cost
-		};
+		ui.payWindow = { defaultAmount: data.cost };
 	}
+
 	function changePaidDateClicked() {
 		ui.showChangePaidDateButton = false;
 		const lastPayment = PaymentLogic.getLastPayment(data.payments!);
@@ -66,17 +63,13 @@
 	}
 
 	async function confirmPay(payment: IPayment) {
-		await PaymentLogic.addPayment(data, payment, ui.payWindow!, ui.payTable);
+		await PaymentLogic.savePayment(data, payment, ui.payWindow!, ui.payTable);
 
 		ui.payWindow = undefined;
 		ui.lastPayment = PaymentLogic.getLastPayment(data.payments!);
 
 		checkPayStatus();
-		triggerOnUpdate();
-	}
-
-	function triggerOnUpdate() {
-		dispatch('update', data);
+		ItemChannel.$channel.next({ type: 'itemEdited', data: { item: data } });
 	}
 
 	function cancelPay() {

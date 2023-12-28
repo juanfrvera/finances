@@ -139,7 +139,7 @@
 
 			closeEditModal();
 
-			ItemChannel.$channel.next({ type: 'itemEdited', data: { item } });
+			ItemChannel.$channel.next({ type: 'itemEdited', data: { item: serverItem } });
 			reRenderUpdatedItem(serverItem);
 			if (ui.seeModal) ui.seeModal.item = serverItem;
 		} catch (error) {
