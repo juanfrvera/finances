@@ -87,6 +87,15 @@
 		ui.creationModal.saving = true;
 		try {
 			let createdItem: ItemT;
+			const minSortOrder =
+				list && list.length > 0
+					? list.reduce((min, item) => {
+							if (min == undefined) return item;
+							if (item.sortOrder < min.sortOrder) return item;
+							return min;
+					  }).sortOrder
+					: 0;
+			ui.creationModal.data.sortOrder = minSortOrder - 1;
 			if (ui.creationModal.data.type != 'currency') {
 				createdItem = await ItemService.create(ui.creationModal.data);
 			} else {
