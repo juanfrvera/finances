@@ -268,16 +268,6 @@
 		};
 	}
 
-	function isInSameRow(y: number, itemOffsetTop: number) {
-		return y >= itemOffsetTop && y <= itemOffsetTop + squareItemRowHeight;
-	}
-
-	function swapSortOrders(itemA: ItemT, itemB: ItemT) {
-		const temp = itemA.sortOrder;
-		itemA.sortOrder = itemB.sortOrder;
-		itemB.sortOrder = temp;
-	}
-
 	function isMoreToTheLeft(square: ISquare, x: number, y: number, originalSquareTop: number) {
 		return (
 			square.offsetTop < originalSquareTop ||
@@ -315,7 +305,9 @@
 		// Moving item right
 		if (direction > 0) {
 			const greaterOrderSqs = dragData.squares.filter(
-				(sq) => sq.item.sortOrder > dragData.draggedItem.sortOrder
+				(sq) =>
+					sq.item._id !== dragData.draggedItem._id &&
+					sq.item.sortOrder >= dragData.draggedItem.sortOrder
 			);
 
 			if (!greaterOrderSqs || !greaterOrderSqs.length) return;
@@ -354,14 +346,16 @@
 			}
 		} else if (direction < 0) {
 			// Moving item left
-			const lowerCoordSqs = dragData.squares.filter(
-				(sq) => sq.item.sortOrder < dragData.draggedItem.sortOrder
+			const lowerOrderSqs = dragData.squares.filter(
+				(sq) =>
+					sq.item._id !== dragData.draggedItem._id &&
+					sq.item.sortOrder <= dragData.draggedItem.sortOrder
 			);
 
-			if (!lowerCoordSqs || !lowerCoordSqs.length) return;
+			if (!lowerOrderSqs || !lowerOrderSqs.length) return;
 
 			// Only update one item at a time,
-			const maxLowerSq = lowerCoordSqs.reduce((max, sq) => {
+			const maxLowerSq = lowerOrderSqs.reduce((max, sq) => {
 				if (max == undefined) return sq;
 
 				if (sq.offsetTop > y) return max;
