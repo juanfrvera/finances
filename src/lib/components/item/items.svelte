@@ -20,6 +20,8 @@
 	import { CurrencyService } from '@/lib/services/currency.service';
 	import { ItemChannel } from '@/lib/services/channel.service';
 
+	const squareItemRowHeight = 80;
+
 	let list: ItemT[] = [];
 	let currentSearchQuery: string = '';
 
@@ -57,6 +59,9 @@
 	function loadItems() {
 		ItemService.getItems().then((data) => {
 			list = data;
+			list.forEach((item) => {
+				if (item.sortOrder == undefined) item.sortOrder = 0;
+			});
 			calculateUiList();
 		});
 	}
@@ -156,7 +161,9 @@
 		calculateUiList();
 	}
 	function calculateUiList() {
-		ui.list = list?.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery));
+		ui.list = list
+			?.filter((i) => ItemHelper.isItemOnQuery(i, currentSearchQuery))
+			.sort((a, b) => a.sortOrder - b.sortOrder);
 	}
 	//#region fromEmptyState
 	function createAccount() {
@@ -223,6 +230,199 @@
 
 		if (serverItem.type === 'account') calculateCurrencyItems(serverItem.currency);
 	}
+
+	interface ISquare {
+		item: ItemT;
+		offsetLeft: number;
+		offsetTop: number;
+		html: Element;
+	}
+
+	let dragData: {
+		squares: Array<ISquare>;
+		draggedItem: ItemT;
+		originalSquare: ISquare;
+		startingSortOders: Array<{ id: string; sortOrder: number }>;
+		previousX: number;
+	};
+
+	function getItemSquares() {
+		const htmlButtons = [...document.getElementsByClassName('item-square')] as HTMLButtonElement[];
+		return htmlButtons.map((sq) => ({
+			item: list.find((i) => i._id === sq.getAttribute('data-itemid'))!,
+			offsetLeft: sq.offsetLeft,
+			offsetTop: sq.offsetTop,
+			html: sq
+		}));
+	}
+
+	function dragStart(item: ItemT) {
+		const squares = getItemSquares();
+		const originalSquare = squares.find((sq) => sq.item._id === item._id)!;
+		dragData = {
+			draggedItem: item,
+			squares,
+			startingSortOders: list.map((i) => ({ id: i._id, sortOrder: i.sortOrder })),
+			originalSquare,
+			previousX: originalSquare.offsetLeft
+		};
+	}
+
+	function isInSameRow(y: number, itemOffsetTop: number) {
+		return y >= itemOffsetTop && y <= itemOffsetTop + squareItemRowHeight;
+	}
+
+	function swapSortOrders(itemA: ItemT, itemB: ItemT) {
+		const temp = itemA.sortOrder;
+		itemA.sortOrder = itemB.sortOrder;
+		itemB.sortOrder = temp;
+	}
+
+	function isMoreToTheLeft(square: ISquare, x: number, y: number, originalSquareTop: number) {
+		return (
+			square.offsetTop < originalSquareTop ||
+			(square.offsetTop == originalSquareTop && square.offsetLeft < x) ||
+			// If the mouse y is in this row
+			(y >= square.offsetTop &&
+				y <= square.offsetTop + squareItemRowHeight &&
+				square.offsetLeft < x)
+		);
+	}
+	function isMoreToTheRight(square: ISquare, x: number, y: number, originalSquareTop: number) {
+		return (
+			square.offsetTop > originalSquareTop ||
+			(square.offsetTop == originalSquareTop && square.offsetLeft > x) ||
+			(y >= square.offsetTop &&
+				y <= square.offsetTop + squareItemRowHeight &&
+				square.offsetLeft > x)
+		);
+	}
+
+	function drag(e: CustomEvent<DragEvent>) {
+		// sort order of dragged item shouldn't be changed to prevent the dragging event from stopping
+		const x = e.detail.clientX;
+		const y = e.detail.clientY;
+
+		// There is a last frame that sends clientX and clientY as 0
+		if (x === 0 && y === 0) return;
+
+		const direction = Math.sign(x - dragData.previousX);
+		dragData.previousX = x;
+		let orderChanged = false;
+
+		// For now it just works limiting the checks according to the direction of the drag
+		// TODO: do a mixed check to also check for drags that goes right but to an upper row, or left to a lower row
+		// Moving item right
+		if (direction > 0) {
+			const greaterOrderSqs = dragData.squares.filter(
+				(sq) => sq.item.sortOrder > dragData.draggedItem.sortOrder
+			);
+
+			if (!greaterOrderSqs || !greaterOrderSqs.length) return;
+
+			// Only update one item at a time,
+			const minGreaterSq = greaterOrderSqs.reduce((min, sq) => {
+				if (min == undefined) return sq;
+
+				if (sq.offsetTop > y) return min;
+
+				// In the case the mouse is in another row, with this we discard some rows
+				if (sq.offsetTop <= y && sq.offsetTop > min.offsetTop) return sq;
+
+				if (sq.offsetLeft < min.offsetLeft) return sq;
+
+				return min;
+			});
+
+			// If the min square has been passed
+			if (isMoreToTheLeft(minGreaterSq, x, y, dragData.originalSquare.offsetTop)) {
+				// This is a comment
+				while (minGreaterSq.item.sortOrder >= dragData.draggedItem.sortOrder) {
+					minGreaterSq.item.sortOrder -= 1;
+				}
+				orderChanged = true;
+
+				// If there will end up being at least one square with the same sort order, reduce their sortOrder by 1
+				let squares = dragData.squares.filter(
+					(sq) => sq.item._id != dragData.draggedItem._id && sq.item._id != minGreaterSq.item._id
+				);
+				if (squares.find((sq) => sq.item.sortOrder === minGreaterSq.item.sortOrder)) {
+					squares
+						.filter((sq) => sq.item.sortOrder <= minGreaterSq.item.sortOrder)
+						.forEach((sq) => (sq.item.sortOrder -= 1));
+				}
+			}
+		} else if (direction < 0) {
+			// Moving item left
+			const lowerCoordSqs = dragData.squares.filter(
+				(sq) => sq.item.sortOrder < dragData.draggedItem.sortOrder
+			);
+
+			if (!lowerCoordSqs || !lowerCoordSqs.length) return;
+
+			// Only update one item at a time,
+			const maxLowerSq = lowerCoordSqs.reduce((max, sq) => {
+				if (max == undefined) return sq;
+
+				if (sq.offsetTop > y) return max;
+
+				if (sq.offsetTop <= y && sq.offsetTop > max.offsetTop) return sq;
+
+				if (sq.offsetLeft > max.offsetLeft) return sq;
+
+				return max;
+			});
+
+			// If the max square has been passed
+			if (
+				isMoreToTheRight(maxLowerSq, x, y, dragData.originalSquare.offsetTop) &&
+				maxLowerSq.item.sortOrder < dragData.draggedItem.sortOrder
+			) {
+				while (maxLowerSq.item.sortOrder <= dragData.draggedItem.sortOrder) {
+					maxLowerSq.item.sortOrder += 1;
+				}
+				orderChanged = true;
+
+				// Remove dragged item and max from list
+				let squares = dragData.squares.filter(
+					(sq) => sq.item._id != dragData.draggedItem._id && sq.item._id != maxLowerSq.item._id
+				);
+
+				// If there will end up being at least one square with the same sort order, reduce their sortOrder by 1
+				if (squares.find((sq) => sq.item.sortOrder === maxLowerSq.item.sortOrder)) {
+					// Increase by one the sort order of every item at the right
+					squares
+						.filter((sq) => sq.item.sortOrder >= maxLowerSq.item.sortOrder)
+						.forEach((sq) => (sq.item.sortOrder += 1));
+				}
+			}
+		}
+
+		if (orderChanged) {
+			calculateUiList();
+
+			// Recalculate square position after ui is updated
+			setTimeout(() => {
+				const squares = getItemSquares();
+				dragData.squares = squares;
+				dragData.originalSquare = squares.find((sq) => sq.item._id === dragData.draggedItem._id)!;
+			});
+		}
+	}
+
+	function dragEnd() {
+		const changedSortOrders = list
+			.map((item) => ({ id: item._id, sortOrder: item.sortOrder }))
+			.filter(
+				(newSO) =>
+					newSO.sortOrder !=
+					dragData.startingSortOders.find((sSO) => sSO.id === newSO.id)!.sortOrder
+			);
+
+		if (changedSortOrders && changedSortOrders.length) {
+			ItemService.updateSortOrders(changedSortOrders);
+		}
+	}
 </script>
 
 <svelte:head><title>Finances</title></svelte:head>
@@ -242,11 +442,17 @@
 				</div>
 			</header>
 			<main id="whiteboard">
-				<button on:click={addClicked} class="square white-button">
+				<button on:click={addClicked} data-itemid="add-button" class="square white-button">
 					<div class="title">Add</div>
 				</button>
-				{#each ui.list as item (item._id + item.type + item.updateDate)}
-					<ItemList data={item} on:click={itemClicked} />
+				{#each ui.list as item (item.sortOrder + item._id + item.type + item.updateDate)}
+					<ItemList
+						data={item}
+						on:click={itemClicked}
+						on:dragstart={() => dragStart(item)}
+						on:drag={(e) => drag(e)}
+						on:dragend={() => dragEnd()}
+					/>
 				{/each}
 			</main>
 		{:else}

@@ -50,6 +50,11 @@ export class ItemService {
         return ApiService.interceptResponse(response);
     }
 
+    public static async updateSortOrders(data: Array<{ id: string; sortOrder: number }>) {
+        const response = await fetch(`${this.getUrl()}/updateSortOrders`, { method: 'POST', body: JSON.stringify(data), headers: this.getHeaders() });
+        return ApiService.interceptResponse(response);
+    }
+
     /** Creates a payment and returns the created one from the server */
     public static addPayment(itemId: string, payment: IPayment) {
         return PaymentService.create({ ...payment, itemId });

@@ -8,6 +8,7 @@ export type ItemType = 'account' | 'service' | 'currency' | 'debt';
 export interface iItem<T = any> {
     _id: string;
     updateDate?: Date;
+    sortOrder: number;
 }
 
 export interface IAccount extends iItem {
