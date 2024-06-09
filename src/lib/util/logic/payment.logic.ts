@@ -57,15 +57,14 @@ export class PaymentLogic {
     }
 
     public static getLastPayment(payments: IPayment[]) {
-        let max: { date: Date, payment: IPayment } | undefined;
+        let max: IPayment | undefined;
         for (const payment of payments) {
-            const date = new Date(payment.dateString);
-            if (!max || date > max.date) {
-                max = { date, payment };
+            if (!max || payment.dateString > max.dateString) {
+               max = payment;
             }
         }
 
         if (!max) return undefined;
-        return max.payment;
+        return max;
     }
 }

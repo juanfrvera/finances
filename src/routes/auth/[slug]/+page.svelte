@@ -144,13 +144,13 @@
 			{/if}
 		</div>
 		<div class="alternative">
-			<p>Want to register instead?</p>
+			<p class="alternative__question">Want to register instead?</p>
 			<button on:click={registerInstead} class="button is-success">Register</button>
 		</div>
 	{/if}
 </div>
 
-<style>
+<style lang="scss">
 	.auth {
 		width: 512px;
 		margin-left: auto;
@@ -162,7 +162,7 @@
 		gap: 32px;
 	}
 	.main-info {
-		font-size: 20px;
+		font-size: 24px;
 	}
 	.auth-form {
 		width: 100%;
@@ -171,7 +171,12 @@
 		margin-top: 32px;
 		display: flex;
 		flex-direction: column;
+      gap: 8px;
 		align-items: center;
+
+      &__question{
+         font-size: 20px;
+      }
 	}
 	.error {
 		color: #a00;
